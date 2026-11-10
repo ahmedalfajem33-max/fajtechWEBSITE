@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
 import ContactForm from '../components/ContactForm.astro';
-import { site, zoho } from '../config/site';
+import { site } from '../config/site';
 const location = site.showStreetAddress
   ? `${site.address.street}, ${site.address.city}, ${site.address.regionName}`
   : `${site.address.city}, ${site.address.regionName}, Canada`;
@@ -27,13 +27,11 @@ const location = site.showStreetAddress
             <li class="flex gap-3"><Icon name="clock" class="h-5 w-5 shrink-0 text-brand-400" />{site.hours}</li>
           </ul>
         </div>
-        {zoho.bookingsUrl && (
-          <div class="rounded-2xl border border-brand-200 bg-brand-50 p-6">
-            <h2 class="text-lg font-bold">Prefer a live conversation?</h2>
+                  <div class="rounded-2xl border border-brand-200 bg-brand-50 p-6">
+          <h2 class="text-lg font-bold">Prefer a live conversation?</h2>
             <p class="mt-2 text-sm text-slate-600">Pick a time that suits you for a free 30-minute call.</p>
-            <a href={zoho.bookingsUrl} class="btn-primary mt-4 w-full">Book a call</a>
+            <a href="/book-a-consultation/" class="btn-primary mt-4 w-full">Pick a day &amp; time</a>
           </div>
-        )}
         <div class="rounded-2xl border border-slate-200 p-6">
           <h2 class="text-lg font-bold">Why businesses choose FAJTech</h2>
           <ul class="mt-4 space-y-2.5 text-sm text-slate-600">

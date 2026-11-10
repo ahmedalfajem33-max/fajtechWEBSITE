@@ -51,7 +51,14 @@ $d = [
     'gclid'      => field('gclid', 200),
     'page'       => field('page', 300),
     'consent'    => field('marketing_consent', 5) === 'yes' ? 'Yes' : 'No',
+    'form_type'  => field('form_type', 20) === 'booking' ? 'booking' : 'contact',
+    'pref_date'  => field('preferred_date', 20),
+    'pref_time'  => field('preferred_time', 40),
+    'meeting'    => field('meeting_type', 40),
 ];
+$isBooking = $d['form_type'] === 'booking';
+if ($isBooking && ($d['pref_date'] === '' || $d['pref_time'] === '')) respond(422, ['ok' => false, 'error' => 'Please choose a preferred day and time.']);
+$bookingText = $isBooking ? "Requested consultation: {$d['pref_date']} — {$d['pref_time']} (Mountain Time), {$d['meeting']}\n" : '';
 foreach (['first_name', 'last_name', 'email', 'message'] as $req) {
     if ($d[$req] === '') respond(422, ['ok' => false, 'error' => 'Please fill in all required fields.']);
 }
@@ -60,8 +67,9 @@ $oneLine = fn(string $s) => preg_replace('/[\n\t]+/', ' ', $s);
 
 // ── 1) Email ─────────────────────────────────────────────
 $name = $oneLine($d['first_name'] . ' ' . $d['last_name']);
-$subject = 'Website enquiry: ' . $name . ($d['company'] ? ' (' . $oneLine($d['company']) . ')' : '');
-$body = "New enquiry from fajtech.ca\n\n"
+$subject = ($isBooking ? 'Consultation request: ' : 'Website enquiry: ') . $name . ($d['company'] ? ' (' . $oneLine($d['company']) . ')' : '');
+$body = ($isBooking ? "New CONSULTATION REQUEST from fajtech.ca — please confirm the time with the client.\n\n" : "New enquiry from fajtech.ca\n\n")
+    . $bookingText . "\n"
     . "Name:        {$name}\nEmail:       {$d['email']}\nPhone:       {$d['phone']}\n"
     . "Company:     {$d['company']}\nEmployees:   {$d['employees']}\nInterest:    {$d['interest']}\n"
     . "Marketing consent (CASL): {$d['consent']}\n\nMessage:\n{$d['message']}\n\n"
@@ -84,7 +92,7 @@ if (is_array($z) && !empty($z['xnQsjsdp']) && !empty($z['xmIwtLD'])) {
         $f['email']      ?? 'Email'       => $d['email'],
         $f['phone']      ?? 'Phone'       => $d['phone'],
         $f['company']    ?? 'Company'     => $d['company'] ?: $name,
-        $f['description'] ?? 'Description' => "Interest: {$d['interest']}\nEmployees: {$d['employees']}\nMarketing consent: {$d['consent']}\n\n{$d['message']}",
+        $f['description'] ?? 'Description' => $bookingText . "Interest: {$d['interest']}\nEmployees: {$d['employees']}\nMarketing consent: {$d['consent']}\n\n{$d['message']}",
         $f['lead_source'] ?? 'Lead Source' => $d['gclid'] ? 'Google AdWords' : 'Website',
     ];
     if (!empty($f['gclid'])) $post[$f['gclid']] = $d['gclid'];

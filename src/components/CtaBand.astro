@@ -1,11 +1,11 @@
 ---
-import { site, zoho } from '../config/site';
+import { site } from '../config/site';
 interface Props { title?: string; text?: string }
 const {
   title = 'Ready for IT that just works?',
   text = 'Book a free, no-obligation IT assessment. We will review your systems and security and give you a clear plan — no pressure, no jargon.',
 } = Astro.props;
-const bookHref = zoho.bookingsUrl || '/contact/';
+const bookHref = '/book-a-consultation/';
 ---
 <section class="relative overflow-hidden bg-ink-900 text-white">
   <div class="grid-bg absolute inset-0 opacity-60" aria-hidden="true"></div>

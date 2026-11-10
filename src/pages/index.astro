@@ -4,9 +4,8 @@ import Icon from '../components/Icon.astro';
 import Faq from '../components/Faq.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { services, industries, faqs } from '../data/services';
-import { zoho } from '../config/site';
 
-const bookHref = zoho.bookingsUrl || '/contact/';
+const bookHref = '/book-a-consultation/';
 const featured = services.filter((s) => s.featured);
 const faqSchema = {
   '@context': 'https://schema.org',

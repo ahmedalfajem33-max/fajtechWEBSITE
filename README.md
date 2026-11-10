@@ -31,7 +31,7 @@ npm run build    # outputs the site to dist/
 
 - **Zoho CRM (leads):** the contact form posts to `/api/contact.php`, which emails the team and, if configured, creates a Lead through Zoho's Web-to-Lead form. Copy `server/fajtech-config.example.php` to the server as `domains/fajtech.ca/fajtech-config.php` (outside `public_html`) and fill in the Zoho values. **Never commit that file.**
 - **Zoho SalesIQ (live chat):** paste the widget code into `zoho.salesIqWidgetCode`.
-- **Zoho Bookings:** paste your booking page URL into `zoho.bookingsUrl`. Every "Book a consultation" button then goes there.
+- **Zoho Bookings (Book a consultation):** every "Book" button goes to `/book-a-consultation/`. Until `zoho.bookingsUrl` is set, that page shows a "request a time" form that emails the team. Once set, it embeds the live Zoho Bookings calendar instead. In Zoho Bookings, set the redirect after booking to `https://fajtech.ca/thank-you/?source=booking` so each booking counts as a Google Ads conversion (`googleAds.conversions.booking`).
 
 ## Deploying
 

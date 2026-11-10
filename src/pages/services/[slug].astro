@@ -4,14 +4,14 @@ import PageHero from '../../components/PageHero.astro';
 import Icon from '../../components/Icon.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { services, type Service } from '../../data/services';
-import { site, zoho } from '../../config/site';
+import { site } from '../../config/site';
 
 export function getStaticPaths() {
   return services.map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
 }
 const { service } = Astro.props as { service: Service };
 const others = services.filter((s) => s.slug !== service.slug).slice(0, 3);
-const bookHref = zoho.bookingsUrl || '/contact/';
+const bookHref = '/book-a-consultation/';
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'Service',

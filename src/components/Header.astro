@@ -1,14 +1,14 @@
 ---
 import Icon from './Icon.astro';
 import { services } from '../data/services';
-import { site, zoho } from '../config/site';
+import { site } from '../config/site';
 const path = Astro.url.pathname;
 const nav = [
   { href: '/industries/', label: 'Industries' },
   { href: '/about/', label: 'About' },
   { href: '/contact/', label: 'Contact' },
 ];
-const bookHref = zoho.bookingsUrl || '/contact/';
+const bookHref = '/book-a-consultation/';
 const isActive = (href: string) => path.startsWith(href);
 ---
 <header class="sticky top-0 z-50 border-b border-white/10 bg-ink-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-ink-900/85">

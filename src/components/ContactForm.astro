@@ -1,7 +1,9 @@
 ---
 import { services } from '../data/services';
+interface Props { booking?: boolean }
+const { booking = false } = Astro.props;
 ---
-<form id="contact-form" action="/api/contact.php" method="post" class="space-y-5" novalidate>
+<form id="contact-form" data-label={booking ? 'Request this time' : 'Send message'} action="/api/contact.php" method="post" class="space-y-5" novalidate>
   <div class="grid gap-5 sm:grid-cols-2">
     <label class="block text-sm font-medium text-ink-900">First name <span class="text-red-600">*</span>
       <input name="first_name" required autocomplete="given-name" class="field" />
@@ -32,7 +34,27 @@ import { services } from '../data/services';
       <option>Something else</option>
     </select>
   </label>
-  <label class="block text-sm font-medium text-ink-900">How can we help? <span class="text-red-600">*</span>
+  {booking && (
+    <div class="grid gap-5 sm:grid-cols-2">
+      <label class="block text-sm font-medium text-ink-900">Preferred day <span class="text-red-600">*</span>
+        <input name="preferred_date" type="date" required class="field" />
+      </label>
+      <label class="block text-sm font-medium text-ink-900">Preferred time (Mountain Time) <span class="text-red-600">*</span>
+        <select name="preferred_time" required class="field">
+          <option value="">Select…</option>
+          <option>Morning (8–10 am)</option><option>Late morning (10 am–12 pm)</option>
+          <option>Early afternoon (12–2 pm)</option><option>Afternoon (2–4 pm)</option><option>Late afternoon (4–6 pm)</option>
+        </select>
+      </label>
+      <label class="block text-sm font-medium text-ink-900 sm:col-span-2">Meeting type
+        <select name="meeting_type" class="field">
+          <option>Video call (Zoom / Teams)</option><option>Phone call</option><option>In person (Calgary area)</option>
+        </select>
+      </label>
+    </div>
+  )}
+  <input type="hidden" name="form_type" value={booking ? 'booking' : 'contact'} />
+  <label class="block text-sm font-medium text-ink-900">{booking ? 'What would you like to discuss?' : 'How can we help?'} <span class="text-red-600">*</span>
     <textarea name="message" rows="5" required class="field"></textarea>
   </label>
 
@@ -48,7 +70,7 @@ import { services } from '../data/services';
   <p class="text-xs text-slate-500">By submitting this form you agree that FAJTech may contact you about your enquiry, as described in our <a href="/privacy/" class="underline hover:text-brand-600">privacy policy</a>.</p>
 
   <div id="form-error" class="hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert"></div>
-  <button type="submit" class="btn-primary w-full py-3.5 text-base sm:w-auto">Send message</button>
+  <button type="submit" class="btn-primary w-full py-3.5 text-base sm:w-auto">{booking ? 'Request this time' : 'Send message'}</button>
 </form>
 
 <script>
@@ -63,6 +85,8 @@ import { services } from '../data/services';
     (form.elements.namedItem('gclid') as HTMLInputElement).value = gclid || localStorage.getItem('faj_gclid') || '';
   } catch {}
   (form.elements.namedItem('page') as HTMLInputElement).value = location.href;
+  const dateInput = form.elements.namedItem('preferred_date') as HTMLInputElement | null;
+  if (dateInput) { const t = new Date(); t.setDate(t.getDate() + 1); dateInput.min = t.toISOString().slice(0, 10); }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -74,12 +98,13 @@ import { services } from '../data/services';
       const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong.');
-      (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' });
-      location.href = '/thank-you/';
+      const isBooking = (form.elements.namedItem('form_type') as HTMLInputElement).value === 'booking';
+      if (!isBooking) (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' });
+      location.href = isBooking ? '/thank-you/?source=booking-request' : '/thank-you/';
     } catch (ex) {
       err.textContent = (ex as Error).message + ' Please try again, or email us directly.';
       err.classList.remove('hidden');
-      btn.disabled = false; btn.textContent = 'Send message';
+      btn.disabled = false; btn.textContent = form.dataset.label || 'Send message';
     }
   });
 </script>

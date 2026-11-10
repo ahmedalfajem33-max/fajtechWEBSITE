@@ -45,6 +45,8 @@ export const googleAds = {
     contactForm: '',
     phoneClick: '',
     emailClick: '',
+    /** Fired on /thank-you/?source=booking — set that as the redirect URL in Zoho Bookings. */
+    booking: '',
   },
   /** Optional Google Analytics 4 ID, e.g. 'G-XXXXXXXXXX'. */
   ga4Id: '',
@@ -61,9 +63,10 @@ export const zoho = {
   /** Zoho data centre for SalesIQ: 'com', 'eu', 'in', 'com.au', 'ca', 'jp' */
   salesIqRegion: 'ca',
   /**
-   * Zoho Bookings page for "Book a consultation" buttons, e.g.
-   * 'https://fajtech.zohobookings.ca/#/consultation'. Leave '' to send
-   * people to the contact page instead.
+   * Zoho Bookings page embedded on /book-a-consultation/, e.g.
+   * 'https://fajtech.zohobookings.ca/portal-embed#/consultation'
+   * (Zoho Bookings → Share → Embed → copy the iframe's src).
+   * Leave '' and the page shows a "request a time" form instead.
    */
   bookingsUrl: '',
 };

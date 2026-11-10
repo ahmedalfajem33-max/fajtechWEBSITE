@@ -6,9 +6,24 @@ import Icon from '../components/Icon.astro';
   <section class="section">
     <div class="container-x max-w-xl text-center">
       <span class="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-brand-600"><Icon name="check" class="h-8 w-8" /></span>
-      <h1 class="mt-6 text-4xl font-extrabold">Message sent — thank you!</h1>
-      <p class="mt-4 text-lg text-slate-600">Our team will get back to you within one business day.</p>
+      <h1 id="ty-title" class="mt-6 text-4xl font-extrabold">Message sent — thank you!</h1>
+      <p id="ty-text" class="mt-4 text-lg text-slate-600">Our team will get back to you within one business day.</p>
       <a href="/" class="btn-primary mt-8">Back to home</a>
     </div>
   </section>
+  <script>
+    const src = new URLSearchParams(location.search).get('source');
+    const title = document.getElementById('ty-title')!;
+    const text = document.getElementById('ty-text')!;
+    if (src === 'booking') {
+      // Zoho Bookings redirects here after a confirmed booking.
+      title.textContent = 'Your consultation is booked!';
+      text.textContent = 'A confirmation with the meeting details is on its way to your inbox. We look forward to speaking with you.';
+      (window as any).fajTrack?.('booking', { value: 1.0, currency: 'CAD' });
+    } else if (src === 'booking-request') {
+      title.textContent = 'Request received — thank you!';
+      text.textContent = 'We will confirm your consultation time by email within one business day.';
+      (window as any).fajTrack?.('booking', { value: 1.0, currency: 'CAD' });
+    }
+  </script>
 </Base>
