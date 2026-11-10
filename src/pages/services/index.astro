@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { services } from '../../data/services';
+---
+<Base title="IT Services in Calgary" description="Managed IT, cybersecurity, cloud, backup, networking, vCIO consulting and automation services for Calgary and Canadian businesses.">
+  <PageHero eyebrow="Services" title="IT services built for growing businesses" text="Comprehensive IT solutions that help your business grow, stay secure and operate efficiently — delivered by a Calgary-based team." />
+  <section class="section">
+    <div class="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {services.map((s) => (
+        <a href={`/services/${s.slug}/`} class="card group flex flex-col">
+          <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-500 group-hover:text-white"><Icon name={s.icon} /></span>
+          <h2 class="mt-5 text-lg font-bold">{s.title}</h2>
+          <p class="mt-2 flex-1 text-slate-600">{s.short}</p>
+          <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600">Learn more <Icon name="arrow" class="h-4 w-4 transition group-hover:translate-x-1" /></span>
+        </a>
+      ))}
+    </div>
+  </section>
+  <CtaBand />
+</Base>

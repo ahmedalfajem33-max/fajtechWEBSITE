@@ -1,0 +1,115 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site, googleAds, zoho } from '../config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  schema?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
+}
+const { title, description, schema, noindex = false } = Astro.props;
+const fullTitle = title.includes(site.name) ? title : `${title} | ${site.name}`;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': `${site.url}/#business`,
+  name: site.name,
+  url: site.url,
+  email: site.email,
+  ...(site.phone ? { telephone: site.phone } : {}),
+  description: 'Managed IT services, cybersecurity and cloud solutions for Canadian businesses.',
+  image: `${site.url}/og-image.png`,
+  logo: `${site.url}/favicon-192x192.png`,
+  areaServed: [{ '@type': 'City', name: 'Calgary' }, { '@type': 'Country', name: 'Canada' }],
+  address: {
+    '@type': 'PostalAddress',
+    ...(site.showStreetAddress ? { streetAddress: site.address.street } : {}),
+    addressLocality: site.address.city,
+    addressRegion: site.address.region,
+    addressCountry: site.address.country,
+  },
+};
+const schemas = [orgSchema, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
+
+// Data passed to the client-side tracking helper.
+const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
+---
+<!doctype html>
+<html lang="en-CA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#111c2a" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/favicon-192x192.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`${site.url}/og-image.png`} />
+    <meta property="og:locale" content="en_CA" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Google Ads tag (kept from the previous fajtech.ca site) -->
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${googleAds.id}`}></script>
+    <script is:inline define:vars={{ adsId: googleAds.id, ga4Id: googleAds.ga4Id }}>
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { dataLayer.push(arguments); };
+      gtag('js', new Date());
+      gtag('config', adsId);
+      if (ga4Id) gtag('config', ga4Id);
+    </script>
+
+    {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:shadow-lg">Skip to content</a>
+    <Header />
+    <main id="main" class="flex-1"><slot /></main>
+    <Footer />
+
+    <!-- Conversion tracking: phone & email clicks, and a helper for the contact form -->
+    <script is:inline define:vars={{ tracking }}>
+      window.fajTrack = function (key, extra) {
+        if (typeof gtag !== 'function') return;
+        var label = tracking.conversions[key];
+        if (label) gtag('event', 'conversion', Object.assign({ send_to: label }, extra || {}));
+        gtag('event', key, extra || {});
+      };
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href^="tel:"], a[href^="mailto:"]');
+        if (!a) return;
+        window.fajTrack(a.href.indexOf('tel:') === 0 ? 'phoneClick' : 'emailClick');
+      });
+    </script>
+
+    {zoho.salesIqWidgetCode && (
+      <script is:inline define:vars={{ code: zoho.salesIqWidgetCode, region: zoho.salesIqRegion }}>
+        window.$zoho = window.$zoho || {};
+        $zoho.salesiq = $zoho.salesiq || { ready: function () {} };
+        var s = document.createElement('script');
+        s.id = 'zsiqscript';
+        s.defer = true;
+        s.src = 'https://salesiq.zohopublic.' + region + '/widget?wc=' + code;
+        document.body.appendChild(s);
+      </script>
+    )}
+  </body>
+</html>

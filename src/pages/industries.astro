@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { industries } from '../data/services';
+---
+<Base title="Industries We Serve" description="Tailored IT and cybersecurity for healthcare, finance, legal, construction, energy, manufacturing, retail, non-profits and more across Canada.">
+  <PageHero eyebrow="Industries" title="Tailored IT solutions built for your industry" text="Every industry has its own systems, regulations and risks. We bring the experience to support yours." />
+  <section class="section">
+    <div class="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {industries.map((ind) => (
+        <div class="card">
+          <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Icon name={ind.icon} /></span>
+          <h2 class="mt-5 text-lg font-bold">{ind.title}</h2>
+          <p class="mt-2 text-slate-600">{ind.text}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+  <CtaBand title="Need IT services for a specialised industry?" />
+</Base>

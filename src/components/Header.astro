@@ -1,0 +1,78 @@
+---
+import Icon from './Icon.astro';
+import { services } from '../data/services';
+import { site, zoho } from '../config/site';
+const path = Astro.url.pathname;
+const nav = [
+  { href: '/industries/', label: 'Industries' },
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' },
+];
+const bookHref = zoho.bookingsUrl || '/contact/';
+const isActive = (href: string) => path.startsWith(href);
+---
+<header class="sticky top-0 z-50 border-b border-white/10 bg-ink-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-ink-900/85">
+  <div class="container-x flex h-16 items-center justify-between gap-4 lg:h-20">
+    <a href="/" class="flex items-center gap-2.5" aria-label={`${site.name} home`}>
+      <img src="/favicon.svg" alt="" width="36" height="36" class="h-9 w-9 rounded-lg bg-white p-1" />
+      <span class="text-xl font-extrabold tracking-tight">FAJ<span class="text-brand-400">Tech</span></span>
+    </a>
+
+    <nav class="hidden items-center gap-1 lg:flex" aria-label="Main">
+      <div class="group relative">
+        <a href="/services/" class:list={['flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium hover:text-brand-300', isActive('/services') && 'text-brand-300']}>
+          Services <Icon name="chevron" class="h-4 w-4 transition group-hover:rotate-180" />
+        </a>
+        <div class="invisible absolute left-1/2 top-full w-[560px] -translate-x-1/2 pt-3 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+          <div class="grid grid-cols-2 gap-1 rounded-2xl border border-slate-200 bg-white p-3 text-slate-700 shadow-2xl">
+            {services.map((s) => (
+              <a href={`/services/${s.slug}/`} class="flex gap-3 rounded-xl p-3 hover:bg-brand-50">
+                <span class="mt-0.5 text-brand-600"><Icon name={s.icon} class="h-5 w-5" /></span>
+                <span>
+                  <span class="block text-sm font-semibold text-ink-900">{s.title}</span>
+                  <span class="mt-0.5 block text-xs leading-snug text-slate-500">{s.short}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+      {nav.map((n) => (
+        <a href={n.href} class:list={['rounded-lg px-3 py-2 text-sm font-medium hover:text-brand-300', isActive(n.href) && 'text-brand-300']}>{n.label}</a>
+      ))}
+    </nav>
+
+    <div class="hidden items-center gap-4 lg:flex">
+      {site.phone && (
+        <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="flex items-center gap-2 text-sm font-semibold hover:text-brand-300">
+          <Icon name="phone" class="h-4 w-4" />{site.phone}
+        </a>
+      )}
+      <a href={bookHref} class="btn-primary">Book a Free Consultation</a>
+    </div>
+
+    <button id="menu-btn" type="button" class="rounded-lg p-2 hover:bg-white/10 lg:hidden" aria-controls="mobile-menu" aria-expanded="false" aria-label="Open menu">
+      <Icon name="menu" />
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="hidden max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-white/10 lg:hidden">
+    <nav class="container-x flex flex-col gap-1 py-4" aria-label="Mobile">
+      <a href="/services/" class="rounded-lg px-3 py-2.5 font-semibold hover:bg-white/10">All Services</a>
+      {services.map((s) => <a href={`/services/${s.slug}/`} class="rounded-lg px-3 py-2 pl-6 text-sm text-slate-300 hover:bg-white/10">{s.title}</a>)}
+      {nav.map((n) => <a href={n.href} class="rounded-lg px-3 py-2.5 font-semibold hover:bg-white/10">{n.label}</a>)}
+      <a href={bookHref} class="btn-primary mt-3">Book a Free Consultation</a>
+      {site.phone && <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="btn-ghost mt-2">Call {site.phone}</a>}
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('menu-btn')!;
+  const menu = document.getElementById('mobile-menu')!;
+  btn.addEventListener('click', () => {
+    const open = menu.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+</script>

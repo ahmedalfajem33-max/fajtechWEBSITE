@@ -1,0 +1,85 @@
+---
+import { services } from '../data/services';
+---
+<form id="contact-form" action="/api/contact.php" method="post" class="space-y-5" novalidate>
+  <div class="grid gap-5 sm:grid-cols-2">
+    <label class="block text-sm font-medium text-ink-900">First name <span class="text-red-600">*</span>
+      <input name="first_name" required autocomplete="given-name" class="field" />
+    </label>
+    <label class="block text-sm font-medium text-ink-900">Last name <span class="text-red-600">*</span>
+      <input name="last_name" required autocomplete="family-name" class="field" />
+    </label>
+    <label class="block text-sm font-medium text-ink-900">Work email <span class="text-red-600">*</span>
+      <input name="email" type="email" required autocomplete="email" class="field" />
+    </label>
+    <label class="block text-sm font-medium text-ink-900">Phone
+      <input name="phone" type="tel" autocomplete="tel" class="field" />
+    </label>
+    <label class="block text-sm font-medium text-ink-900">Company
+      <input name="company" autocomplete="organization" class="field" />
+    </label>
+    <label class="block text-sm font-medium text-ink-900">Number of employees
+      <select name="employees" class="field">
+        <option value="">Select…</option>
+        <option>1–10</option><option>11–25</option><option>26–50</option><option>51–150</option><option>150+</option>
+      </select>
+    </label>
+  </div>
+  <label class="block text-sm font-medium text-ink-900">What are you interested in?
+    <select name="interest" class="field">
+      <option value="">Select…</option>
+      {services.map((s) => <option>{s.title}</option>)}
+      <option>Something else</option>
+    </select>
+  </label>
+  <label class="block text-sm font-medium text-ink-900">How can we help? <span class="text-red-600">*</span>
+    <textarea name="message" rows="5" required class="field"></textarea>
+  </label>
+
+  <!-- Spam trap: hidden from people, bots fill it in -->
+  <div class="hidden" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+  <input type="hidden" name="gclid" />
+  <input type="hidden" name="page" />
+
+  <label class="flex gap-3 text-sm text-slate-600">
+    <input type="checkbox" name="marketing_consent" value="yes" class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-brand-500" />
+    <span>Yes, send me occasional IT tips and news from FAJTech. You can unsubscribe at any time.</span>
+  </label>
+  <p class="text-xs text-slate-500">By submitting this form you agree that FAJTech may contact you about your enquiry, as described in our <a href="/privacy/" class="underline hover:text-brand-600">privacy policy</a>.</p>
+
+  <div id="form-error" class="hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert"></div>
+  <button type="submit" class="btn-primary w-full py-3.5 text-base sm:w-auto">Send message</button>
+</form>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const err = document.getElementById('form-error')!;
+
+  // Keep the Google Ads click ID so leads can be matched to ad campaigns (also forwarded to Zoho CRM).
+  const params = new URLSearchParams(location.search);
+  const gclid = params.get('gclid');
+  try {
+    if (gclid) localStorage.setItem('faj_gclid', gclid);
+    (form.elements.namedItem('gclid') as HTMLInputElement).value = gclid || localStorage.getItem('faj_gclid') || '';
+  } catch {}
+  (form.elements.namedItem('page') as HTMLInputElement).value = location.href;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.classList.add('hidden');
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const btn = form.querySelector('button[type=submit]') as HTMLButtonElement;
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong.');
+      (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' });
+      location.href = '/thank-you/';
+    } catch (ex) {
+      err.textContent = (ex as Error).message + ' Please try again, or email us directly.';
+      err.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = 'Send message';
+    }
+  });
+</script>

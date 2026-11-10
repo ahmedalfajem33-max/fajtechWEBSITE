@@ -1,0 +1,48 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { site, zoho } from '../config/site';
+const location = site.showStreetAddress
+  ? `${site.address.street}, ${site.address.city}, ${site.address.regionName}`
+  : `${site.address.city}, ${site.address.regionName}, Canada`;
+---
+<Base title="Contact FAJTech | Book a Free IT Assessment" description="Contact FAJTech in Calgary for managed IT, cybersecurity and cloud services. Book a free, no-obligation IT assessment. We reply within one business day.">
+  <PageHero eyebrow="Contact" title="Let's talk about your IT" text="Fill out the form and we'll get back to you within one business day. No pressure, no jargon." />
+  <section class="section">
+    <div class="container-x grid gap-12 lg:grid-cols-[2fr_1fr]">
+      <div class="rounded-2xl border border-slate-200 p-6 shadow-sm sm:p-8">
+        <h2 class="text-2xl font-extrabold">Send us a message</h2>
+        <p class="mt-2 mb-8 text-slate-600">Tell us a little about your business and what you need.</p>
+        <ContactForm />
+      </div>
+      <aside class="space-y-6">
+        <div class="rounded-2xl bg-ink-900 p-6 text-white">
+          <h2 class="text-lg font-bold text-white">Contact details</h2>
+          <ul class="mt-5 space-y-4 text-sm text-slate-300">
+            <li class="flex gap-3"><Icon name="mail" class="h-5 w-5 shrink-0 text-brand-400" /><a href={`mailto:${site.email}`} class="hover:text-white">{site.email}</a></li>
+            {site.phone && <li class="flex gap-3"><Icon name="phone" class="h-5 w-5 shrink-0 text-brand-400" /><a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="hover:text-white">{site.phone}</a></li>}
+            <li class="flex gap-3"><Icon name="pin" class="h-5 w-5 shrink-0 text-brand-400" />{location}</li>
+            <li class="flex gap-3"><Icon name="clock" class="h-5 w-5 shrink-0 text-brand-400" />{site.hours}</li>
+          </ul>
+        </div>
+        {zoho.bookingsUrl && (
+          <div class="rounded-2xl border border-brand-200 bg-brand-50 p-6">
+            <h2 class="text-lg font-bold">Prefer a live conversation?</h2>
+            <p class="mt-2 text-sm text-slate-600">Pick a time that suits you for a free 30-minute call.</p>
+            <a href={zoho.bookingsUrl} class="btn-primary mt-4 w-full">Book a call</a>
+          </div>
+        )}
+        <div class="rounded-2xl border border-slate-200 p-6">
+          <h2 class="text-lg font-bold">Why businesses choose FAJTech</h2>
+          <ul class="mt-4 space-y-2.5 text-sm text-slate-600">
+            {['Calgary-based Canadian team', 'Flat, predictable monthly pricing', 'Security included in every plan', 'Dedicated client success manager'].map((t) => (
+              <li class="flex gap-2"><Icon name="check" class="h-5 w-5 shrink-0 text-brand-500" />{t}</li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>

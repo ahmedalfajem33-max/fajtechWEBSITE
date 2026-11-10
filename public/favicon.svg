@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="jGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#2c3e50"/>
+      <stop offset="100%" stop-color="#1a2737"/>
+    </linearGradient>
+    <linearGradient id="tGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#30c9a2"/>
+      <stop offset="100%" stop-color="#22a88a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Letter J -->
+  <path d="
+    M 62 72
+    L 206 72
+    L 206 310
+    C 206 430 130 478 60 460
+    L 42 450
+    L 42 400
+    C 80 420 138 410 138 330
+    L 138 132
+    L 62 132
+    Z
+  " fill="url(#jGrad)"/>
+
+  <!-- Letter T -->
+  <path d="
+    M 234 72
+    L 470 72
+    L 470 132
+    L 394 132
+    L 394 440
+    L 326 440
+    L 326 132
+    L 234 132
+    Z
+  " fill="url(#tGrad)"/>
+</svg>

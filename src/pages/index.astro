@@ -1,0 +1,258 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { services, industries, faqs } from '../data/services';
+import { zoho } from '../config/site';
+
+const bookHref = zoho.bookingsUrl || '/contact/';
+const featured = services.filter((s) => s.featured);
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+
+const plans = [
+  {
+    name: 'Fully Managed IT',
+    who: 'For businesses with no internal IT staff',
+    text: 'We become your IT department: help desk, monitoring, security, backups and strategy for one flat monthly fee.',
+    points: ['Unlimited help desk support', '24/7 monitoring & patching', 'Cybersecurity stack included', 'Quarterly strategy reviews'],
+    highlight: true,
+  },
+  {
+    name: 'Co-Managed IT',
+    who: 'For businesses with an in-house IT person or team',
+    text: 'We back up your team with tools, after-hours coverage, security expertise and extra hands for projects.',
+    points: ['Enterprise tools for your team', 'Escalation & after-hours cover', 'Security monitoring', 'Project support'],
+  },
+  {
+    name: 'Projects & Consulting',
+    who: 'For a specific project or problem',
+    text: 'Fixed-scope work such as Microsoft 365 migrations, office moves, network upgrades and security assessments.',
+    points: ['Clear fixed quote', 'Cloud & M365 migrations', 'Network & Wi-Fi upgrades', 'Security assessments'],
+  },
+];
+
+const reasons = [
+  { icon: 'clock', title: 'We are responsive', text: 'Real people answer, and urgent issues are picked up right away. No ticket black holes.' },
+  { icon: 'shield', title: 'Security first', text: 'Every plan includes layered cybersecurity — not as an expensive add-on.' },
+  { icon: 'handshake', title: 'We are accountable', text: 'We stand behind our work for every client, every time. No excuses.' },
+  { icon: 'users', title: 'Dedicated success manager', text: 'One person who knows your business, your systems and your goals.' },
+  { icon: 'dollar', title: 'Predictable pricing', text: 'One flat monthly fee. No surprise invoices for routine support.' },
+  { icon: 'maple', title: 'Proudly Canadian', text: 'Calgary-based team that understands Canadian privacy law and keeps your data in Canada.' },
+];
+
+const steps = [
+  { title: 'Free assessment', text: 'We review your systems, security and pain points — at no cost.' },
+  { title: 'Clear plan & quote', text: 'You get a written plan with fixed pricing and priorities.' },
+  { title: 'Smooth onboarding', text: 'We document everything, fix urgent risks and set up monitoring.' },
+  { title: 'Ongoing partnership', text: 'Day-to-day support plus regular reviews to keep improving.' },
+];
+
+const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', 'Cisco Meraki', 'Zoho', 'Veeam'];
+---
+<Base
+  title="FAJTech | Managed IT Services & Cybersecurity in Calgary"
+  description="FAJTech provides managed IT services, cybersecurity, cloud and backup solutions for small and mid-sized businesses in Calgary and across Canada. Book a free IT assessment."
+  schema={faqSchema}
+>
+  <!-- HERO -->
+  <section class="relative overflow-hidden bg-ink-900 text-white">
+    <div class="grid-bg absolute inset-0" aria-hidden="true"></div>
+    <div class="absolute -left-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-brand-500/25 blur-3xl" aria-hidden="true"></div>
+    <div class="absolute -bottom-40 right-0 h-[24rem] w-[24rem] rounded-full bg-sky-500/10 blur-3xl" aria-hidden="true"></div>
+    <div class="container-x relative grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-[1.15fr_1fr] lg:py-28">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-400/10 px-3 py-1 text-xs font-semibold text-brand-200">
+          <Icon name="maple" class="h-3.5 w-3.5" /> Calgary-based · Serving businesses across Canada
+        </p>
+        <h1 class="mt-6 text-4xl font-extrabold leading-[1.1] text-white sm:text-5xl lg:text-6xl">
+          Managed IT &amp; cybersecurity that keeps your business <span class="text-brand-400">running</span>.
+        </h1>
+        <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
+          FAJTech is the IT partner for growing Canadian businesses. We support your team, secure your data and plan your technology — for one predictable monthly fee — so you can focus on growth.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href={bookHref} class="btn-primary px-6 py-3.5 text-base">Book a Free IT Assessment <Icon name="arrow" class="h-4 w-4" /></a>
+          <a href="/services/" class="btn-ghost px-6 py-3.5 text-base">Explore services</a>
+        </div>
+        <ul class="mt-10 grid gap-3 text-sm text-slate-300 sm:grid-cols-3">
+          {['Flat monthly pricing', 'Security in every plan', 'Reply within 1 business day'].map((t) => (
+            <li class="flex items-center gap-2"><Icon name="check" class="h-4 w-4 text-brand-400" />{t}</li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Illustration: what a managed environment looks like -->
+      <div class="relative mx-auto w-full max-w-md lg:max-w-none" aria-hidden="true">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Your IT environment</p>
+            <span class="flex items-center gap-1.5 rounded-full bg-brand-500/20 px-2.5 py-1 text-xs font-semibold text-brand-300">
+              <span class="h-2 w-2 animate-pulse rounded-full bg-brand-400"></span> Protected
+            </span>
+          </div>
+          <div class="mt-5 space-y-3">
+            {[
+              ['shield', 'Endpoint protection', 'Active on all devices'],
+              ['refresh', 'Backups', 'Verified overnight'],
+              ['server', 'Servers & network', 'All systems operational'],
+              ['cloud', 'Microsoft 365', 'MFA enforced'],
+              ['check', 'Security patches', 'Up to date'],
+            ].map(([icon, label, status]) => (
+              <div class="flex items-center gap-3 rounded-xl border border-white/5 bg-ink-950/60 p-3">
+                <span class="rounded-lg bg-brand-500/15 p-2 text-brand-300"><Icon name={icon} class="h-4 w-4" /></span>
+                <span class="flex-1 text-sm text-slate-200">{label}</span>
+                <span class="text-xs text-brand-300">{status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="absolute -bottom-14 left-6 hidden rounded-xl border border-slate-200 bg-white p-4 text-ink-900 shadow-xl sm:block">
+          <p class="text-xs text-slate-500">Support request</p>
+          <p class="mt-1 flex items-center gap-2 text-sm font-semibold"><Icon name="check" class="h-4 w-4 text-brand-500" /> Resolved remotely</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECHNOLOGIES -->
+  <section class="border-b border-slate-200 bg-white" aria-label="Technologies we support">
+    <div class="container-x flex flex-col items-center gap-4 py-8 sm:flex-row sm:justify-between">
+      <p class="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Technologies we support</p>
+      <ul class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-semibold text-slate-500 sm:justify-end">
+        {tech.map((t) => <li>{t}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="section">
+    <div class="container-x grid items-center gap-12 lg:grid-cols-2">
+      <div>
+        <p class="eyebrow">An IT partner that makes your life easier</p>
+        <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">Spend less time fixing technology and more time growing your business.</h2>
+      </div>
+      <div class="space-y-4 text-lg leading-relaxed text-slate-600">
+        <p>Whether you're overwhelmed by day-to-day IT problems or planning a project you're not sure how to start, we work alongside you to deliver IT that makes a real difference to your business.</p>
+        <p>We can run everything for you, or work with your internal team. Either way, you get proactive support, strong security and a clear technology plan.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section bg-slate-50" aria-labelledby="services-title">
+    <div class="container-x">
+      <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <div class="max-w-2xl">
+          <p class="eyebrow">Our core IT services</p>
+          <h2 id="services-title" class="mt-3 text-3xl font-extrabold sm:text-4xl">Everything your business needs to stay secure, supported and productive</h2>
+        </div>
+        <a href="/services/" class="btn-outline shrink-0">All services <Icon name="arrow" class="h-4 w-4" /></a>
+      </div>
+      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {featured.map((s) => (
+          <a href={`/services/${s.slug}/`} class="card group flex flex-col">
+            <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-500 group-hover:text-white"><Icon name={s.icon} /></span>
+            <h3 class="mt-5 text-lg font-bold">{s.title}</h3>
+            <p class="mt-2 flex-1 text-slate-600">{s.short}</p>
+            <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600">Learn more <Icon name="arrow" class="h-4 w-4 transition group-hover:translate-x-1" /></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANS -->
+  <section class="section" aria-labelledby="plans-title">
+    <div class="container-x">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="eyebrow">Ways to work with us</p>
+        <h2 id="plans-title" class="mt-3 text-3xl font-extrabold sm:text-4xl">Not sure which IT plan is right for you?</h2>
+        <p class="mt-4 text-lg text-slate-600">Every business is different. Pick the model that fits today — you can change it as you grow.</p>
+      </div>
+      <div class="mt-12 grid gap-6 lg:grid-cols-3">
+        {plans.map((p) => (
+          <div class:list={['relative flex flex-col rounded-2xl border p-7', p.highlight ? 'border-brand-500 bg-ink-900 text-white shadow-2xl shadow-brand-500/10' : 'border-slate-200 bg-white']}>
+            {p.highlight && <span class="absolute -top-3 left-7 rounded-full bg-brand-500 px-3 py-1 text-xs font-bold text-white">Most popular</span>}
+            <h3 class:list={['text-xl font-bold', p.highlight && 'text-white']}>{p.name}</h3>
+            <p class:list={['mt-1 text-sm font-medium', p.highlight ? 'text-brand-300' : 'text-brand-600']}>{p.who}</p>
+            <p class:list={['mt-4', p.highlight ? 'text-slate-300' : 'text-slate-600']}>{p.text}</p>
+            <ul class="mt-6 flex-1 space-y-2.5 text-sm">
+              {p.points.map((pt) => <li class="flex gap-2"><Icon name="check" class="h-5 w-5 shrink-0 text-brand-400" />{pt}</li>)}
+            </ul>
+            <a href={bookHref} class:list={['mt-8', p.highlight ? 'btn-primary' : 'btn-outline']}>Get a custom quote</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="section bg-ink-900 text-white" aria-labelledby="why-title">
+    <div class="container-x">
+      <div class="max-w-2xl">
+        <p class="eyebrow text-brand-300">What sets FAJTech apart</p>
+        <h2 id="why-title" class="mt-3 text-3xl font-extrabold text-white sm:text-4xl">A team that always connects IT to your business growth</h2>
+      </div>
+      <div class="mt-12 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+        {reasons.map((r) => (
+          <div class="bg-ink-900 p-7">
+            <span class="inline-flex rounded-xl bg-brand-500/15 p-3 text-brand-300"><Icon name={r.icon} /></span>
+            <h3 class="mt-5 text-lg font-bold text-white">{r.title}</h3>
+            <p class="mt-2 text-slate-400">{r.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section" aria-labelledby="process-title">
+    <div class="container-x">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="eyebrow">How it works</p>
+        <h2 id="process-title" class="mt-3 text-3xl font-extrabold sm:text-4xl">Getting started is simple</h2>
+      </div>
+      <ol class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        {steps.map((s, i) => (
+          <li class="relative">
+            <span class="flex h-11 w-11 items-center justify-center rounded-full bg-brand-500 text-lg font-extrabold text-white">{i + 1}</span>
+            <h3 class="mt-4 text-lg font-bold">{s.title}</h3>
+            <p class="mt-2 text-slate-600">{s.text}</p>
+          </li>
+        ))}
+      </ol>
+      <div class="mt-12 text-center">
+        <a href={bookHref} class="btn-primary px-6 py-3.5 text-base">Start with a free assessment</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INDUSTRIES -->
+  <section class="section bg-slate-50" aria-labelledby="industries-title">
+    <div class="container-x">
+      <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <div class="max-w-2xl">
+          <p class="eyebrow">Industries we serve</p>
+          <h2 id="industries-title" class="mt-3 text-3xl font-extrabold sm:text-4xl">IT services for specialised industries</h2>
+        </div>
+        <a href="/industries/" class="btn-outline shrink-0">All industries <Icon name="arrow" class="h-4 w-4" /></a>
+      </div>
+      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {industries.slice(0, 8).map((ind) => (
+          <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+            <span class="text-brand-600"><Icon name={ind.icon} class="h-5 w-5" /></span>
+            <span class="text-sm font-semibold text-ink-900">{ind.title}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Faq items={faqs} title="What Canadian businesses ask before choosing an IT provider" />
+  <CtaBand />
+</Base>
