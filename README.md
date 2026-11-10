@@ -35,7 +35,10 @@ npm run build    # outputs the site to dist/
 
 ## Deploying
 
-Hostinger deploys this repo as a **static** site. It runs `npm run build` and publishes `dist/`. Every push to `main` redeploys.
+Hostinger deploys this repo from GitHub as a Node.js build (app type `astro`, build script `build`, output directory `dist`). It runs `npm run build` and publishes `dist/`. Every push to `main` redeploys.
+
+- Preview: https://new.fajtech.ca
+- Live (after launch): https://fajtech.ca
 
 ## Before launch
 
