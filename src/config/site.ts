@@ -68,5 +68,5 @@ export const zoho = {
    * (Zoho Bookings → Share → Embed → copy the iframe's src).
    * Leave '' and the page shows a "request a time" form instead.
    */
-  bookingsUrl: '',
+  bookingsUrl: 'https://fajtech.zohobookings.com/portal-embed#/5016282000000039071',
 };
