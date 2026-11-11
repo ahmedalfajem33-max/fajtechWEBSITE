@@ -11,6 +11,12 @@ const nav = [
 const bookHref = '/book-a-consultation/';
 const isActive = (href: string) => path.startsWith(href);
 ---
+<div class="bg-brand-600 text-white">
+  <div class="container-x flex items-center justify-center gap-2 py-1.5 text-center text-xs font-medium sm:text-sm">
+    <Icon name="clock" class="h-4 w-4 shrink-0" />
+    <span><strong>24/7/365 IT support</strong> &amp; security monitoring<span class="hidden sm:inline"> — day, night, weekends and holidays</span></span>
+  </div>
+</div>
 <header class="sticky top-0 z-50 border-b border-white/10 bg-ink-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-ink-900/85">
   <div class="container-x flex h-16 items-center justify-between gap-4 lg:h-20">
     <a href="/" class="flex items-center gap-2.5" aria-label={`${site.name} home`}>

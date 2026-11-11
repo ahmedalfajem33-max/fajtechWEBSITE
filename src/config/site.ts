@@ -24,7 +24,10 @@ export const site = {
   },
   /** Show the street address publicly? (false = only "Calgary, Alberta") */
   showStreetAddress: false,
-  hours: 'Mon–Fri, 8:00 am – 6:00 pm MT',
+  /** Support availability (shown everywhere) */
+  support: '24/7/365 support',
+  /** Office / sales hours */
+  hours: 'Office: Mon–Fri, 8:00 am – 6:00 pm MT',
   social: {
     linkedin: '',
     facebook: '',

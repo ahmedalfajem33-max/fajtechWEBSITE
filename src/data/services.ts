@@ -13,14 +13,14 @@ export const services: Service[] = [
   {
     slug: 'managed-it',
     title: 'Managed IT Services',
-    short: 'Fully managed IT support with monitoring, proactive maintenance, and predictable pricing.',
+    short: 'Fully managed IT with 24/7/365 support and monitoring, proactive maintenance and predictable pricing.',
     icon: 'server',
     featured: true,
     intro:
-      'Everything your business needs to stay secure, supported and productive — for one predictable monthly fee. We monitor, patch and support your systems so problems are fixed before your team notices them.',
+      'Everything your business needs to stay secure, supported and productive — for one predictable monthly fee. Our team is available 24 hours a day, 365 days a year, and we monitor, patch and support your systems so problems are fixed before your team notices them.',
     features: [
       { title: '24/7 monitoring', text: 'Real-time monitoring of servers, workstations and network devices to prevent downtime before it happens.' },
-      { title: 'Help desk support', text: 'Canadian IT experts ready to help your staff by phone, email or remote session whenever problems arise.' },
+      { title: '24/7/365 help desk', text: 'Real IT experts ready to help your staff by phone, email or remote session — day, night, weekends and holidays.' },
       { title: 'Proactive maintenance', text: 'Patching, updates, optimisation and routine health checks on a set schedule.' },
       { title: 'Vendor management', text: 'We deal with your ISP, software vendors and phone provider so you do not have to.' },
       { title: 'Onboarding & offboarding', text: 'New hires get working devices and accounts on day one; departing staff lose access the same day.' },
@@ -31,13 +31,13 @@ export const services: Service[] = [
   {
     slug: 'cybersecurity',
     title: 'Cybersecurity',
-    short: 'Protection from threats with advanced security monitoring and compliance tools.',
+    short: 'Protection from threats with 24/7 security monitoring, response and compliance tools.',
     icon: 'shield',
     featured: true,
     intro:
       'We protect your business with multi-layered security built for modern threats — from endpoint protection and email filtering to staff training and incident response.',
     features: [
-      { title: 'Managed detection & response', text: 'Real-time detection and response to suspicious activity across your entire environment.' },
+      { title: '24/7 detection & response', text: 'Round-the-clock monitoring with analysts ready to respond to suspicious activity across your entire environment — even at 3 am.' },
       { title: 'Security awareness training', text: 'Phishing simulations and short training that help employees spot and avoid cyber threats.' },
       { title: 'Data protection', text: 'Encryption, access controls and backups that keep sensitive information safe from ransomware and leaks.' },
       { title: 'Email security', text: 'Advanced filtering, impersonation protection and DMARC/SPF/DKIM set up correctly.' },
@@ -73,7 +73,7 @@ export const services: Service[] = [
     intro:
       'Ransomware, hardware failure, floods, human error — when something goes wrong, you need your data and systems back fast. We design, monitor and regularly test backups so recovery is a plan, not a hope.',
     features: [
-      { title: 'Automated backups', text: 'Servers, workstations, Microsoft 365 and cloud apps backed up automatically.' },
+      { title: 'Automated backups', text: 'Servers, workstations, Microsoft 365 and cloud apps backed up automatically and monitored 24/7.' },
       { title: 'Offsite & immutable copies', text: 'Copies stored in Canadian data centres that ransomware cannot alter or delete.' },
       { title: 'Tested restores', text: 'We test restores on a schedule and report the results to you.' },
       { title: 'Business continuity plan', text: 'A documented plan for who does what when systems go down.' },
@@ -89,7 +89,7 @@ export const services: Service[] = [
     intro:
       'Firewalls, Wi-Fi, switching and VPN designed for performance and protection. We build networks that stay up, stay fast and keep intruders out.',
     features: [
-      { title: 'Firewall management', text: 'Next-generation firewalls configured, monitored and kept up to date.' },
+      { title: 'Firewall management', text: 'Next-generation firewalls configured, monitored 24/7 and kept up to date.' },
       { title: 'Business Wi-Fi', text: 'Secure, segmented wireless with separate guest access.' },
       { title: 'Secure remote access', text: 'VPN and zero-trust access for staff working from anywhere.' },
       { title: 'Cabling & installs', text: 'Office moves, new sites and structured cabling handled end to end.' },
@@ -176,11 +176,15 @@ export const faqs = [
   },
   {
     q: 'How quickly do you respond to support requests?',
-    a: 'Urgent issues are picked up right away during business hours, and our monitoring alerts us to many problems before you notice them. Response times are set out in writing in your service agreement.',
+    a: 'Our support team is available 24 hours a day, 365 days a year, and urgent issues are picked up right away — including nights, weekends and holidays. Our monitoring also alerts us to many problems before you notice them. Response times are set out in writing in your service agreement.',
+  },
+  {
+    q: 'Do you really offer 24/7 support?',
+    a: 'Yes. Our team works across time zones — in Calgary and in Cairo, Egypt — so there is always a qualified technician on shift. Help desk, security monitoring and incident response are covered around the clock, 365 days a year. On-site visits in the Calgary area are scheduled during local business hours, or after hours for urgent issues.',
   },
   {
     q: 'Why choose a Canadian IT provider?',
-    a: 'A Canadian provider understands Canadian privacy law (PIPEDA and provincial laws such as Alberta PIPA), can keep your data in Canadian data centres, works in your time zone, and can send a technician on site when needed.',
+    a: 'A Canadian provider understands Canadian privacy law (PIPEDA and provincial laws such as Alberta PIPA), can keep your data in Canadian data centres, and can send a technician on site when needed. With FAJTech you also get a 24/7 team, so help is available whenever you need it.',
   },
   {
     q: 'Is there a long-term contract?',

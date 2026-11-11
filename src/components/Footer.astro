@@ -14,7 +14,7 @@ const location = site.showStreetAddress
         <img src="/favicon.svg" alt="" width="32" height="32" class="h-8 w-8 rounded-lg bg-white p-1" />
         <span class="text-lg font-extrabold">FAJ<span class="text-brand-400">Tech</span></span>
       </a>
-      <p class="mt-4 text-sm leading-relaxed">Managed IT, cybersecurity and cloud services for Canadian businesses. Proudly based in Calgary, Alberta.</p>
+      <p class="mt-4 text-sm leading-relaxed">Managed IT, cybersecurity and cloud services for Canadian businesses, with 24/7/365 support. Proudly based in Calgary, Alberta.</p>
       {site.social.linkedin && (
         <a href={site.social.linkedin} class="mt-4 inline-flex rounded-full bg-white/5 p-2 hover:bg-brand-500 hover:text-white" aria-label="FAJTech on LinkedIn"><Icon name="linkedin" class="h-4 w-4" /></a>
       )}
@@ -41,7 +41,7 @@ const location = site.showStreetAddress
         <li class="flex gap-2.5"><Icon name="mail" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><a href={`mailto:${site.email}`} class="hover:text-brand-300">{site.email}</a></li>
         {site.phone && <li class="flex gap-2.5"><Icon name="phone" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="hover:text-brand-300">{site.phone}</a></li>}
         <li class="flex gap-2.5"><Icon name="pin" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />{location}</li>
-        <li class="flex gap-2.5"><Icon name="clock" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />{site.hours}</li>
+        <li class="flex gap-2.5"><Icon name="clock" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><span><span class="block font-semibold text-white">{site.support}</span>{site.hours}</span></li>
       </ul>
     </div>
   </div>

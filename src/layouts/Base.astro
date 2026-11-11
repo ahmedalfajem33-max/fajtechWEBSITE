@@ -26,6 +26,12 @@ const orgSchema = {
   image: `${site.url}/og-image.png`,
   logo: `${site.url}/favicon-192x192.png`,
   areaServed: [{ '@type': 'City', name: 'Calgary' }, { '@type': 'Country', name: 'Canada' }],
+  openingHoursSpecification: [{
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    opens: '00:00',
+    closes: '23:59',
+  }],
   address: {
     '@type': 'PostalAddress',
     ...(site.showStreetAddress ? { streetAddress: site.address.street } : {}),

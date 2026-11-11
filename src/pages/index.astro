@@ -17,26 +17,26 @@ const plans = [
   {
     name: 'Fully Managed IT',
     who: 'For businesses with no internal IT staff',
-    text: 'We become your IT department: help desk, monitoring, security, backups and strategy for one flat monthly fee.',
-    points: ['Unlimited help desk support', '24/7 monitoring & patching', 'Cybersecurity stack included', 'Quarterly strategy reviews'],
+    text: 'We become your IT department: 24/7 help desk, monitoring, security, backups and strategy for one flat monthly fee.',
+    points: ['Unlimited 24/7/365 help desk', '24/7 monitoring & patching', 'Cybersecurity stack included', 'Quarterly strategy reviews'],
     highlight: true,
   },
   {
     name: 'Co-Managed IT',
     who: 'For businesses with an in-house IT person or team',
-    text: 'We back up your team with tools, after-hours coverage, security expertise and extra hands for projects.',
-    points: ['Enterprise tools for your team', 'Escalation & after-hours cover', 'Security monitoring', 'Project support'],
+    text: 'We back up your team with tools, 24/7 coverage, security expertise and extra hands for projects.',
+    points: ['Enterprise tools for your team', 'Nights, weekends & holiday cover', '24/7 security monitoring', 'Project support'],
   },
   {
     name: 'Projects & Consulting',
     who: 'For a specific project or problem',
     text: 'Fixed-scope work such as Microsoft 365 migrations, office moves, network upgrades and security assessments.',
-    points: ['Clear fixed quote', 'Cloud & M365 migrations', 'Network & Wi-Fi upgrades', 'Security assessments'],
+    points: ['Clear fixed quote', 'After-hours work to avoid downtime', 'Cloud & M365 migrations', 'Network & Wi-Fi upgrades', 'Security assessments'],
   },
 ];
 
 const reasons = [
-  { icon: 'clock', title: 'We are responsive', text: 'Real people answer, and urgent issues are picked up right away. No ticket black holes.' },
+  { icon: 'clock', title: '24/7/365 support', text: 'Real people answer day and night, weekends and holidays. Urgent issues are picked up right away — no ticket black holes.' },
   { icon: 'shield', title: 'Security first', text: 'Every plan includes layered cybersecurity — not as an expensive add-on.' },
   { icon: 'handshake', title: 'We are accountable', text: 'We stand behind our work for every client, every time. No excuses.' },
   { icon: 'users', title: 'Dedicated success manager', text: 'One person who knows your business, your systems and your goals.' },
@@ -55,7 +55,7 @@ const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', '
 ---
 <Base
   title="FAJTech | Managed IT Services & Cybersecurity in Calgary"
-  description="FAJTech provides managed IT services, cybersecurity, cloud and backup solutions for small and mid-sized businesses in Calgary and across Canada. Book a free IT assessment."
+  description="FAJTech provides managed IT services with 24/7/365 support, cybersecurity, cloud and backup solutions for businesses in Calgary and across Canada. Book a free IT assessment."
   schema={faqSchema}
 >
   <!-- HERO -->
@@ -72,14 +72,14 @@ const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', '
           Managed IT &amp; cybersecurity that keeps your business <span class="text-brand-400">running</span>.
         </h1>
         <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
-          FAJTech is the IT partner for growing Canadian businesses. We support your team, secure your data and plan your technology — for one predictable monthly fee — so you can focus on growth.
+          FAJTech is the IT partner for growing Canadian businesses. Our team supports your staff 24/7/365, secures your data and plans your technology — for one predictable monthly fee — so you can focus on growth.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a href={bookHref} class="btn-primary px-6 py-3.5 text-base">Book a Free IT Assessment <Icon name="arrow" class="h-4 w-4" /></a>
           <a href="/services/" class="btn-ghost px-6 py-3.5 text-base">Explore services</a>
         </div>
         <ul class="mt-10 grid gap-3 text-sm text-slate-300 sm:grid-cols-3">
-          {['Flat monthly pricing', 'Security in every plan', 'Reply within 1 business day'].map((t) => (
+          {['24/7/365 support', 'Flat monthly pricing', 'Security in every plan'].map((t) => (
             <li class="flex items-center gap-2"><Icon name="check" class="h-4 w-4 text-brand-400" />{t}</li>
           ))}
         </ul>
@@ -101,6 +101,7 @@ const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', '
               ['server', 'Servers & network', 'All systems operational'],
               ['cloud', 'Microsoft 365', 'MFA enforced'],
               ['check', 'Security patches', 'Up to date'],
+              ['clock', 'Help desk', 'Online 24/7'],
             ].map(([icon, label, status]) => (
               <div class="flex items-center gap-3 rounded-xl border border-white/5 bg-ink-950/60 p-3">
                 <span class="rounded-lg bg-brand-500/15 p-2 text-brand-300"><Icon name={icon} class="h-4 w-4" /></span>
