@@ -5,6 +5,34 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 ErrorDocument 404 /404.html
 
+# ── Redirects from the previous fajtech.ca site (keeps Google results & bookmarks working) ──
+RedirectMatch 301 ^/book-consultation(/thanks)?/?$ /book-a-consultation/
+RedirectMatch 301 ^/services/managed-it-services/?$ /services/managed-it/
+RedirectMatch 301 ^/services/cybersecurity-services/?$ /services/cybersecurity/
+RedirectMatch 301 ^/services/cloud-solutions/?$ /services/cloud-services/
+RedirectMatch 301 ^/services/hosted-private-cloud/?$ /services/cloud-services/
+RedirectMatch 301 ^/services/disaster-recovery/?$ /services/backup-disaster-recovery/
+RedirectMatch 301 ^/services/(it-consulting|vcio-services)/?$ /services/it-consulting-vcio/
+RedirectMatch 301 ^/services/robotic-process-automation/?$ /services/automation/
+RedirectMatch 301 ^/services/managed-print-services/?$ /services/
+RedirectMatch 301 ^/industries/(audiology|healthcare-and-medical-practices)/?$ /industries/healthcare/
+RedirectMatch 301 ^/industries/education-and-training-institutions/?$ /industries/education/
+RedirectMatch 301 ^/industries/financial-services-and-accounting-firms/?$ /industries/financial-services/
+RedirectMatch 301 ^/industries/legal-firms/?$ /industries/legal/
+RedirectMatch 301 ^/industries/local-governments-and-municipalities/?$ /industries/government/
+RedirectMatch 301 ^/industries/manufacturing-and-logistics/?$ /industries/manufacturing/
+RedirectMatch 301 ^/industries/nonprofit-organizations/?$ /industries/non-profits/
+RedirectMatch 301 ^/industries/real-estate-and-property-management/?$ /industries/real-estate/
+RedirectMatch 301 ^/industries/retail-and-ecommerce/?$ /industries/retail/
+RedirectMatch 301 ^/industries/(aviation|hospitality-and-tourism|professional-services-consulting-marketing-hr)/?$ /industries/
+RedirectMatch 301 ^/about/(awards-recognition|e-waste-recycling|events-hub|faqs|our-mission-values)/?$ /about/
+RedirectMatch 301 ^/(team|events|portfolio|testimonials)/?$ /about/
+RedirectMatch 301 ^/faqs/?$ /#faq-title
+RedirectMatch 301 ^/privacy-policy/?$ /privacy/
+RedirectMatch 301 ^/remote-support/?$ /support/
+RedirectMatch 301 ^/blog(/.*)?$ /resources/
+
+
 # Security headers
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"

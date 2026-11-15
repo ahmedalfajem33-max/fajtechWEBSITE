@@ -6,6 +6,7 @@ const path = Astro.url.pathname;
 const nav = [
   { href: '/industries/', label: 'Industries' },
   { href: '/about/', label: 'About' },
+  { href: '/resources/', label: 'Resources' },
   { href: '/free-it-assessment/', label: 'Free Assessment' },
   { href: '/contact/', label: 'Contact' },
 ];
@@ -50,9 +51,9 @@ const isActive = (href: string) => path.startsWith(href);
     </nav>
 
     <div class="hidden items-center gap-4 lg:flex">
-      <a href="/support/" class="hidden whitespace-nowrap text-sm font-semibold text-slate-300 hover:text-white xl:inline">Get Support</a>
+      <a href="/support/" class="hidden whitespace-nowrap text-sm font-semibold text-slate-300 hover:text-white 2xl:inline">Get Support</a>
       {site.phone && (
-        <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="hidden items-center gap-2 whitespace-nowrap text-sm font-semibold hover:text-brand-300 xl:flex">
+        <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="hidden items-center gap-2 whitespace-nowrap text-sm font-semibold hover:text-brand-300 2xl:flex">
           <Icon name="phone" class="h-4 w-4" />{site.phone}
         </a>
       )}

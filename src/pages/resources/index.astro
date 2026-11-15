@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import CtaBand from '../../components/CtaBand.astro';
+
+const posts = (await getCollection('resources')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = (d: Date) => d.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+<Base title="IT & Cybersecurity Resources" description="Practical guides on managed IT, cybersecurity, privacy compliance and IT costs for Canadian small and mid-sized businesses.">
+  <PageHero eyebrow="Resources" title="IT & cybersecurity guides for growing businesses" text="Practical, plain-language advice from the FAJTech team — no jargon." />
+  <section class="section">
+    <div class="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {posts.map((p) => (
+        <a href={`/resources/${p.id}/`} class="card group flex flex-col">
+          <span class="text-xs font-bold uppercase tracking-wider text-brand-600">{p.data.category}</span>
+          <h2 class="mt-3 text-xl font-bold leading-snug group-hover:text-brand-700">{p.data.title}</h2>
+          <p class="mt-3 flex-1 text-slate-600">{p.data.description}</p>
+          <span class="mt-6 flex items-center justify-between text-sm text-slate-500">
+            <span>{fmt(p.data.date)}{p.data.readingMinutes && ` · ${p.data.readingMinutes} min read`}</span>
+            <Icon name="arrow" class="h-4 w-4 text-brand-600 transition group-hover:translate-x-1" />
+          </span>
+        </a>
+      ))}
+    </div>
+  </section>
+  <CtaBand />
+</Base>

@@ -41,6 +41,20 @@
   .prose-legal h2 { @apply mt-10 mb-3 text-xl font-bold; }
   .prose-legal p, .prose-legal li { @apply mb-3 leading-relaxed; }
   .prose-legal ul { @apply list-disc pl-6; }
+  .prose-article { @apply text-lg leading-relaxed text-slate-700; }
+  .prose-article > * + * { @apply mt-5; }
+  .prose-article h2 { @apply mt-12 text-2xl font-extrabold text-ink-900; }
+  .prose-article h3 { @apply mt-8 text-xl font-bold text-ink-900; }
+  .prose-article a { @apply font-semibold text-brand-600 underline decoration-brand-300 underline-offset-2 hover:text-brand-700; }
+  .prose-article strong { @apply font-semibold text-ink-900; }
+  .prose-article ul { @apply list-disc space-y-2 pl-6; }
+  .prose-article ol { @apply list-decimal space-y-2 pl-6; }
+  .prose-article li::marker { @apply text-brand-500; }
+  .prose-article ul:has(input[type=checkbox]) { @apply list-none pl-0; }
+  .prose-article li:has(> input[type=checkbox]) { @apply relative rounded-lg border border-slate-200 py-3 pr-4 pl-11; }
+  .prose-article li > input[type=checkbox] { @apply absolute top-4 left-4 m-0 h-4 w-4 accent-brand-500; }
+  .prose-article { overflow-wrap: anywhere; }
+  .prose-article em { @apply text-slate-600; }
   .grid-bg {
     background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
     background-size: 44px 44px;
