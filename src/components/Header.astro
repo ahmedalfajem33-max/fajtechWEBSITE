@@ -20,7 +20,7 @@ const isActive = (href: string) => path.startsWith(href);
 </div>
 <header class="sticky top-0 z-50 border-b border-white/10 bg-ink-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-ink-900/85">
   <div class="container-x flex h-16 items-center justify-between gap-4 lg:h-20">
-    <a href="/" class="flex items-center gap-2.5" aria-label={`${site.name} home`}>
+    <a href="/" class="flex shrink-0 items-center gap-2.5" aria-label={`${site.name} home`}>
       <img src="/favicon.svg" alt="" width="36" height="36" class="h-9 w-9 rounded-lg bg-white p-1" />
       <span class="text-xl font-extrabold tracking-tight">FAJ<span class="text-brand-400">Tech</span></span>
     </a>
@@ -45,18 +45,18 @@ const isActive = (href: string) => path.startsWith(href);
         </div>
       </div>
       {nav.map((n) => (
-        <a href={n.href} class:list={['rounded-lg px-3 py-2 text-sm font-medium hover:text-brand-300', isActive(n.href) && 'text-brand-300']}>{n.label}</a>
+        <a href={n.href} class:list={['whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium hover:text-brand-300', isActive(n.href) && 'text-brand-300']}>{n.label}</a>
       ))}
     </nav>
 
     <div class="hidden items-center gap-4 lg:flex">
-      <a href="/support/" class="text-sm font-semibold text-slate-300 hover:text-white">Get Support</a>
+      <a href="/support/" class="hidden whitespace-nowrap text-sm font-semibold text-slate-300 hover:text-white xl:inline">Get Support</a>
       {site.phone && (
-        <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="flex items-center gap-2 text-sm font-semibold hover:text-brand-300">
+        <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="hidden items-center gap-2 whitespace-nowrap text-sm font-semibold hover:text-brand-300 xl:flex">
           <Icon name="phone" class="h-4 w-4" />{site.phone}
         </a>
       )}
-      <a href={bookHref} class="btn-primary">Book a Free Consultation</a>
+      <a href={bookHref} class="btn-primary whitespace-nowrap">Book a Free Consultation</a>
     </div>
 
     <button id="menu-btn" type="button" class="rounded-lg p-2 hover:bg-white/10 lg:hidden" aria-controls="mobile-menu" aria-expanded="false" aria-label="Open menu">
