@@ -31,6 +31,8 @@ RedirectMatch 301 ^/faqs/?$ /#faq-title
 RedirectMatch 301 ^/privacy-policy/?$ /privacy/
 RedirectMatch 301 ^/remote-support/?$ /support/
 RedirectMatch 301 ^/blog(/.*)?$ /resources/
+# Old admin panel (retired)
+RedirectMatch 301 ^/(admin|login|install|forgot-password|reset-password)(/.*)?$ /
 
 
 # Security headers
