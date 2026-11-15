@@ -49,7 +49,7 @@ const schema = {
           <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600"><Icon name={service.icon} /></span>
           <span><span class="block text-sm text-slate-600">Related service</span><span class="block text-lg font-bold text-ink-900">{service.title}</span></span>
         </span>
-        <a href={`/services/${service.slug}/`} class="btn-primary">Learn more</a>
+        <a href={`/services/${service.slug}/`} class="btn-primary">Learn about {service.title}</a>
       </aside>
     )}
   </article>

@@ -24,6 +24,12 @@ import Icon from '../components/Icon.astro';
       title.textContent = 'Request received — thank you!';
       text.textContent = 'We will confirm your consultation time by email within one business day.';
       (window as any).fajTrack?.('booking', { value: 1.0, currency: 'CAD' });
+    } else if (src === 'assessment') {
+      title.textContent = 'Assessment request received!';
+      text.textContent = 'We will contact you within one business day to arrange your free IT & cybersecurity assessment.';
+      (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' });
+    } else if (src === 'contact') {
+      (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' });
     }
   </script>
 </Base>

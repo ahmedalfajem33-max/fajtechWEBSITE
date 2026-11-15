@@ -74,18 +74,23 @@ const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
     <meta property="og:locale" content="en_CA" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <!-- Google Ads tag (kept from the previous fajtech.ca site) -->
-    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${googleAds.id}`}></script>
+    <!-- Events queue in dataLayer immediately; the gtag library loads once the page has rendered (faster first paint). -->
     <script is:inline define:vars={{ adsId: googleAds.id, ga4Id: googleAds.ga4Id }}>
       window.dataLayer = window.dataLayer || [];
       window.gtag = function () { dataLayer.push(arguments); };
       gtag('js', new Date());
       gtag('config', adsId);
       if (ga4Id) gtag('config', ga4Id);
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + adsId;
+          document.head.appendChild(s);
+        }, 1500);
+      });
     </script>
 
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
