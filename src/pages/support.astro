@@ -4,32 +4,46 @@ import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
 import { site } from '../config/site';
 const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
+const afterTel = `tel:${site.afterHours.phone.replace(/[^+\d]/g, '')}`;
 ---
 <Base title="Get IT Support" description="FAJTech clients: get help 24/7/365 by phone or email. Call for urgent issues, outages and security incidents.">
   <PageHero eyebrow="Client support" title="Need help? We're here 24/7/365." text="Existing FAJTech clients can reach our support team any time — day, night, weekends and holidays." />
   <section class="section">
     <div class="container-x">
+      <p id="shift-now" class="mb-6 hidden rounded-xl bg-brand-50 px-4 py-3 text-center text-sm font-semibold text-brand-700"></p>
       <div class="grid gap-6 lg:grid-cols-2">
-        <a href={tel} class="group rounded-2xl bg-brand-500 p-8 text-white shadow-xl shadow-brand-500/20 transition hover:bg-brand-600">
-          <Icon name="phone" class="h-8 w-8" />
-          <h2 class="mt-5 text-2xl font-extrabold text-white">Call support</h2>
-          <p class="mt-2 text-brand-50">Best for urgent issues: outages, people unable to work, or a suspected security incident.</p>
-          <p class="mt-6 text-3xl font-extrabold tracking-tight">{site.phone}</p>
-          <p class="mt-1 text-sm font-semibold text-brand-100">Available 24/7/365</p>
-        </a>
-        <a href={`mailto:${site.email}?subject=Support%20request`} class="group rounded-2xl border border-slate-200 p-8 transition hover:border-brand-400 hover:shadow-lg">
-          <span class="text-brand-600"><Icon name="mail" class="h-8 w-8" /></span>
-          <h2 class="mt-5 text-2xl font-extrabold">Email support</h2>
-          <p class="mt-2 text-slate-600">Best for non-urgent requests: new users, software installs, questions and changes.</p>
-          <p class="mt-6 text-2xl font-extrabold text-ink-900">{site.email}</p>
-          <p class="mt-1 text-sm font-semibold text-slate-500">Include your name, company and a short description</p>
-        </a>
+        <div id="shift-day" data-shift="day" class="shift-card rounded-2xl border-2 border-slate-200 p-8 transition">
+          <span class="text-brand-600"><Icon name="phone" class="h-8 w-8" /></span>
+          <h2 class="mt-5 text-2xl font-extrabold">Daytime — Calgary team</h2>
+          <p class="mt-1 font-semibold text-slate-500">{site.dayShift} Calgary time</p>
+          <a href={tel} class="mt-6 block text-3xl font-extrabold tracking-tight text-ink-900 hover:text-brand-600">{site.phone}</a>
+          <a href={tel} class="btn-primary mt-6 w-full sm:w-auto">Call the Calgary team</a>
+        </div>
+        <div id="shift-night" data-shift="night" class="shift-card rounded-2xl border-2 border-slate-200 p-8 transition">
+          <span class="text-brand-600"><Icon name="clock" class="h-8 w-8" /></span>
+          <h2 class="mt-5 text-2xl font-extrabold">After hours — night team</h2>
+          <p class="mt-1 font-semibold text-slate-500">{site.afterHours.label} Calgary time</p>
+          <a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="mt-6 block text-3xl font-extrabold tracking-tight text-ink-900 hover:text-brand-600">{site.afterHours.phone}</a>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="btn bg-[#25D366] text-white hover:bg-[#1ebe5b] focus-visible:ring-green-200"><Icon name="whatsapp" class="h-5 w-5" /> WhatsApp us</a>
+            <a href={afterTel} class="btn-outline">Call</a>
+          </div>
+          <p class="mt-4 text-xs text-slate-500">WhatsApp messages and calls are free over the internet. Regular calls to this number are international.</p>
+        </div>
       </div>
+
+      <a href={`mailto:${site.email}?subject=Support%20request`} class="mt-6 flex flex-col gap-2 rounded-2xl border border-slate-200 p-6 transition hover:border-brand-400 hover:shadow-lg sm:flex-row sm:items-center sm:justify-between">
+        <span class="flex items-center gap-4">
+          <span class="text-brand-600"><Icon name="mail" class="h-7 w-7" /></span>
+          <span><span class="block font-bold text-ink-900">Email support — any time</span><span class="block text-sm text-slate-600">Best for non-urgent requests: new users, installs, questions and changes.</span></span>
+        </span>
+        <span class="font-bold text-brand-600">{site.email}</span>
+      </a>
 
       <div class="mt-12 rounded-2xl border border-red-200 bg-red-50 p-6 sm:p-8">
         <h2 class="flex items-center gap-2 text-xl font-extrabold text-red-800"><Icon name="shield" class="h-6 w-6" /> Think you've been hacked or clicked a suspicious link?</h2>
         <ol class="mt-4 list-decimal space-y-2 pl-6 text-red-900">
-          <li><strong>Call us right away</strong> on <a href={tel} class="underline">{site.phone}</a> — don't wait for business hours.</li>
+          <li><strong>Contact us right away</strong> — {site.dayShift}: call <a href={tel} class="underline">{site.phone}</a>; {site.afterHours.label}: <a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="underline">WhatsApp</a> or call <a href={afterTel} class="underline">{site.afterHours.phone}</a> (Calgary time).</li>
           <li>Disconnect the affected computer from the network (unplug the cable or turn off Wi-Fi). Do not turn it off.</li>
           <li>Don't enter any passwords or approve any sign-in prompts you didn't start.</li>
         </ol>
@@ -51,4 +65,15 @@ const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
       <p class="mt-10 text-center text-slate-600">Not a client yet? <a href="/book-a-consultation/" class="font-semibold text-brand-600 hover:underline">Book a free consultation</a>.</p>
     </div>
   </section>
+  <script>
+    // Highlight the team that is on shift right now (Calgary time).
+    const hour = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
+    const shift = hour >= 8 && hour < 18 ? 'day' : 'night';
+    const card = document.getElementById('shift-' + shift);
+    card?.classList.remove('border-slate-200');
+    card?.classList.add('border-brand-500', 'shadow-xl', 'shadow-brand-500/10');
+    const note = document.getElementById('shift-now')!;
+    note.textContent = shift === 'day' ? 'Right now: call the Calgary team.' : 'Right now: WhatsApp or call our night team.';
+    note.classList.remove('hidden');
+  </script>
 </Base>

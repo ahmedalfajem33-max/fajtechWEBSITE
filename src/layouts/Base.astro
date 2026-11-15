@@ -26,6 +26,10 @@ const orgSchema = {
   image: `${site.url}/og-image.png`,
   logo: `${site.url}/favicon-192x192.png`,
   areaServed: [{ '@type': 'City', name: 'Calgary' }, { '@type': 'Country', name: 'Canada' }],
+  contactPoint: [
+    { '@type': 'ContactPoint', contactType: 'technical support', telephone: site.phone, areaServed: 'CA', availableLanguage: ['English'] },
+    { '@type': 'ContactPoint', contactType: 'technical support', telephone: site.afterHours.phone, description: 'After hours (6 pm – 8 am Mountain Time), also on WhatsApp', availableLanguage: ['English', 'Arabic'] },
+  ],
   openingHoursSpecification: [{
     '@type': 'OpeningHoursSpecification',
     dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],

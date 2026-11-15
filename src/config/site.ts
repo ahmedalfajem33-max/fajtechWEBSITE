@@ -14,6 +14,14 @@ export const site = {
   email: 'info@fajtech.ca',
   /** Shown in header/footer/contact when set, e.g. '+1 (403) 555-0123'. Leave '' to hide. */
   phone: '+1 (403) 926-4494',
+  /** Calgary line hours (Calgary time) */
+  dayShift: '8:00 am – 6:00 pm',
+  /** After-hours team (Cairo) — covers 6 pm – 8 am Calgary time */
+  afterHours: {
+    label: '6:00 pm – 8:00 am',
+    phone: '+20 122 370 4138',
+    whatsapp: 'https://wa.me/201223704138?text=' + encodeURIComponent('Hi FAJTech, I need IT support. My name and company: '),
+  },
   address: {
     street: '415 Pinewind Rd NE',
     city: 'Calgary',
