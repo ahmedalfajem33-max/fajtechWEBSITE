@@ -142,20 +142,7 @@ export const services: Service[] = [
   },
 ];
 
-export const industries = [
-  { title: 'Healthcare & Medical Practices', text: 'Secure, compliant IT that supports patient care, clinic operations and health-information privacy.', icon: 'heart' },
-  { title: 'Financial Services & Accounting', text: 'Robust infrastructure and cybersecurity for firms that handle sensitive client financial data.', icon: 'chart' },
-  { title: 'Legal', text: 'Data security, compliance and workflow optimisation for law firms.', icon: 'scale' },
-  { title: 'Construction & Trades', text: 'Reliable connectivity, mobile devices and cloud tools for teams on job sites and in the office.', icon: 'hardhat' },
-  { title: 'Oil, Gas & Energy', text: 'Mission-critical infrastructure built for safety, compliance and operational efficiency.', icon: 'flame' },
-  { title: 'Manufacturing & Logistics', text: 'Automation, IoT integration and dependable IT for production environments.', icon: 'factory' },
-  { title: 'Retail & eCommerce', text: 'Point-of-sale support, cloud systems and secure networks for retail operations.', icon: 'cart' },
-  { title: 'Real Estate & Property Management', text: 'Flexible, secure IT that supports collaboration, data protection and growth.', icon: 'building' },
-  { title: 'Non-Profits', text: 'Cost-effective IT that helps non-profits focus resources on impact, not infrastructure.', icon: 'hand' },
-  { title: 'Education & Training', text: 'Reliable IT for schools, institutions, online learning and student management.', icon: 'book' },
-  { title: 'Local Government', text: 'Secure, scalable systems that support public services and community operations.', icon: 'landmark' },
-  { title: 'Automotive & Dealerships', text: 'Technology that keeps dealerships, service centres and operations running smoothly.', icon: 'car' },
-];
+export { industries } from './industries';
 
 export const faqs = [
   {

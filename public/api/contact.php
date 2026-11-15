@@ -51,7 +51,7 @@ $d = [
     'gclid'      => field('gclid', 200),
     'page'       => field('page', 300),
     'consent'    => field('marketing_consent', 5) === 'yes' ? 'Yes' : 'No',
-    'form_type'  => field('form_type', 20) === 'booking' ? 'booking' : 'contact',
+    'form_type'  => in_array(field('form_type', 20), ['booking', 'assessment'], true) ? field('form_type', 20) : 'contact',
     'pref_date'  => field('preferred_date', 20),
     'pref_time'  => field('preferred_time', 40),
     'meeting'    => field('meeting_type', 40),
@@ -67,7 +67,7 @@ $oneLine = fn(string $s) => preg_replace('/[\n\t]+/', ' ', $s);
 
 // ── 1) Email ─────────────────────────────────────────────
 $name = $oneLine($d['first_name'] . ' ' . $d['last_name']);
-$subject = ($isBooking ? 'Consultation request: ' : 'Website enquiry: ') . $name . ($d['company'] ? ' (' . $oneLine($d['company']) . ')' : '');
+$subject = ($isBooking ? 'Consultation request: ' : ($d['form_type'] === 'assessment' ? 'FREE ASSESSMENT request: ' : 'Website enquiry: ')) . $name . ($d['company'] ? ' (' . $oneLine($d['company']) . ')' : '');
 $body = ($isBooking ? "New CONSULTATION REQUEST from fajtech.ca — please confirm the time with the client.\n\n" : "New enquiry from fajtech.ca\n\n")
     . $bookingText . "\n"
     . "Name:        {$name}\nEmail:       {$d['email']}\nPhone:       {$d['phone']}\n"

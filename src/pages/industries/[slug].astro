@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { industries, type Industry } from '../../data/industries';
+import { services } from '../../data/services';
+import { site } from '../../config/site';
+
+export function getStaticPaths() {
+  return industries.map((i) => ({ params: { slug: i.slug }, props: { industry: i } }));
+}
+const { industry } = Astro.props as { industry: Industry };
+const related = industry.services.map((s) => services.find((x) => x.slug === s)!).filter(Boolean);
+const others = industries.filter((i) => i.slug !== industry.slug).slice(0, 6);
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `IT services for ${industry.title}`,
+  description: industry.intro,
+  provider: { '@id': `${site.url}/#business` },
+  audience: { '@type': 'BusinessAudience', name: industry.title },
+};
+---
+<Base title={`IT Services for ${industry.title}`} description={`${industry.short} 24/7/365 support from FAJTech in Calgary and across Canada.`} schema={schema}>
+  <PageHero eyebrow="Industries" title={`IT services for ${industry.title.toLowerCase()}`} text={industry.intro}>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="/book-a-consultation/" class="btn-primary px-6 py-3.5 text-base">Book a Free Consultation</a>
+      <a href="/free-it-assessment/" class="btn-ghost px-6 py-3.5 text-base">Get a free IT assessment</a>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container-x grid gap-12 lg:grid-cols-2">
+      <div>
+        <p class="eyebrow">The challenges</p>
+        <h2 class="mt-3 text-3xl font-extrabold">What we hear from {industry.title.toLowerCase()} businesses</h2>
+        <ul class="mt-8 space-y-4">
+          {industry.challenges.map((c) => (
+            <li class="flex gap-3 rounded-xl border border-slate-200 p-4">
+              <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500"><Icon name="x" class="h-3.5 w-3.5" /></span>
+              <span class="text-slate-700">{c}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <p class="eyebrow">How we help</p>
+        <h2 class="mt-3 text-3xl font-extrabold">IT built around how you work</h2>
+        <div class="mt-8 grid gap-4 sm:grid-cols-2">
+          {industry.solutions.map((s) => (
+            <div class="rounded-xl border border-brand-200 bg-brand-50/50 p-5">
+              <span class="text-brand-600"><Icon name="check" class="h-5 w-5" /></span>
+              <h3 class="mt-3 font-bold">{s.title}</h3>
+              <p class="mt-1.5 text-sm text-slate-600">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-slate-50">
+    <div class="container-x">
+      <h2 class="text-2xl font-extrabold">Recommended services</h2>
+      <div class="mt-8 grid gap-6 md:grid-cols-3">
+        {related.map((s) => (
+          <a href={`/services/${s.slug}/`} class="card group">
+            <span class="text-brand-600"><Icon name={s.icon} /></span>
+            <h3 class="mt-3 font-bold">{s.title}</h3>
+            <p class="mt-1 text-sm text-slate-600">{s.short}</p>
+          </a>
+        ))}
+      </div>
+      <h2 class="mt-16 text-xl font-extrabold">Other industries we serve</h2>
+      <ul class="mt-5 flex flex-wrap gap-3">
+        {others.map((o) => <li><a href={`/industries/${o.slug}/`} class="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:border-brand-500 hover:text-brand-600">{o.title}</a></li>)}
+      </ul>
+    </div>
+  </section>
+  <CtaBand title={`Talk to an IT expert who understands ${industry.title.toLowerCase()}`} />
+</Base>

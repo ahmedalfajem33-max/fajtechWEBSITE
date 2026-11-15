@@ -1,14 +1,15 @@
 ---
 import Icon from './Icon.astro';
 import { services } from '../data/services';
+import { locations } from '../data/industries';
 import { site } from '../config/site';
 const year = new Date().getFullYear();
 const location = site.showStreetAddress
-  ? `${site.address.street}, ${site.address.city}, ${site.address.regionName}`
+  ? `${site.address.street}, ${site.address.city}, ${site.address.region} ${site.address.postalCode}`.trim()
   : `${site.address.city}, ${site.address.regionName}, Canada`;
 ---
 <footer class="bg-ink-950 text-slate-400">
-  <div class="container-x grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="container-x grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-5">
     <div>
       <a href="/" class="flex items-center gap-2.5 text-white">
         <img src="/favicon.svg" alt="" width="32" height="32" class="h-8 w-8 rounded-lg bg-white p-1" />
@@ -30,9 +31,17 @@ const location = site.showStreetAddress
       <ul class="mt-4 space-y-2 text-sm">
         <li><a href="/about/" class="hover:text-brand-300">About FAJTech</a></li>
         <li><a href="/industries/" class="hover:text-brand-300">Industries</a></li>
+        <li><a href="/free-it-assessment/" class="hover:text-brand-300">Free IT assessment</a></li>
+        <li><a href="/support/" class="hover:text-brand-300">Client support</a></li>
         <li><a href="/services/" class="hover:text-brand-300">All services</a></li>
         <li><a href="/contact/" class="hover:text-brand-300">Contact</a></li>
         <li><a href="/privacy/" class="hover:text-brand-300">Privacy policy</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="text-sm font-bold uppercase tracking-wider text-white">Service areas</h2>
+      <ul class="mt-4 space-y-2 text-sm">
+        {locations.map((l) => <li><a href={`/locations/${l.slug}/`} class="hover:text-brand-300">{l.slug === 'canada' ? 'Remote IT across Canada' : `IT support ${l.name}`}</a></li>)}
       </ul>
     </div>
     <div>

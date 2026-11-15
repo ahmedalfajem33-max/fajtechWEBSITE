@@ -6,6 +6,7 @@ const path = Astro.url.pathname;
 const nav = [
   { href: '/industries/', label: 'Industries' },
   { href: '/about/', label: 'About' },
+  { href: '/free-it-assessment/', label: 'Free Assessment' },
   { href: '/contact/', label: 'Contact' },
 ];
 const bookHref = '/book-a-consultation/';
@@ -14,7 +15,7 @@ const isActive = (href: string) => path.startsWith(href);
 <div class="bg-brand-600 text-white">
   <div class="container-x flex items-center justify-center gap-2 py-1.5 text-center text-xs font-medium sm:text-sm">
     <Icon name="clock" class="h-4 w-4 shrink-0" />
-    <span><strong>24/7/365 IT support</strong> &amp; security monitoring<span class="hidden sm:inline"> — day, night, weekends and holidays</span></span>
+    <span><strong>24/7/365 IT support</strong><span class="hidden sm:inline"> &amp; security monitoring</span> — <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="font-bold underline-offset-2 hover:underline">{site.phone}</a><span class="hidden md:inline"> · <a href="/support/" class="underline-offset-2 hover:underline">Client support</a></span></span>
   </div>
 </div>
 <header class="sticky top-0 z-50 border-b border-white/10 bg-ink-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-ink-900/85">
@@ -49,6 +50,7 @@ const isActive = (href: string) => path.startsWith(href);
     </nav>
 
     <div class="hidden items-center gap-4 lg:flex">
+      <a href="/support/" class="text-sm font-semibold text-slate-300 hover:text-white">Get Support</a>
       {site.phone && (
         <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="flex items-center gap-2 text-sm font-semibold hover:text-brand-300">
           <Icon name="phone" class="h-4 w-4" />{site.phone}
@@ -67,6 +69,7 @@ const isActive = (href: string) => path.startsWith(href);
       <a href="/services/" class="rounded-lg px-3 py-2.5 font-semibold hover:bg-white/10">All Services</a>
       {services.map((s) => <a href={`/services/${s.slug}/`} class="rounded-lg px-3 py-2 pl-6 text-sm text-slate-300 hover:bg-white/10">{s.title}</a>)}
       {nav.map((n) => <a href={n.href} class="rounded-lg px-3 py-2.5 font-semibold hover:bg-white/10">{n.label}</a>)}
+      <a href="/support/" class="rounded-lg px-3 py-2.5 font-semibold hover:bg-white/10">Get Support (clients)</a>
       <a href={bookHref} class="btn-primary mt-3">Book a Free Consultation</a>
       {site.phone && <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="btn-ghost mt-2">Call {site.phone}</a>}
     </nav>

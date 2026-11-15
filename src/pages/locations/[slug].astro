@@ -1,0 +1,88 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Faq from '../../components/Faq.astro';
+import { locations } from '../../data/industries';
+import { services } from '../../data/services';
+import { site } from '../../config/site';
+
+type Loc = (typeof locations)[number];
+export function getStaticPaths() {
+  return locations.map((l) => ({ params: { slug: l.slug }, props: { loc: l } }));
+}
+const { loc } = Astro.props as { loc: Loc };
+const isCanada = loc.slug === 'canada';
+const where = isCanada ? 'across Canada' : `in ${loc.name}`;
+const nearby = locations.filter((l) => loc.nearby.includes(l.name));
+const faqs = [
+  {
+    q: `Do you provide on-site IT support ${where}?`,
+    a: `${loc.onsite} Most issues are resolved remotely in minutes by our 24/7/365 support team.`,
+  },
+  {
+    q: `How much does managed IT cost ${where}?`,
+    a: 'Managed IT is usually priced per user or per device per month, depending on the support and security you need. We provide a fixed, written quote after a free assessment.',
+  },
+  {
+    q: 'How fast can you get started?',
+    a: 'After a free assessment and agreement, onboarding typically takes one to two weeks. Urgent security issues are dealt with right away.',
+  },
+];
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: loc.title,
+  description: loc.intro,
+  provider: { '@id': `${site.url}/#business` },
+  areaServed: isCanada ? { '@type': 'Country', name: 'Canada' } : { '@type': 'City', name: loc.name, containedInPlace: { '@type': 'State', name: 'Alberta' } },
+};
+---
+<Base title={loc.title} description={`${loc.title}: managed IT, cybersecurity, cloud and backup with 24/7/365 support from FAJTech. Book a free IT assessment.`} schema={schema}>
+  <PageHero eyebrow={isCanada ? 'Service area' : `${loc.name}, Alberta`} title={loc.title} text={loc.intro}>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="/book-a-consultation/" class="btn-primary px-6 py-3.5 text-base">Book a Free Consultation</a>
+      <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="btn-ghost px-6 py-3.5 text-base"><Icon name="phone" class="h-4 w-4" /> {site.phone}</a>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container-x">
+      <div class="grid gap-6 sm:grid-cols-3">
+        {[
+          ['clock', '24/7/365 support', 'Day, night, weekends and holidays.'],
+          ['pin', isCanada ? 'Nationwide coverage' : 'Local technicians', loc.onsite],
+          ['maple', 'Canadian company', 'Canadian privacy law and data residency built in.'],
+        ].map(([icon, t, d]) => (
+          <div class="flex gap-4 rounded-2xl border border-slate-200 p-5">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Icon name={icon} class="h-5 w-5" /></span>
+            <span><span class="block font-bold text-ink-900">{t}</span><span class="mt-1 block text-sm text-slate-600">{d}</span></span>
+          </div>
+        ))}
+      </div>
+
+      <h2 class="mt-16 text-3xl font-extrabold">IT services {where}</h2>
+      <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {services.map((s) => (
+          <a href={`/services/${s.slug}/`} class="card group">
+            <span class="text-brand-600"><Icon name={s.icon} /></span>
+            <h3 class="mt-3 font-bold">{s.title}</h3>
+            <p class="mt-1 text-sm text-slate-600">{s.short}</p>
+          </a>
+        ))}
+      </div>
+
+      {nearby.length > 0 && (
+        <>
+          <h2 class="mt-16 text-xl font-extrabold">{isCanada ? 'Local service areas' : 'Nearby service areas'}</h2>
+          <ul class="mt-5 flex flex-wrap gap-3">
+            {nearby.map((n) => <li><a href={`/locations/${n.slug}/`} class="inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-medium hover:border-brand-500 hover:text-brand-600">{n.title}</a></li>)}
+          </ul>
+        </>
+      )}
+    </div>
+  </section>
+  <Faq items={faqs} title={`IT support ${where}: common questions`} />
+  <CtaBand />
+</Base>

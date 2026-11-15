@@ -1,9 +1,12 @@
 ---
 import { services } from '../data/services';
-interface Props { booking?: boolean }
-const { booking = false } = Astro.props;
+interface Props { booking?: boolean; variant?: 'contact' | 'booking' | 'assessment' }
+const { booking: bookingProp = false, variant: v } = Astro.props;
+const variant = v ?? (bookingProp ? 'booking' : 'contact');
+const booking = variant === 'booking';
+const label = booking ? 'Request this time' : variant === 'assessment' ? 'Request my free assessment' : 'Send message';
 ---
-<form id="contact-form" data-label={booking ? 'Request this time' : 'Send message'} action="/api/contact.php" method="post" class="space-y-5" novalidate>
+<form id="contact-form" data-label={label} action="/api/contact.php" method="post" class="space-y-5" novalidate>
   <div class="grid gap-5 sm:grid-cols-2">
     <label class="block text-sm font-medium text-ink-900">First name <span class="text-red-600">*</span>
       <input name="first_name" required autocomplete="given-name" class="field" />
@@ -53,8 +56,8 @@ const { booking = false } = Astro.props;
       </label>
     </div>
   )}
-  <input type="hidden" name="form_type" value={booking ? 'booking' : 'contact'} />
-  <label class="block text-sm font-medium text-ink-900">{booking ? 'What would you like to discuss?' : 'How can we help?'} <span class="text-red-600">*</span>
+  <input type="hidden" name="form_type" value={variant} />
+  <label class="block text-sm font-medium text-ink-900">{booking ? 'What would you like to discuss?' : variant === 'assessment' ? 'What worries you most about your IT today?' : 'How can we help?'} <span class="text-red-600">*</span>
     <textarea name="message" rows="5" required class="field"></textarea>
   </label>
 
@@ -70,7 +73,7 @@ const { booking = false } = Astro.props;
   <p class="text-xs text-slate-500">By submitting this form you agree that FAJTech may contact you about your enquiry, as described in our <a href="/privacy/" class="underline hover:text-brand-600">privacy policy</a>.</p>
 
   <div id="form-error" class="hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert"></div>
-  <button type="submit" class="btn-primary w-full py-3.5 text-base sm:w-auto">{booking ? 'Request this time' : 'Send message'}</button>
+  <button type="submit" class="btn-primary w-full py-3.5 text-base sm:w-auto">{label}</button>
 </form>
 
 <script>

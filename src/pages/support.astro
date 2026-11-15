@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../config/site';
+const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
+---
+<Base title="Get IT Support" description="FAJTech clients: get help 24/7/365 by phone or email. Call for urgent issues, outages and security incidents.">
+  <PageHero eyebrow="Client support" title="Need help? We're here 24/7/365." text="Existing FAJTech clients can reach our support team any time — day, night, weekends and holidays." />
+  <section class="section">
+    <div class="container-x">
+      <div class="grid gap-6 lg:grid-cols-2">
+        <a href={tel} class="group rounded-2xl bg-brand-500 p-8 text-white shadow-xl shadow-brand-500/20 transition hover:bg-brand-600">
+          <Icon name="phone" class="h-8 w-8" />
+          <h2 class="mt-5 text-2xl font-extrabold text-white">Call support</h2>
+          <p class="mt-2 text-brand-50">Best for urgent issues: outages, people unable to work, or a suspected security incident.</p>
+          <p class="mt-6 text-3xl font-extrabold tracking-tight">{site.phone}</p>
+          <p class="mt-1 text-sm font-semibold text-brand-100">Available 24/7/365</p>
+        </a>
+        <a href={`mailto:${site.email}?subject=Support%20request`} class="group rounded-2xl border border-slate-200 p-8 transition hover:border-brand-400 hover:shadow-lg">
+          <span class="text-brand-600"><Icon name="mail" class="h-8 w-8" /></span>
+          <h2 class="mt-5 text-2xl font-extrabold">Email support</h2>
+          <p class="mt-2 text-slate-600">Best for non-urgent requests: new users, software installs, questions and changes.</p>
+          <p class="mt-6 text-2xl font-extrabold text-ink-900">{site.email}</p>
+          <p class="mt-1 text-sm font-semibold text-slate-500">Include your name, company and a short description</p>
+        </a>
+      </div>
+
+      <div class="mt-12 rounded-2xl border border-red-200 bg-red-50 p-6 sm:p-8">
+        <h2 class="flex items-center gap-2 text-xl font-extrabold text-red-800"><Icon name="shield" class="h-6 w-6" /> Think you've been hacked or clicked a suspicious link?</h2>
+        <ol class="mt-4 list-decimal space-y-2 pl-6 text-red-900">
+          <li><strong>Call us right away</strong> on <a href={tel} class="underline">{site.phone}</a> — don't wait for business hours.</li>
+          <li>Disconnect the affected computer from the network (unplug the cable or turn off Wi-Fi). Do not turn it off.</li>
+          <li>Don't enter any passwords or approve any sign-in prompts you didn't start.</li>
+        </ol>
+      </div>
+
+      <div class="mt-12 grid gap-6 sm:grid-cols-3">
+        {[
+          ['clock', 'Urgent issues', 'Picked up right away, any time of day.'],
+          ['chat', 'Normal requests', 'Handled in order of priority, usually the same day.'],
+          ['pin', 'On-site help', 'Scheduled with our local technicians when needed.'],
+        ].map(([icon, t, d]) => (
+          <div class="rounded-2xl border border-slate-200 p-6">
+            <span class="text-brand-600"><Icon name={icon} /></span>
+            <h3 class="mt-3 font-bold">{t}</h3>
+            <p class="mt-1 text-sm text-slate-600">{d}</p>
+          </div>
+        ))}
+      </div>
+      <p class="mt-10 text-center text-slate-600">Not a client yet? <a href="/book-a-consultation/" class="font-semibold text-brand-600 hover:underline">Book a free consultation</a>.</p>
+    </div>
+  </section>
+</Base>

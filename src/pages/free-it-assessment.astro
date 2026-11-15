@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ContactForm from '../components/ContactForm.astro';
+const checks = [
+  ['shield', 'Security review', 'Antivirus, firewall, MFA, email security and patching — where are the gaps?'],
+  ['refresh', 'Backup check', 'Are your backups working, offsite and recoverable after ransomware?'],
+  ['server', 'Systems health', 'Servers, network, Wi-Fi and devices — what is ageing or at risk of failing?'],
+  ['cloud', 'Microsoft 365 review', 'Licensing, sharing settings and security configuration.'],
+  ['dollar', 'Cost review', 'Where you may be overspending on licences, hardware or support.'],
+  ['compass', 'Written action plan', 'A clear, prioritised report you can use — with us or without us.'],
+];
+---
+<Base title="Free IT & Cybersecurity Assessment" description="Get a free, no-obligation IT and cybersecurity assessment from FAJTech. Find security gaps, backup risks and wasted IT spend — with a written action plan.">
+  <section class="relative overflow-hidden bg-ink-900 text-white">
+    <div class="grid-bg absolute inset-0" aria-hidden="true"></div>
+    <div class="absolute -left-32 top-0 h-96 w-96 rounded-full bg-brand-500/25 blur-3xl" aria-hidden="true"></div>
+    <div class="container-x relative grid gap-12 py-16 sm:py-20 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-400/10 px-3 py-1 text-xs font-semibold text-brand-200">Free · No obligation · Written report</p>
+        <h1 class="mt-5 text-4xl font-extrabold leading-tight text-white sm:text-5xl">Free IT &amp; Cybersecurity Assessment</h1>
+        <p class="mt-5 text-lg text-slate-300">Find out how secure and reliable your IT really is. We review your systems and give you a clear, written action plan — at no cost.</p>
+        <ul class="mt-10 grid gap-5 sm:grid-cols-2">
+          {checks.map(([icon, t, d]) => (
+            <li class="flex gap-3">
+              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-500/15 text-brand-300"><Icon name={icon} class="h-5 w-5" /></span>
+              <span><span class="block font-semibold text-white">{t}</span><span class="mt-0.5 block text-sm text-slate-400">{d}</span></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="rounded-2xl bg-white p-6 text-slate-700 shadow-2xl sm:p-8">
+        <h2 class="text-2xl font-extrabold">Request your free assessment</h2>
+        <p class="mt-2 mb-6 text-slate-600">We'll contact you within one business day to arrange it.</p>
+        <ContactForm variant="assessment" />
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container-x max-w-3xl text-center">
+      <h2 class="text-3xl font-extrabold">Why is it free?</h2>
+      <p class="mt-4 text-lg text-slate-600">Because it's the best way to show you how we work. Many businesses discover risks they didn't know about — and the report is yours to keep, whether or not you become a client.</p>
+    </div>
+  </section>
+</Base>

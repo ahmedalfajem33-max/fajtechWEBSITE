@@ -5,7 +5,7 @@ import Icon from '../components/Icon.astro';
 import ContactForm from '../components/ContactForm.astro';
 import { site } from '../config/site';
 const location = site.showStreetAddress
-  ? `${site.address.street}, ${site.address.city}, ${site.address.regionName}`
+  ? `${site.address.street}, ${site.address.city}, ${site.address.region} ${site.address.postalCode}`.trim()
   : `${site.address.city}, ${site.address.regionName}, Canada`;
 ---
 <Base title="Contact FAJTech | Book a Free IT Assessment" description="Contact FAJTech in Calgary for managed IT, cybersecurity and cloud services. Book a free, no-obligation IT assessment. New enquiries answered within one business day; 24/7/365 support for clients.">
@@ -32,6 +32,10 @@ const location = site.showStreetAddress
             <p class="mt-2 text-sm text-slate-600">Pick a time that suits you for a free 30-minute call.</p>
             <a href="/book-a-consultation/" class="btn-primary mt-4 w-full">Pick a day &amp; time</a>
           </div>
+        <div class="overflow-hidden rounded-2xl border border-slate-200">
+          <iframe src="https://www.google.com/maps?q=415+Pinewind+Rd+NE,+Calgary,+AB&output=embed" title="FAJTech location map" class="block h-56 w-full border-0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=415+Pinewind+Rd+NE,+Calgary,+AB" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-3 text-sm font-semibold text-brand-600 hover:bg-brand-50"><Icon name="pin" class="h-4 w-4" /> Get directions</a>
+        </div>
         <div class="rounded-2xl border border-slate-200 p-6">
           <h2 class="text-lg font-bold">Why businesses choose FAJTech</h2>
           <ul class="mt-4 space-y-2.5 text-sm text-slate-600">

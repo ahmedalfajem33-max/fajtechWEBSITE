@@ -13,17 +13,17 @@ export const site = {
   url: 'https://fajtech.ca',
   email: 'info@fajtech.ca',
   /** Shown in header/footer/contact when set, e.g. '+1 (403) 555-0123'. Leave '' to hide. */
-  phone: '',
+  phone: '+1 (403) 926-4494',
   address: {
     street: '415 Pinewind Rd NE',
     city: 'Calgary',
     region: 'AB',
     regionName: 'Alberta',
-    postalCode: '',
+    postalCode: 'T1Y 2M8',
     country: 'CA',
   },
   /** Show the street address publicly? (false = only "Calgary, Alberta") */
-  showStreetAddress: false,
+  showStreetAddress: true,
   /** Support availability (shown everywhere) */
   support: '24/7/365 support',
   /** Office / sales hours */
