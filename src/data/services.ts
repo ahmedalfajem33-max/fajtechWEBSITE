@@ -167,7 +167,7 @@ export const faqs = [
   },
   {
     q: 'Do you really offer 24/7 support?',
-    a: 'Yes. Our team works across time zones — in Calgary and in Cairo, Egypt — so there is always a qualified technician on shift. Help desk, security monitoring and incident response are covered around the clock, 365 days a year. From 8 am to 6 pm Calgary time, call our Calgary line; from 6 pm to 8 am, reach our night team by WhatsApp or phone. On-site visits in the Calgary area are scheduled during local business hours, or after hours for urgent issues.',
+    a: 'Yes. Our team works across time zones — in Calgary and in Cairo, Egypt — so there is always a qualified technician on shift. Help desk, security monitoring and incident response are covered around the clock, 365 days a year. You can WhatsApp our support team at any time. By phone, call our Calgary line from 8 am to 6 pm Calgary time, and our night team from 6 pm to 8 am. On-site visits in the Calgary area are scheduled during local business hours, or after hours for urgent issues.',
   },
   {
     q: 'Why choose a Canadian IT provider?',
