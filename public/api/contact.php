@@ -109,4 +109,72 @@ if (!$mailed && $zohoOk !== true) {
     error_log('FAJTech: contact form could not send email or reach Zoho');
     respond(500, ['ok' => false, 'error' => 'Sorry, your message could not be sent.']);
 }
+
+// ── 3) Confirmation email to the customer, from info@fajtech.ca ─────────
+// Anti-abuse: the email only repeats a cleaned first name and the chosen day/time,
+// never the visitor's free-text message, so the form can't be used to send spam.
+$replyFrom = $config['confirm_from'] ?? 'info@fajtech.ca';
+$first = preg_split('/\s+/u', trim($d['first_name']))[0] ?? '';
+$first = preg_replace("/[^\\p{L}\\p{M}'\\-]/u", '', $first);
+$first = mb_substr($first, 0, 20) ?: 'there';
+$h = fn(string $s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+
+$allowedTimes = ['Morning (8–10 am)', 'Late morning (10 am–12 pm)', 'Early afternoon (12–2 pm)', 'Afternoon (2–4 pm)', 'Late afternoon (4–6 pm)'];
+$allowedMeet  = ['Video call (Zoom / Teams)', 'Phone call', 'In person (Calgary area)'];
+$prefDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $d['pref_date']) ? date('l, F j, Y', strtotime($d['pref_date'])) : '';
+$prefTime = in_array($d['pref_time'], $allowedTimes, true) ? $d['pref_time'] : '';
+$meeting  = in_array($d['meeting'], $allowedMeet, true) ? $d['meeting'] : '';
+
+if ($isBooking) {
+    $cSubject = 'We received your consultation request — FAJTech';
+    $lead = 'Thank you for requesting a free IT consultation with FAJTech. We have received your request and will confirm your appointment by email within one business day.';
+    $details = array_filter(['Preferred day' => $prefDate, 'Preferred time (Mountain Time)' => $prefTime, 'Meeting type' => $meeting]);
+} elseif ($d['form_type'] === 'assessment') {
+    $cSubject = 'We received your free IT assessment request — FAJTech';
+    $lead = 'Thank you for requesting a free IT & cybersecurity assessment. A member of our team will contact you within one business day to arrange it.';
+    $details = [];
+} else {
+    $cSubject = 'Thanks for contacting FAJTech';
+    $lead = 'Thank you for contacting FAJTech. We have received your message and will reply within one business day.';
+    $details = [];
+}
+
+$rowsHtml = '';
+$rowsText = '';
+foreach ($details as $k => $v) {
+    $rowsHtml .= '<tr><td style="padding:6px 12px 6px 0;color:#64748b">' . $h($k) . '</td><td style="padding:6px 0;font-weight:600;color:#111c2a">' . $h($v) . '</td></tr>';
+    $rowsText .= "{$k}: {$v}\n";
+}
+$text = "Hi {$first},\n\n{$lead}\n\n" . ($rowsText ? $rowsText . "\n" : '')
+    . "Need help sooner?\n- Call: +1 (403) 926-4494 (8 am – 6 pm Calgary time)\n- WhatsApp 24/7: +20 122 370 4138 (https://wa.me/201223704138)\n- Email: info@fajtech.ca\n\n"
+    . "Kind regards,\nThe FAJTech team\nManaged IT & Cybersecurity — 24/7/365 support\nhttps://fajtech.ca\n415 Pinewind Rd NE, Calgary, AB T1Y 2M8\n\n"
+    . "You received this email because this address was used on a form at fajtech.ca. If that wasn't you, please ignore this message.";
+$html = '<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif">'
+    . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 12px"><tr><td align="center">'
+    . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden">'
+    . '<tr><td style="background:#111c2a;padding:20px 28px;color:#ffffff;font-size:22px;font-weight:800">FAJ<span style="color:#30c9a2">Tech</span></td></tr>'
+    . '<tr><td style="padding:28px;color:#334155;font-size:15px;line-height:1.6">'
+    . '<p style="margin:0 0 14px">Hi ' . $h($first) . ',</p>'
+    . '<p style="margin:0 0 18px">' . $h($lead) . '</p>'
+    . ($rowsHtml ? '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;font-size:15px">' . $rowsHtml . '</table>' : '')
+    . '<p style="margin:0 0 8px;font-weight:700;color:#111c2a">Need help sooner?</p>'
+    . '<p style="margin:0 0 4px">Call <a href="tel:+14039264494" style="color:#0f7a64">+1 (403) 926-4494</a> (8 am – 6 pm Calgary time)</p>'
+    . '<p style="margin:0 0 4px">WhatsApp 24/7: <a href="https://wa.me/201223704138" style="color:#0f7a64">+20 122 370 4138</a></p>'
+    . '<p style="margin:0 0 22px">Email: <a href="mailto:info@fajtech.ca" style="color:#0f7a64">info@fajtech.ca</a></p>'
+    . '<p style="margin:0">Kind regards,<br><strong>The FAJTech team</strong></p>'
+    . '</td></tr>'
+    . '<tr><td style="background:#f8fafc;padding:16px 28px;color:#64748b;font-size:12px;line-height:1.5">Managed IT &amp; Cybersecurity · 24/7/365 support<br>415 Pinewind Rd NE, Calgary, AB T1Y 2M8 · <a href="https://fajtech.ca" style="color:#0f7a64">fajtech.ca</a><br>You received this email because this address was used on a form at fajtech.ca. If that wasn\'t you, please ignore this message.</td></tr>'
+    . '</table></td></tr></table></body></html>';
+
+$boundary = 'faj_' . bin2hex(random_bytes(8));
+$cHeaders = "From: FAJTech <{$replyFrom}>\r\nReply-To: {$replyFrom}\r\nMIME-Version: 1.0\r\n"
+    . "Auto-Submitted: auto-replied\r\nX-Auto-Response-Suppress: All\r\n"
+    . "Content-Type: multipart/alternative; boundary=\"{$boundary}\"";
+$cBody = "--{$boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text))
+    . "--{$boundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($html))
+    . "--{$boundary}--\r\n";
+if (!@mail($d['email'], '=?UTF-8?B?' . base64_encode($cSubject) . '?=', $cBody, $cHeaders, '-f' . $replyFrom)) {
+    error_log('FAJTech: confirmation email to customer could not be sent');
+}
+
 respond(200, ['ok' => true]);

@@ -33,6 +33,10 @@ npm run build    # outputs the site to dist/
 - **Zoho SalesIQ (live chat):** paste the widget code into `zoho.salesIqWidgetCode`.
 - **Zoho Bookings (Book a consultation):** every "Book" button goes to `/book-a-consultation/`. Until `zoho.bookingsUrl` is set, that page shows a "request a time" form that emails the team. Once set, it embeds the live Zoho Bookings calendar instead. In Zoho Bookings, set the redirect after booking to `https://fajtech.ca/thank-you/?source=booking` so each booking counts as a Google Ads conversion (`googleAds.conversions.booking`).
 
+## Confirmation emails
+
+Every form submission (contact, free assessment, request-a-time) sends the visitor a branded confirmation from `info@fajtech.ca` (override with `confirm_from` in `fajtech-config.php`). To prevent abuse, it only repeats a cleaned first name and the chosen day/time, never the visitor's message. Zoho Bookings calendar bookings get Zoho's own confirmation.
+
 ## Deploying
 
 Hostinger deploys this repo from GitHub as a Node.js build (app type `astro`, build script `build`, output directory `dist`). It runs `npm run build` and publishes `dist/`. Every push to `main` redeploys.
