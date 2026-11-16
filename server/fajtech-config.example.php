@@ -7,6 +7,30 @@ return [
     'mail_to'   => 'info@fajtech.ca',
     'mail_from' => 'website@fajtech.ca', // must be a mailbox/domain hosted at Hostinger
 
+    // Sender of the automatic confirmation emails to customers
+    'confirm_from' => 'info@fajtech.ca',
+
+    // Built-in consultation booking (/book-a-consultation/), connected to on-premises Exchange (EWS).
+    // The booking mailbox organises each meeting and invites the customer + the consultant.
+    'booking' => [
+        'ews_url'      => 'https://mail.fajtech.ca/EWS/Exchange.asmx',
+        'ews_user'     => 'booking@fajtech.ca',      // or DOMAIN\\booking
+        'ews_pass'     => 'PASTE_PASSWORD_HERE',     // the booking mailbox password — only ever stored here
+        'ews_version'  => 'Exchange2013',            // works for Exchange 2013/2016/2019
+        'owner'        => 'ahmed.alfajem@fajtech.ca',// calendar checked for free/busy, invited to each meeting
+        'owner_name'   => 'Ahmed Alfajem',
+        'timezone'     => 'America/Edmonton',        // working hours below are in this time zone
+        'days'         => [1, 2, 3, 4, 5],           // Mon–Fri
+        'open'         => '09:00',
+        'close'        => '17:00',
+        'duration'     => 30,                        // minutes
+        'buffer'       => 15,                        // free minutes kept around existing meetings
+        'min_notice_hours' => 4,
+        'horizon_days' => 30,
+        'meeting_link' => '',                        // e.g. your reusable Microsoft Teams link
+        'mock'         => false,                     // true = fake calendar for testing without Exchange
+    ],
+
     // Zoho CRM → Setup → Developer Hub → Webforms → (Leads form) → Embed → copy the hidden values.
     // Leave as null to only send email.
     'zoho_web_to_lead' => null,

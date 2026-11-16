@@ -1,8 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
-import ContactForm from '../components/ContactForm.astro';
-import { site, zoho } from '../config/site';
+import BookingWidget from '../components/BookingWidget.astro';
+import { site } from '../config/site';
 
 const expect = [
   { icon: 'clock', title: '30 minutes, no cost', text: 'A relaxed conversation by video, phone or in person in Calgary.' },
@@ -30,21 +30,8 @@ const expect = [
   <!-- Calendar card, pulled up over the hero -->
   <section class="relative z-10 -mt-32 pb-16 sm:-mt-36">
     <div class="container-x">
-      <div class="mx-auto max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200">
-        {zoho.bookingsUrl ? (
-          <iframe
-            src={zoho.bookingsUrl}
-            title="Book a consultation with FAJTech"
-            class="block h-[1000px] w-full border-0 sm:h-[760px]"
-            loading="lazy"
-          ></iframe>
-        ) : (
-          <div class="p-6 sm:p-10">
-            <h2 class="text-2xl font-extrabold">Choose your preferred time</h2>
-            <p class="mt-2 mb-8 text-slate-600">Tell us when suits you and we'll confirm your appointment by email within one business day.</p>
-            <ContactForm booking />
-          </div>
-        )}
+      <div class="mx-auto max-w-5xl">
+        <BookingWidget />
       </div>
       <p class="mt-5 text-center text-sm text-slate-500">
         Prefer to reach us directly? Email <a href={`mailto:${site.email}`} class="font-semibold text-brand-600 hover:underline">{site.email}</a>{site.phone && <> or call <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="font-semibold text-brand-600 hover:underline">{site.phone}</a></>} · {site.support}
