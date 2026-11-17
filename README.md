@@ -41,7 +41,11 @@ The site has its own private live chat (no Zoho, no WhatsApp, no third party): t
 - **Team inbox:** `src/pages/agent/index.astro`. Sign in, see open/closed chats, reply, close. Click "Turn on alerts" for a sound and browser notifications. On a phone, open the link and "Add to Home Screen".
 - **Team members:** admins add people under the ☰ menu → Team members (with a temporary password; they choose their own at first sign-in).
 - **Server:** `public/api/chat.php`, MySQL database `u954394309_fajchat` on Hostinger. The database login lives in `domains/fajtech.ca/fajtech-chat.php`, **outside** `public_html`. Never commit it. Tables are created automatically.
-- **Email alerts** for new chats go to `mail_to` in `fajtech-config.php` (or `'notify'` in `fajtech-chat.php`).
+- **Alerts when a chat starts:**
+  - **Email** to `mail_to` in `fajtech-config.php` (default info@fajtech.ca) **and** every team member who has "Email me when a new chat starts" on (inbox → ☰ → Settings & notifications).
+  - **Push notifications** on each device where someone tapped "Turn on notifications" in the inbox. On iPhone: open fajtech.ca/agent/ in Safari → Share → Add to Home Screen → open the app → Turn on notifications.
+  - **Telegram**: an admin connects a bot under Settings & notifications (steps are shown there). The bot token is stored in the chat database, never in this repository.
+  - While nobody has the inbox open, further visitor messages also ping push/Telegram (at most every 2 minutes per chat).
 - WhatsApp stays only on the Contact page and in the footer.
 
 ## Confirmation emails

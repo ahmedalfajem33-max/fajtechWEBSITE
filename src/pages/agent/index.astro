@@ -14,9 +14,14 @@ import '../../styles/global.css';
   <meta name="theme-color" content="#111c2a" />
   <title>FAJTech Chat Inbox</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/favicon-192x192.png" />
+  <link rel="apple-touch-icon" href="/agent/apple-touch-icon.png" />
+  <link rel="manifest" href="/agent/manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FAJTech Chat" />
 </head>
-<body class="h-full bg-slate-100 text-ink-900 antialiased">
+<body class="h-full bg-slate-100 text-ink-900 antialiased" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
 
   <!-- Sign in -->
   <main id="v-login" class="hidden min-h-full items-center justify-center p-4">
@@ -54,14 +59,17 @@ import '../../styles/global.css';
         <button data-tab="closed" class="tab rounded-md px-3 py-1.5 font-semibold">Closed</button>
       </nav>
       <div class="ml-auto flex items-center gap-2">
-        <button id="b-alerts" class="hidden rounded-lg border border-white/25 px-3 py-1.5 text-xs font-semibold hover:bg-white/10 sm:block">Turn on alerts</button>
+        <button id="b-alerts" aria-label="Turn on notifications" class="hidden items-center gap-1.5 rounded-lg border border-white/25 px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="hidden sm:inline">Turn on notifications</span>
+        </button>
         <details class="relative">
           <summary class="flex cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-white/10">
             <span id="me-name" class="hidden max-w-32 truncate sm:inline"></span>
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </summary>
           <div class="absolute right-0 z-20 mt-2 w-52 overflow-hidden rounded-xl bg-white text-sm text-ink-900 shadow-xl ring-1 ring-slate-200">
-            <button id="m-alerts" class="block w-full px-4 py-2.5 text-left hover:bg-slate-50 sm:hidden">Turn on alerts</button>
+            <button id="m-settings" class="block w-full px-4 py-2.5 text-left hover:bg-slate-50">Settings &amp; notifications</button>
             <button id="m-team" class="hidden w-full px-4 py-2.5 text-left hover:bg-slate-50">Team members</button>
             <button id="m-password" class="block w-full px-4 py-2.5 text-left hover:bg-slate-50">Change password</button>
             <button id="m-logout" class="block w-full border-t border-slate-100 px-4 py-2.5 text-left text-red-600 hover:bg-red-50">Sign out</button>
@@ -118,6 +126,60 @@ import '../../styles/global.css';
     </form>
   </dialog>
 
+  <dialog id="d-settings" class="m-auto max-h-[90vh] w-[min(94vw,32rem)] overflow-y-auto rounded-2xl p-0 shadow-2xl backdrop:bg-ink-950/50">
+    <div class="p-6">
+      <div class="flex items-center justify-between"><h2 class="text-lg font-extrabold">Settings &amp; notifications</h2><button type="button" data-close class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Close">✕</button></div>
+
+      <form id="f-prefs" class="mt-5 space-y-3 rounded-xl border border-slate-200 p-4">
+        <p class="text-sm font-bold">You</p>
+        <label class="block text-sm font-semibold">Name visitors see in the chat<input name="name" required maxlength="80" class="field" /></label>
+        <label class="flex items-center gap-2 text-sm"><input name="notifyEmail" type="checkbox" class="h-4 w-4 rounded border-slate-300" /> Email me when a new chat starts</label>
+        <p class="err hidden text-sm font-medium text-red-600" role="alert"></p>
+        <div class="flex items-center gap-3"><button class="btn-primary py-2">Save</button><span class="saved hidden text-sm font-semibold text-brand-600">Saved ✓</span></div>
+      </form>
+
+      <section class="mt-4 space-y-3 rounded-xl border border-slate-200 p-4">
+        <p class="text-sm font-bold">Notifications on this device</p>
+        <p id="push-state" class="text-sm text-slate-600"></p>
+        <div id="ios-steps" class="hidden rounded-lg bg-brand-50 p-3 text-sm text-ink-900">
+          <p class="font-semibold">On iPhone, add the inbox to your Home Screen first:</p>
+          <ol class="mt-2 list-decimal space-y-1 pl-5">
+            <li>In Safari, tap the <strong>Share</strong> button <span aria-hidden="true">(□↑)</span>.</li>
+            <li>Choose <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+            <li>Open <strong>FAJTech Chat</strong> from your Home Screen, sign in, and tap <strong>Turn on notifications</strong> here.</li>
+          </ol>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="b-push-on" class="btn-primary hidden py-2">Turn on notifications</button>
+          <button type="button" id="b-push-test" class="btn-outline hidden py-2">Send a test</button>
+          <button type="button" id="b-push-off" class="hidden rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Turn off</button>
+        </div>
+        <p id="push-msg" class="hidden text-sm font-medium"></p>
+      </section>
+
+      <section id="tg-box" class="mt-4 hidden space-y-3 rounded-xl border border-slate-200 p-4">
+        <p class="text-sm font-bold">Telegram alerts <span class="font-normal text-slate-500">(whole team)</span></p>
+        <div id="tg-on" class="hidden space-y-3">
+          <p class="text-sm text-slate-600">Connected: new chats are posted to <strong id="tg-chat"></strong> by <span id="tg-bot"></span>.</p>
+          <div class="flex flex-wrap gap-2"><button type="button" id="b-tg-test" class="btn-outline py-2">Send a test</button><button type="button" id="b-tg-off" class="rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Disconnect</button></div>
+        </div>
+        <form id="f-tg" class="hidden space-y-3">
+          <ol class="list-decimal space-y-1.5 pl-5 text-sm text-slate-700">
+            <li>In Telegram, open <a href="https://t.me/BotFather" target="_blank" rel="noopener" class="font-semibold text-brand-600 underline">@BotFather</a>, send <code class="rounded bg-slate-100 px-1">/newbot</code> and follow the steps (e.g. name it "FAJTech Chat Alerts").</li>
+            <li>Copy the <strong>bot token</strong> it gives you and paste it below.</li>
+            <li>Create a Telegram group for your team (or use an existing one), <strong>add the bot to the group</strong>, and send any message in the group. (For alerts only to you, open the bot and press <strong>Start</strong> instead.)</li>
+            <li>Press <strong>Connect</strong>.</li>
+          </ol>
+          <input name="token" autocomplete="off" placeholder="Bot token, e.g. 123456789:AAH…" class="field mt-0 font-mono text-xs" />
+          <p class="err hidden text-sm font-medium text-red-600" role="alert"></p>
+          <p id="tg-next" class="hidden rounded-lg bg-amber-50 p-3 text-sm text-amber-900"></p>
+          <button class="btn-primary py-2">Connect</button>
+        </form>
+        <p id="tg-msg" class="hidden text-sm font-medium"></p>
+      </section>
+    </div>
+  </dialog>
+
   <dialog id="d-team" class="m-auto w-[min(92vw,30rem)] rounded-2xl p-0 shadow-2xl backdrop:bg-ink-950/50">
     <div class="p-6">
       <div class="flex items-center justify-between"><h2 class="text-lg font-extrabold">Team members</h2><button type="button" data-close class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Close">✕</button></div>
@@ -138,7 +200,7 @@ import '../../styles/global.css';
   <script>
     const API = '/api/chat.php';
     const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-    type Agent = { id: number; name: string; email: string; admin: boolean; mustChange: boolean; lastSeenAt?: string | null };
+    type Agent = { id: number; name: string; email: string; admin: boolean; mustChange: boolean; notifyEmail: boolean; lastSeenAt?: string | null };
     type Thread = { id: number; name: string; email: string; page: string; status: string; unread: number; last: string; lastFrom: string; lastAt: string; visitorSeenAt: string; createdAt: string };
     type Msg = { id: number; from: 'visitor' | 'agent' | 'system'; agent: string | null; body: string; at: string };
 
@@ -184,14 +246,121 @@ import '../../styles/global.css';
       } catch {}
     }
     function alertsOn() { return 'Notification' in window && Notification.permission === 'granted'; }
-    function refreshAlertButtons() {
-      const off = 'Notification' in window && Notification.permission === 'default';
-      $('b-alerts').classList.toggle('sm:block', off);
-      $('m-alerts').classList.toggle('hidden', !off);
+
+    // ── Push notifications (phone home-screen app + desktop) ──
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const standalone = matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+    const pushSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    let swReg: ServiceWorkerRegistration | null = null;
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/agent/sw.js', { scope: '/agent/' }).then((r) => { swReg = r; if (me) refreshPush(); }).catch(() => {});
+      navigator.serviceWorker.addEventListener('message', (e) => {
+        const m = String(e.data?.open || '').match(/#chat-(\d+)$/);
+        if (m && me) openThread(Number(m[1]));
+      });
     }
-    async function enableAlerts() { audio ??= new AudioContext(); if ('Notification' in window) await Notification.requestPermission(); refreshAlertButtons(); beep(); }
-    $('b-alerts').addEventListener('click', enableAlerts);
-    $('m-alerts').addEventListener('click', enableAlerts);
+    function urlB64ToUint8(b64: string) {
+      const pad = '='.repeat((4 - (b64.length % 4)) % 4);
+      const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+      return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+    }
+    async function currentSub() { try { return swReg ? await swReg.pushManager.getSubscription() : null; } catch { return null; } }
+    async function refreshPush() {
+      const sub = await currentSub();
+      const on = !!sub && 'Notification' in window && Notification.permission === 'granted';
+      const offerButton = !on && (pushSupported || (isIOS && !standalone));
+      const btn = $('b-alerts');
+      btn.classList.toggle('hidden', !offerButton); btn.classList.toggle('flex', offerButton);
+      $('ios-steps').classList.toggle('hidden', !(isIOS && !standalone));
+      $('b-push-on').classList.toggle('hidden', on || !pushSupported || (isIOS && !standalone));
+      $('b-push-test').classList.toggle('hidden', !on);
+      $('b-push-off').classList.toggle('hidden', !on);
+      const state = $('push-state');
+      if (on) state.textContent = '✅ This device gets a notification for every new chat message, even when the inbox is closed.';
+      else if (isIOS && !standalone) state.textContent = 'Notifications are off on this iPhone.';
+      else if (!pushSupported) state.textContent = "This browser can't receive notifications. Try Chrome, Edge, Firefox or Safari.";
+      else if (Notification.permission === 'denied') state.textContent = 'Notifications are blocked for this site. Allow them in your browser or phone settings, then try again.';
+      else state.textContent = 'Notifications are off on this device.';
+    }
+    function pushMsg(text: string, ok = true) { const p = $('push-msg'); p.textContent = text; p.className = 'text-sm font-medium ' + (ok ? 'text-brand-600' : 'text-red-600'); }
+    async function enablePush() {
+      if ((isIOS && !standalone) || !pushSupported) { openSettings(); return; }
+      try {
+        audio ??= new AudioContext();
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') { await refreshPush(); openSettings(); return; }
+        swReg ??= await navigator.serviceWorker.register('/agent/sw.js', { scope: '/agent/' });
+        await navigator.serviceWorker.ready;
+        const { key } = await api('push_key');
+        let sub = await swReg.pushManager.getSubscription();
+        if (!sub) sub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(key) });
+        const device = (isIOS ? 'iPhone/iPad' : navigator.userAgent.includes('Android') ? 'Android' : 'Computer') + (standalone ? ' app' : ' browser');
+        await api('push_sub', { endpoint: sub.endpoint, device });
+        pushMsg('Notifications are on. ✓');
+        beep();
+      } catch (e: any) { pushMsg(e.message || 'Could not turn on notifications.', false); }
+      refreshPush();
+    }
+    $('b-alerts').addEventListener('click', enablePush);
+    $('b-push-on').addEventListener('click', enablePush);
+    $('b-push-test').addEventListener('click', async () => {
+      try { await api('push_test', {}); pushMsg('Test sent. It should appear in a few seconds.'); } catch (e: any) { pushMsg(e.message, false); }
+    });
+    $('b-push-off').addEventListener('click', async () => {
+      const sub = await currentSub();
+      if (sub) { await api('push_unsub', { endpoint: sub.endpoint }).catch(() => {}); await sub.unsubscribe().catch(() => {}); }
+      pushMsg('Notifications turned off on this device.'); refreshPush();
+    });
+
+    // ── Settings dialog ──
+    const dSet = () => $<HTMLDialogElement>('d-settings');
+    async function openSettings() {
+      (document.querySelector('details') as HTMLDetailsElement).open = false;
+      const f = $<HTMLFormElement>('f-prefs');
+      (f.elements.namedItem('name') as HTMLInputElement).value = me!.name;
+      (f.elements.namedItem('notifyEmail') as HTMLInputElement).checked = me!.notifyEmail;
+      formErr(f); f.querySelector('.saved')!.classList.add('hidden');
+      await refreshPush();
+      $('tg-box').classList.toggle('hidden', !me!.admin);
+      if (me!.admin) loadTelegram();
+      if (!dSet().open) dSet().showModal();
+    }
+    $('m-settings').addEventListener('click', openSettings);
+    $('f-prefs').addEventListener('submit', async (e) => {
+      e.preventDefault(); const f = e.currentTarget as HTMLFormElement; formErr(f);
+      const name = (f.elements.namedItem('name') as HTMLInputElement).value.trim();
+      const notifyEmail = (f.elements.namedItem('notifyEmail') as HTMLInputElement).checked;
+      try {
+        await api('prefs_save', { name, notifyEmail });
+        me!.name = name; me!.notifyEmail = notifyEmail; $('me-name').textContent = name;
+        f.querySelector('.saved')!.classList.remove('hidden');
+      } catch (ex: any) { formErr(f, ex.message); }
+    });
+    function tgMsg(text: string, ok = true) { const p = $('tg-msg'); p.textContent = text; p.className = 'text-sm font-medium ' + (ok ? 'text-brand-600' : 'text-red-600'); }
+    function showTelegram(r: any) {
+      $('tg-on').classList.toggle('hidden', !r.connected);
+      $('f-tg').classList.toggle('hidden', !!r.connected);
+      if (r.connected) { $('tg-chat').textContent = r.chat; $('tg-bot').textContent = r.bot; }
+    }
+    async function loadTelegram() {
+      $('tg-msg').classList.add('hidden'); $('tg-next').classList.add('hidden');
+      try { showTelegram(await api('tg_status')); } catch {}
+    }
+    $('f-tg').addEventListener('submit', async (e) => {
+      e.preventDefault(); const f = e.currentTarget as HTMLFormElement; formErr(f);
+      const btn = f.querySelector('button') as HTMLButtonElement; btn.disabled = true; btn.textContent = 'Connecting…';
+      try {
+        const r = await api('tg_connect', { token: (f.elements.namedItem('token') as HTMLInputElement).value.trim() });
+        if (r.connected) { f.reset(); showTelegram(r); tgMsg('Connected! Check Telegram for a confirmation message.'); }
+        else { const n = $('tg-next'); n.textContent = r.next; n.classList.remove('hidden'); }
+      } catch (ex: any) { formErr(f, ex.message); }
+      finally { btn.disabled = false; btn.textContent = 'Connect'; }
+    });
+    $('b-tg-test').addEventListener('click', async () => { try { await api('tg_test', {}); tgMsg('Test sent to Telegram.'); } catch (e: any) { tgMsg(e.message, false); } });
+    $('b-tg-off').addEventListener('click', async () => {
+      if (!confirm('Stop posting new chats to Telegram?')) return;
+      await api('tg_disconnect', {}).catch(() => {}); loadTelegram(); tgMsg('Telegram disconnected.');
+    });
 
     // ── Conversation list ──
     async function loadList() {
@@ -325,7 +494,7 @@ import '../../styles/global.css';
 
     // ── Sign in / out / passwords ──
     function startApp() {
-      show('app'); paintTabs(); refreshAlertButtons();
+      show('app'); paintTabs(); refreshPush();
       $('me-name').textContent = me!.name;
       $('m-team').classList.toggle('hidden', !me!.admin); $('m-team').classList.toggle('block', me!.admin);
       loadList();

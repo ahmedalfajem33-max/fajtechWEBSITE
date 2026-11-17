@@ -9,14 +9,22 @@
  * Visitor actions (no login, identified by a random thread token kept in the browser):
  *   status, start, send, poll
  * Team actions (PHP session login):
- *   login, logout, me, password, list, thread, reply, close, reopen, agents, agent_add, agent_remove
+ *   login, logout, me, password, list, thread, reply, close, reopen, agents, agent_add, agent_remove,
+ *   prefs, prefs_save, push_key, push_sub, push_unsub, push_test, push_preview,
+ *   tg_status, tg_connect, tg_test, tg_disconnect (admins)
+ * Team alerts (email to every member, Telegram, Web Push) live in chat-notify.php.
  */
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('X-Robots-Tag: noindex');
 header('Cache-Control: no-store');
 
-function respond(int $code, array $body): void { http_response_code($code); echo json_encode($body, JSON_UNESCAPED_UNICODE); exit; }
+function respond(int $code, array $body): void {
+    http_response_code($code);
+    echo json_encode($body, JSON_UNESCAPED_UNICODE);
+    if (function_exists('run_after_response')) run_after_response();
+    exit;
+}
 function fail(int $code, string $msg): void { respond($code, ['ok' => false, 'error' => $msg]); }
 
 // ── Settings ────────────────────────────────────────────────────────────────
@@ -83,8 +91,25 @@ function ensure_schema(PDO $pdo): void {
         KEY thread_id (thread_id, id),
         CONSTRAINT fk_chat_thread FOREIGN KEY (thread_id) REFERENCES chat_threads(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    // v2: settings, push subscriptions, per-member email alerts
+    $pdo->exec("CREATE TABLE IF NOT EXISTS chat_settings (
+        k VARCHAR(50) PRIMARY KEY,
+        v TEXT NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS chat_push_subs (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        agent_id INT UNSIGNED NOT NULL,
+        endpoint VARCHAR(700) NOT NULL,
+        endpoint_hash CHAR(64) NOT NULL UNIQUE,
+        device VARCHAR(120) NOT NULL DEFAULT '',
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY agent_id (agent_id),
+        CONSTRAINT fk_push_agent FOREIGN KEY (agent_id) REFERENCES chat_agents(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    $has = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chat_agents' AND COLUMN_NAME = 'notify_email'")->fetchColumn();
+    if (!$has) $pdo->exec("ALTER TABLE chat_agents ADD COLUMN notify_email TINYINT(1) NOT NULL DEFAULT 1");
 }
-$schemaFlag = sys_get_temp_dir() . '/faj_chat_schema_v1_' . md5((string) $chatCfg['db_name']);
+$schemaFlag = sys_get_temp_dir() . '/faj_chat_schema_v2_' . md5((string) $chatCfg['db_name']);
 if (!is_file($schemaFlag)) { ensure_schema($pdo); @touch($schemaFlag); }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -131,6 +156,9 @@ function thread_by_token(PDO $pdo, string $token): array {
 }
 function require_post(string $method): void { if ($method !== 'POST') fail(405, 'Method not allowed.'); }
 
+define('FAJCHAT', true);
+require __DIR__ . '/chat-notify.php';
+
 // ── Visitor actions ─────────────────────────────────────────────────────────
 switch ($action) {
 case 'status':
@@ -153,9 +181,8 @@ case 'start':
     $tid = (int) $pdo->lastInsertId();
     if ($topics !== '') $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, body, created_at) VALUES (?, 'system', ?, UTC_TIMESTAMP())")->execute([$tid, "Wants to talk to: {$topics}"]);
     $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, body, created_at) VALUES (?, 'visitor', ?, UTC_TIMESTAMP())")->execute([$tid, $text]);
-    send_mail($mailTo, "New website chat from {$name}" . ($topics !== '' ? " ({$topics})" : ''),
-        "New chat on fajtech.ca\n\nName: {$name}\nEmail: {$email}\nTeam: " . ($topics ?: '-') . "\nPage: {$page}\n\nMessage:\n{$text}\n\nReply in the team inbox: {$siteUrl}/agent/#chat-{$tid}\n",
-        $mailFrom, $email);
+    $thread = ['id' => $tid, 'name' => $name, 'email' => $email, 'page' => $page];
+    after_response(fn() => notify_team($pdo, 'new', $thread, $text, $topics, $mailTo, $mailFrom, $siteUrl));
     $st = $pdo->prepare('SELECT * FROM chat_messages WHERE thread_id = ? ORDER BY id');
     $st->execute([$tid]);
     respond(200, ['ok' => true, 'token' => $token, 'online' => agents_online($pdo), 'messages' => array_map('msg_out', $st->fetchAll())]);
@@ -171,7 +198,12 @@ case 'send':
     $wasClosed = $t['status'] === 'closed';
     $pdo->prepare("UPDATE chat_threads SET status = 'open', last_visitor_at = UTC_TIMESTAMP(), last_message_at = UTC_TIMESTAMP() WHERE id = ?")->execute([$t['id']]);
     if ($wasClosed) {
-        send_mail($mailTo, "Chat reopened by {$t['name']}", "{$t['name']} ({$t['email']}) wrote again:\n\n{$text}\n\nReply: {$siteUrl}/agent/#chat-{$t['id']}\n", $mailFrom, $t['email']);
+        after_response(fn() => notify_team($pdo, 'reopened', $t, $text, '', $mailTo, $mailFrom, $siteUrl));
+    } elseif (!agents_online($pdo) && rate_ok("notify:{$t['id']}", 1, 120)) {
+        // Nobody has the inbox open: ping phones/Telegram (at most every 2 minutes per chat).
+        after_response(fn() => notify_team($pdo, 'message', $t, $text, '', $mailTo, $mailFrom, $siteUrl));
+    } elseif (rate_ok("push:{$t['id']}", 1, 60)) {
+        after_response(fn() => push_agents($pdo));
     }
     respond(200, ['ok' => true, 'id' => $id]);
 
@@ -196,7 +228,7 @@ if ($method === 'POST' && ($_SERVER['HTTP_X_FAJCHAT'] ?? '') !== '1') fail(403, 
 function current_agent(PDO $pdo): array {
     $id = (int) ($_SESSION['agent_id'] ?? 0);
     if (!$id) fail(401, 'Please sign in.');
-    $st = $pdo->prepare('SELECT id, name, email, is_admin, must_change FROM chat_agents WHERE id = ?');
+    $st = $pdo->prepare('SELECT id, name, email, is_admin, must_change, notify_email FROM chat_agents WHERE id = ?');
     $st->execute([$id]);
     $a = $st->fetch();
     if (!$a) { $_SESSION = []; fail(401, 'Please sign in.'); }
@@ -204,7 +236,7 @@ function current_agent(PDO $pdo): array {
     return $a;
 }
 function agent_out(array $a): array {
-    return ['id' => (int) $a['id'], 'name' => $a['name'], 'email' => $a['email'], 'admin' => (bool) $a['is_admin'], 'mustChange' => (bool) $a['must_change']];
+    return ['id' => (int) $a['id'], 'name' => $a['name'], 'email' => $a['email'], 'admin' => (bool) $a['is_admin'], 'mustChange' => (bool) $a['must_change'], 'notifyEmail' => (bool) ($a['notify_email'] ?? true)];
 }
 function strong_enough(string $p): bool { return mb_strlen($p) >= 10; }
 
@@ -309,7 +341,7 @@ case 'reopen':
 case 'agents':
     $a = current_agent($pdo);
     if (!$a['is_admin']) fail(403, 'Only admins can manage the team.');
-    $rows = $pdo->query('SELECT id, name, email, is_admin, must_change, last_seen_at FROM chat_agents ORDER BY name')->fetchAll();
+    $rows = $pdo->query('SELECT id, name, email, is_admin, must_change, notify_email, last_seen_at FROM chat_agents ORDER BY name')->fetchAll();
     respond(200, ['ok' => true, 'agents' => array_map(fn($r) => agent_out($r) + ['lastSeenAt' => iso($r['last_seen_at'])], $rows)]);
 
 case 'agent_add':
@@ -334,6 +366,103 @@ case 'agent_remove':
     $id = (int) ($in['id'] ?? 0);
     if ($id === (int) $a['id']) fail(422, "You can't remove yourself.");
     $pdo->prepare('DELETE FROM chat_agents WHERE id = ?')->execute([$id]);
+    respond(200, ['ok' => true]);
+
+case 'prefs_save':
+    require_post($method);
+    $a = current_agent($pdo);
+    $name = str_in($in, 'name', 80);
+    if ($name === '') fail(422, 'Please enter the name visitors will see.');
+    $pdo->prepare('UPDATE chat_agents SET name = ?, notify_email = ? WHERE id = ?')->execute([$name, !empty($in['notifyEmail']) ? 1 : 0, $a['id']]);
+    respond(200, ['ok' => true]);
+
+case 'push_key':
+    current_agent($pdo);
+    $keys = vapid_keys($pdo);
+    if (!$keys) fail(503, 'Push notifications are not available on this server.');
+    respond(200, ['ok' => true, 'key' => $keys['public']]);
+
+case 'push_sub':
+    require_post($method);
+    $a = current_agent($pdo);
+    $endpoint = str_in($in, 'endpoint', 700);
+    if (!preg_match('#^https://[a-z0-9.-]+/#i', $endpoint)) fail(422, 'Invalid push subscription.');
+    $pdo->prepare('INSERT INTO chat_push_subs (agent_id, endpoint, endpoint_hash, device) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE agent_id = VALUES(agent_id), device = VALUES(device)')
+        ->execute([$a['id'], $endpoint, hash('sha256', $endpoint), str_in($in, 'device', 120)]);
+    respond(200, ['ok' => true]);
+
+case 'push_unsub':
+    require_post($method);
+    $a = current_agent($pdo);
+    $pdo->prepare('DELETE FROM chat_push_subs WHERE agent_id = ? AND endpoint_hash = ?')->execute([$a['id'], hash('sha256', str_in($in, 'endpoint', 700))]);
+    respond(200, ['ok' => true]);
+
+case 'push_test':
+    require_post($method);
+    $a = current_agent($pdo);
+    $_SESSION['push_test'] = time();
+    $n = push_agents($pdo, [(int) $a['id']]);
+    if (!$n) fail(422, 'No device is set up for notifications yet. Tap "Turn on notifications" first.');
+    respond(200, ['ok' => true, 'sent' => $n]);
+
+case 'push_preview':
+    // Called by the service worker when a push arrives, to show what's new.
+    $a = current_agent($pdo);
+    if (time() - (int) ($_SESSION['push_test'] ?? 0) < 60) {
+        unset($_SESSION['push_test']);
+        respond(200, ['ok' => true, 'title' => 'FAJTech Chat', 'body' => 'Notifications are working on this device. ✅', 'url' => '/agent/', 'tag' => 'fajchat-test']);
+    }
+    $st = $pdo->query("SELECT t.id, t.name,
+            (SELECT m.body FROM chat_messages m WHERE m.thread_id = t.id AND m.sender = 'visitor' ORDER BY m.id DESC LIMIT 1) AS body,
+            (SELECT COUNT(*) FROM chat_messages m WHERE m.thread_id = t.id AND m.sender = 'visitor' AND m.id > t.agent_seen_id) AS unread
+        FROM chat_threads t WHERE t.status = 'open'
+        HAVING unread > 0 ORDER BY t.last_message_at DESC LIMIT 1");
+    $t = $st->fetch();
+    if (!$t) respond(200, ['ok' => true, 'title' => 'FAJTech Chat', 'body' => 'You have a new chat message.', 'url' => '/agent/', 'tag' => 'fajchat']);
+    respond(200, ['ok' => true, 'title' => "{$t['name']} on fajtech.ca", 'body' => mb_substr((string) $t['body'], 0, 180), 'url' => "/agent/#chat-{$t['id']}", 'tag' => "fajchat-{$t['id']}"]);
+
+case 'tg_status':
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can change Telegram alerts.');
+    respond(200, ['ok' => true, 'connected' => (bool) (setting_get($pdo, 'tg_token') && setting_get($pdo, 'tg_chat_id')),
+        'bot' => setting_get($pdo, 'tg_bot'), 'chat' => setting_get($pdo, 'tg_chat_title'), 'hasToken' => (bool) setting_get($pdo, 'tg_token')]);
+
+case 'tg_connect':
+    require_post($method);
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can change Telegram alerts.');
+    $token = str_in($in, 'token', 100) ?: (string) setting_get($pdo, 'tg_token');
+    $me = tg_call($token, 'getMe');
+    if (!($me['ok'] ?? false)) fail(422, "That bot token didn't work. Copy it again from @BotFather (it looks like 123456789:AAH…).");
+    setting_set($pdo, 'tg_token', $token);
+    setting_set($pdo, 'tg_bot', '@' . $me['result']['username']);
+    $up = tg_call($token, 'getUpdates', ['allowed_updates' => ['message', 'my_chat_member', 'channel_post']]);
+    $chat = null;
+    foreach (array_reverse($up['result'] ?? []) as $u) {
+        $c = $u['message']['chat'] ?? $u['my_chat_member']['chat'] ?? $u['channel_post']['chat'] ?? null;
+        $leftNow = isset($u['my_chat_member']) && in_array($u['my_chat_member']['new_chat_member']['status'] ?? '', ['left', 'kicked'], true);
+        if ($c && !$leftNow) { $chat = $c; break; }
+    }
+    if (!$chat) respond(200, ['ok' => true, 'connected' => false, 'bot' => '@' . $me['result']['username'],
+        'next' => 'Bot found. Now add it to your Telegram group (or open the bot and press Start), send any message there, then press "Connect" again.']);
+    $title = $chat['title'] ?? trim(($chat['first_name'] ?? '') . ' ' . ($chat['last_name'] ?? '')) ?: 'Telegram chat';
+    setting_set($pdo, 'tg_chat_id', (string) $chat['id']);
+    setting_set($pdo, 'tg_chat_title', $title);
+    tg_send($pdo, "✅ <b>FAJTech website chat is connected.</b>\nNew chats from fajtech.ca will be posted here.", 'Open the inbox', 'https://fajtech.ca/agent/');
+    respond(200, ['ok' => true, 'connected' => true, 'bot' => '@' . $me['result']['username'], 'chat' => $title]);
+
+case 'tg_test':
+    require_post($method);
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can change Telegram alerts.');
+    if (!tg_send($pdo, '🔔 Test alert from the FAJTech website chat.', 'Open the inbox', 'https://fajtech.ca/agent/')) fail(422, 'Telegram did not accept the message. Is the bot still in the group?');
+    respond(200, ['ok' => true]);
+
+case 'tg_disconnect':
+    require_post($method);
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can change Telegram alerts.');
+    foreach (['tg_token', 'tg_bot', 'tg_chat_id', 'tg_chat_title'] as $k) setting_set($pdo, $k, null);
     respond(200, ['ok' => true]);
 }
 

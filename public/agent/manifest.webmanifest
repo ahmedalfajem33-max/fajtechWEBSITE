@@ -1,0 +1,15 @@
+{
+  "name": "FAJTech Chat",
+  "short_name": "FAJTech Chat",
+  "description": "FAJTech website chat inbox",
+  "id": "/agent/",
+  "start_url": "/agent/",
+  "scope": "/agent/",
+  "display": "standalone",
+  "background_color": "#111c2a",
+  "theme_color": "#111c2a",
+  "icons": [
+    { "src": "/agent/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/agent/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
