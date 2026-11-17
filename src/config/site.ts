@@ -63,6 +63,20 @@ export const googleAds = {
   ga4Id: '',
 };
 
+// ── Visitor insights ─────────────────────────────────────────
+export const insights = {
+  /**
+   * Microsoft Clarity project ID (clarity.microsoft.com → your project → Settings → Overview,
+   * a short code like 'k3x9abcd12'). Leave '' to turn Clarity off.
+   */
+  clarityId: '',
+  /**
+   * Google Search Console HTML-tag verification code (only needed if you verify with the
+   * "HTML tag" method; the DNS method needs nothing here). Just the content="..." value.
+   */
+  googleSiteVerification: '',
+};
+
 // ── Zoho ──────────────────────────────────────────────────────
 export const zoho = {
   /**

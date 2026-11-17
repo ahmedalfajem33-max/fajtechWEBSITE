@@ -3,7 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ChatWidget from '../components/ChatWidget.astro';
-import { site, googleAds, zoho } from '../config/site';
+import { site, googleAds, zoho, insights } from '../config/site';
 
 interface Props {
   title: string;
@@ -60,6 +60,7 @@ const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
+    {insights.googleSiteVerification && <meta name="google-site-verification" content={insights.googleSiteVerification} />}
     <meta name="theme-color" content="#111c2a" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
@@ -95,6 +96,16 @@ const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
     </script>
 
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+    <!-- Microsoft Clarity (heatmaps & session recordings; form inputs are masked). Loads after the page renders. -->
+    {insights.clarityId && (
+      <script is:inline define:vars={{ clarityId: insights.clarityId }}>
+        (function (c, l, a, r, i) {
+          c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+          function load() { var t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i; l.head.appendChild(t); }
+          if (l.readyState === 'complete') setTimeout(load, 1500); else c.addEventListener('load', function () { setTimeout(load, 1500); });
+        })(window, document, 'clarity', 'script', clarityId);
+      </script>
+    )}
   </head>
   <body class="flex min-h-screen flex-col pb-16 lg:pb-0">
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:shadow-lg">Skip to content</a>
