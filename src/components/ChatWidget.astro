@@ -1,19 +1,24 @@
 ---
 /**
  * FAJTech live chat widget (talks to /api/chat.php; the team answers at /agent/).
- * Any element with a `data-open-chat` attribute opens it; so does `?chat=<token>` in the URL
- * (the link in "we replied" emails).
+ * A short guided intro (name → email → team → question) runs inside the chat, then the
+ * conversation goes to the team inbox. Any element with `data-open-chat` opens it; so does
+ * `?chat=<token>` in the URL (the link in "we replied" emails).
  */
+const topics = [
+  'Technical Support', 'Managed IT Services', 'Cybersecurity', 'Cloud Services', 'Backup & Recovery',
+  'Network Security', 'IT Consulting / vCIO', 'Hardware as a Service', 'Business Automation', "I don't know",
+];
 ---
-<div id="faj-chat" class="contents" data-api="/api/chat.php">
+<div id="faj-chat" class="contents" data-api="/api/chat.php" data-topics={JSON.stringify(topics)}>
   <!-- Teaser bubble -->
   <div id="chat-teaser" class="fixed right-4 bottom-36 z-40 hidden w-72 rounded-2xl bg-white p-4 pr-9 text-sm text-ink-900 shadow-2xl ring-1 ring-slate-200 lg:right-6 lg:bottom-24" role="status">
     <button type="button" id="chat-teaser-close" class="absolute top-2 right-2 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Dismiss">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
-    <button type="button" data-open-chat class="text-left">
-      <span class="mb-1 flex items-center gap-2 font-bold"><span class="h-2 w-2 rounded-full bg-brand-500"></span>FAJTech support</span>
-      Need a question answered? Chat with one of our IT experts. We usually reply within minutes.
+    <button type="button" data-open-chat class="flex gap-3 text-left">
+      <img src="/favicon.svg" alt="" class="h-9 w-9 shrink-0" width="36" height="36" />
+      <span>Need a question answered? We can connect you to one of our IT experts who are happy to help.</span>
     </button>
   </div>
 
@@ -27,64 +32,66 @@
 
   <!-- Panel -->
   <section id="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title"
-    class="fixed inset-0 z-[60] hidden flex-col overflow-hidden bg-white sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[620px] sm:max-h-[calc(100vh-3rem)] sm:w-[390px] sm:rounded-2xl sm:shadow-2xl sm:ring-1 sm:ring-slate-200">
-    <header class="flex items-center gap-3 bg-ink-900 px-4 py-3.5 text-white">
-      <img src="/favicon.svg" alt="" class="h-9 w-9 rounded-lg bg-white p-1" width="36" height="36" />
+    class="fixed inset-0 z-[60] hidden flex-col overflow-hidden bg-white transition-[width,height] sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[620px] sm:max-h-[calc(100vh-3rem)] sm:w-[400px] sm:rounded-2xl sm:shadow-2xl sm:ring-1 sm:ring-slate-200">
+    <header class="flex items-center gap-3 bg-brand-600 px-4 py-3.5 text-white">
+      <span class="relative shrink-0">
+        <img src="/favicon.svg" alt="" class="h-10 w-10 rounded-full bg-white p-1" width="40" height="40" />
+        <span id="chat-dot" class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-brand-600 bg-slate-300"></span>
+      </span>
       <div class="min-w-0 flex-1">
-        <h2 id="chat-title" class="text-base leading-tight font-bold text-white">FAJTech support</h2>
-        <p class="flex items-center gap-1.5 text-xs text-slate-300"><span id="chat-dot" class="h-2 w-2 rounded-full bg-brand-400"></span><span id="chat-status">Usually replies within minutes</span></p>
+        <h2 id="chat-title" class="text-base leading-tight font-bold text-white">FAJTech</h2>
+        <p id="chat-status" class="truncate text-xs text-brand-50/90">We usually reply within minutes</p>
       </div>
-      <button type="button" id="chat-close" class="rounded-lg p-2 text-slate-300 hover:bg-white/10 hover:text-white" aria-label="Close chat">
+      <button type="button" id="chat-expand" class="hidden rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white sm:block" aria-label="Expand chat">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path id="chat-expand-icon" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+      </button>
+      <button type="button" id="chat-close" class="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white" aria-label="Close chat">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </header>
 
-    <div id="chat-body" class="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-4 py-5" aria-live="polite">
-      <div class="flex gap-2">
-        <div class="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm ring-1 ring-slate-200">Hi there! 👋 Need a question answered? We can connect you to one of our IT experts, who are happy to help.</div>
-      </div>
-
-      <form id="chat-start" class="space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" novalidate>
-        <p class="text-sm font-semibold text-ink-900">Tell us a little about you and we'll get started.</p>
-        <label class="block text-xs font-semibold text-slate-600">Your name
-          <input name="name" required maxlength="80" autocomplete="name" class="field mt-1 py-2 text-sm" />
-        </label>
-        <label class="block text-xs font-semibold text-slate-600">Email (in case we get disconnected)
-          <input name="email" type="email" required maxlength="150" autocomplete="email" class="field mt-1 py-2 text-sm" />
-        </label>
-        <label class="block text-xs font-semibold text-slate-600">How can we help?
-          <textarea name="message" required maxlength="3000" rows="3" class="field mt-1 resize-none py-2 text-sm"></textarea>
-        </label>
-        <input name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
-        <p id="chat-start-error" class="hidden text-sm font-medium text-red-600" role="alert"></p>
-        <button type="submit" class="btn-primary w-full py-2.5">Start chat</button>
-        <p class="text-xs leading-relaxed text-slate-500">Your chat is stored securely on FAJTech's own servers and only used to help you. See our <a href="/privacy/" class="underline">privacy policy</a>.</p>
-      </form>
-
+    <div id="chat-body" class="flex-1 space-y-3 overflow-y-auto bg-white px-4 py-5" aria-live="polite">
       <div id="chat-messages" class="space-y-3"></div>
+      <div id="chat-typing" class="hidden items-center gap-2.5">
+        <img src="/favicon.svg" alt="" class="h-8 w-8 shrink-0 rounded-full bg-white p-0.5 ring-1 ring-slate-200" width="32" height="32" />
+        <span class="flex gap-1 rounded-2xl bg-slate-100 px-4 py-3.5"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>
+      </div>
     </div>
 
-    <form id="chat-compose" class="hidden items-end gap-2 border-t border-slate-200 bg-white p-3">
-      <label for="chat-input" class="sr-only">Type your message</label>
-      <textarea id="chat-input" rows="1" maxlength="3000" placeholder="Type your message…" class="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none"></textarea>
-      <button type="submit" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50" aria-label="Send">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
-      </button>
-    </form>
     <p id="chat-send-error" class="hidden bg-red-50 px-4 py-2 text-xs font-medium text-red-700" role="alert"></p>
+    <form id="chat-compose" class="border-t border-slate-200 bg-white p-3">
+      <div class="flex items-end gap-2 rounded-2xl border border-slate-300 py-1.5 pr-1.5 pl-4 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-100">
+        <label for="chat-input" class="sr-only">Type your message</label>
+        <textarea id="chat-input" rows="1" maxlength="3000" placeholder="Write a message…" class="max-h-32 min-h-[36px] flex-1 resize-none border-0 bg-transparent py-2 text-sm text-ink-900 placeholder:text-slate-400 focus:ring-0 focus:outline-none"></textarea>
+        <button type="submit" id="chat-send" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-brand-600 hover:bg-brand-50 disabled:text-slate-300 disabled:hover:bg-transparent" aria-label="Send">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+        </button>
+      </div>
+      <p id="chat-privacy" class="mt-2 px-1 text-[11px] leading-snug text-slate-400">Chats are stored securely on FAJTech's own servers. See our <a href="/privacy/" class="underline">privacy policy</a>.</p>
+    </form>
   </section>
 </div>
+
+<style>
+  .typing-dot { width: 6px; height: 6px; border-radius: 9999px; background: #94a3b8; animation: faj-typing 1.2s infinite ease-in-out; }
+  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes faj-typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+  #chat-panel.is-expanded { width: min(720px, calc(100vw - 3rem)); height: calc(100vh - 3rem); max-height: none; }
+</style>
 
 <script>
   const root = document.getElementById('faj-chat')!;
   const API = root.dataset.api!;
+  const TOPICS: string[] = JSON.parse(root.dataset.topics || '[]');
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const panel = $('chat-panel'), launcher = $('chat-launcher'), teaser = $('chat-teaser'), badge = $('chat-badge');
-  const body = $('chat-body'), list = $('chat-messages'), startForm = $<HTMLFormElement>('chat-start');
-  const compose = $<HTMLFormElement>('chat-compose'), input = $<HTMLTextAreaElement>('chat-input');
+  const body = $('chat-body'), list = $('chat-messages'), typing = $('chat-typing');
+  const compose = $<HTMLFormElement>('chat-compose'), input = $<HTMLTextAreaElement>('chat-input'), sendBtn = $<HTMLButtonElement>('chat-send');
   const statusEl = $('chat-status'), dot = $('chat-dot');
 
-  type Msg = { id: number; from: 'visitor' | 'agent' | 'system'; agent: string | null; body: string; at: string };
+  type From = 'visitor' | 'agent' | 'system' | 'bot';
+  type Msg = { id: number; from: From; agent: string | null; body: string; at: string };
   const store = {
     get: (k: string) => { try { return localStorage.getItem('fajchat_' + k); } catch { return null; } },
     set: (k: string, v: string) => { try { localStorage.setItem('fajchat_' + k, v); } catch {} },
@@ -96,6 +103,12 @@
   let isOpen = false;
   let timer: number | undefined;
   let busy = false;
+
+  // Guided intro state
+  type Step = 'name' | 'email' | 'topics' | 'message' | 'chat';
+  let step: Step = token ? 'chat' : 'name';
+  const intro = { name: '', email: '', topics: [] as string[] };
+  let introStarted = false;
 
   async function api(action: string, data?: Record<string, unknown>) {
     const res = await fetch(`${API}?action=${action}` + (data ? '' : `&token=${token}&after=${lastId}`), data
@@ -122,45 +135,160 @@
   function time(iso: string) {
     try { return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch { return ''; }
   }
+  function avatar() {
+    const img = document.createElement('img');
+    img.src = '/favicon.svg'; img.alt = ''; img.width = 32; img.height = 32;
+    img.className = 'mt-5 h-8 w-8 shrink-0 rounded-full bg-white p-0.5 ring-1 ring-slate-200';
+    return img;
+  }
+  let lastSender = '';
   function addMessage(m: Msg) {
     if (m.id && m.id <= lastId) return;
     if (m.id) lastId = m.id;
+    const at = m.at || new Date().toISOString();
     const row = document.createElement('div');
     const bubble = document.createElement('div');
-    const meta = document.createElement('div');
+    const stamp = document.createElement('span');
+    stamp.className = 'mt-1 block text-[11px] opacity-70';
+    stamp.textContent = time(at);
     if (m.from === 'visitor') {
-      row.className = 'flex flex-col items-end';
-      bubble.className = 'max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-sm bg-brand-600 px-4 py-2.5 text-sm text-white';
-      meta.className = 'mt-1 text-[11px] text-slate-400';
-      meta.textContent = time(m.at);
-    } else if (m.from === 'agent') {
-      row.className = 'flex flex-col items-start';
-      bubble.className = 'max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm ring-1 ring-slate-200';
-      meta.className = 'mt-1 text-[11px] text-slate-400';
-      meta.textContent = `${m.agent || 'FAJTech'} · ${time(m.at)}`;
-    } else {
+      row.className = 'flex justify-end';
+      bubble.className = 'max-w-[80%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-brand-600 px-4 py-2.5 text-sm text-white';
+      linkify(bubble, m.body); bubble.append(stamp); row.append(bubble);
+      lastSender = 'visitor';
+    } else if (m.from === 'system') {
       row.className = 'flex justify-center';
-      bubble.className = 'max-w-[90%] rounded-xl bg-slate-200/70 px-3 py-2 text-center text-xs text-slate-600';
+      bubble.className = 'max-w-[90%] rounded-xl bg-slate-100 px-3 py-2 text-center text-xs text-slate-600';
+      bubble.textContent = m.body; row.append(bubble);
+      lastSender = 'system';
+    } else {
+      const who = m.from === 'bot' ? 'FAJTech' : (m.agent || 'FAJTech');
+      const continued = lastSender === who;
+      row.className = 'flex items-start gap-2.5';
+      const col = document.createElement('div'); col.className = 'min-w-0 max-w-[80%]';
+      if (!continued) {
+        const nm = document.createElement('p'); nm.className = 'mb-1 text-xs font-bold text-ink-900'; nm.textContent = who; col.append(nm);
+        row.append(avatar());
+      } else {
+        const spacer = document.createElement('span'); spacer.className = 'w-8 shrink-0'; row.append(spacer);
+      }
+      bubble.className = 'whitespace-pre-wrap break-words rounded-2xl rounded-tl-md bg-slate-100 px-4 py-2.5 text-sm text-ink-900';
+      linkify(bubble, m.body); bubble.append(stamp);
+      col.append(bubble); row.append(col);
+      lastSender = who;
     }
-    linkify(bubble, m.body);
-    row.append(bubble);
-    if (meta.textContent) row.append(meta);
     list.append(row);
   }
-  function note(text: string) { addMessage({ id: 0, from: 'system', agent: null, body: text, at: '' }); }
   function scrollDown() { body.scrollTop = body.scrollHeight; }
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  async function botSay(text: string, delay = 700) {
+    typing.classList.remove('hidden'); typing.classList.add('flex'); scrollDown();
+    await wait(delay);
+    typing.classList.add('hidden'); typing.classList.remove('flex');
+    addMessage({ id: 0, from: 'bot', agent: null, body: text, at: '' });
+    scrollDown();
+  }
   function setOnline(online: boolean) {
     statusEl.textContent = online ? 'Online now · usually replies within minutes' : 'We reply here or by email';
-    dot.className = 'h-2 w-2 rounded-full ' + (online ? 'bg-brand-400' : 'bg-slate-400');
+    dot.className = 'absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-brand-600 ' + (online ? 'bg-green-400' : 'bg-slate-300');
   }
   function setBadge() {
-    const unread = lastId > seenId && !isOpen ? Number(store.get('unread') || 0) : 0;
+    const unread = !isOpen ? Number(store.get('unread') || 0) : 0;
     badge.textContent = String(unread);
     badge.classList.toggle('hidden', unread === 0);
   }
-  function showConversation() {
-    startForm.classList.add('hidden');
-    compose.classList.remove('hidden'); compose.classList.add('flex');
+  function setInput(placeholder: string, opts: { type?: string; enabled?: boolean } = {}) {
+    input.placeholder = placeholder;
+    input.setAttribute('inputmode', opts.type === 'email' ? 'email' : 'text');
+    input.setAttribute('autocomplete', opts.type === 'email' ? 'email' : opts.type === 'name' ? 'name' : 'off');
+    const on = opts.enabled !== false;
+    input.disabled = !on; sendBtn.disabled = !on;
+    if (on && isOpen) input.focus();
+  }
+
+  // ── Guided intro ──
+  async function runIntro() {
+    if (introStarted) return;
+    introStarted = true;
+    await botSay('Hi there! 👋 Need a question answered? We can connect you to one of our IT experts who are happy to help.', 500);
+    await botSay('What is your name?');
+    setInput('Type your name…', { type: 'name' });
+  }
+  function topicPicker() {
+    const wrap = document.createElement('div');
+    wrap.className = 'flex flex-wrap items-center gap-2 pl-[42px]';
+    const chosen = new Set<string>();
+    const ok = document.createElement('button');
+    ok.type = 'button'; ok.disabled = true; ok.setAttribute('aria-label', 'Confirm');
+    ok.className = 'flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white transition disabled:bg-slate-200 disabled:text-slate-400';
+    ok.innerHTML = '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+    for (const t of TOPICS) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('aria-pressed', 'false');
+      b.className = 'flex items-center gap-2 rounded-xl border border-brand-600/60 px-3 py-1.5 text-sm font-semibold text-brand-700 hover:bg-brand-50 aria-pressed:bg-brand-600 aria-pressed:hover:bg-brand-700 aria-pressed:text-white';
+      const box = document.createElement('span');
+      box.className = 'flex h-4 w-4 items-center justify-center rounded border-2 border-current';
+      b.append(box, t);
+      b.addEventListener('click', () => {
+        if (chosen.has(t)) chosen.delete(t); else chosen.add(t);
+        const on = chosen.has(t);
+        b.setAttribute('aria-pressed', String(on));
+        box.innerHTML = on ? '<svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : '';
+        ok.disabled = chosen.size === 0;
+      });
+      wrap.append(b);
+    }
+    ok.addEventListener('click', async () => {
+      intro.topics = TOPICS.filter((t) => chosen.has(t));
+      wrap.remove();
+      addMessage({ id: 0, from: 'visitor', agent: null, body: intro.topics.join(', '), at: '' });
+      step = 'message';
+      await botSay('Got it! How can we help you today?');
+      setInput('Type your question…');
+    });
+    wrap.append(ok);
+    list.append(wrap);
+    scrollDown();
+  }
+  async function handleIntro(text: string) {
+    addMessage({ id: 0, from: 'visitor', agent: null, body: text, at: '' });
+    scrollDown();
+    if (step === 'name') {
+      intro.name = text.slice(0, 80);
+      step = 'email';
+      setInput('Type your email…', { type: 'email', enabled: false });
+      await botSay('Great, now just in case we get disconnected, what is a good email address to reach you?');
+      setInput('Type your email…', { type: 'email' });
+    } else if (step === 'email') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(text)) {
+        await botSay("Hmm, that doesn't look like an email address. Could you check it and try again?");
+        return;
+      }
+      intro.email = text.slice(0, 150);
+      step = 'topics';
+      setInput('Choose one or more options above', { enabled: false });
+      await botSay(`Perfect. Now, which team can we put you in touch with, ${intro.name.split(' ')[0]}?`);
+      topicPicker();
+    } else if (step === 'message') {
+      setInput('Connecting you…', { enabled: false });
+      try {
+        const r = await api('start', { name: intro.name, email: intro.email, topics: intro.topics.join(', '), message: text, page: location.pathname });
+        token = r.token; store.set('token', r.token);
+        lastId = Math.max(lastId, ...(r.messages as Msg[]).map((m) => m.id));
+        seenId = lastId; store.set('seen', String(seenId));
+        step = 'chat';
+        setOnline(r.online);
+        await botSay(r.online
+          ? `Thanks, ${intro.name.split(' ')[0]}! A member of our team will be with you in a moment.`
+          : `Thanks, ${intro.name.split(' ')[0]}! Our team has been notified and will reply here shortly. If you leave, we'll email our answer to ${intro.email}.`);
+        setInput('Write a message…');
+        schedule();
+        (window as any).fajTrack?.('chat_start');
+      } catch (ex: any) {
+        await botSay(`Sorry, something went wrong: ${ex.message}`);
+        setInput('Type your question…');
+      }
+    }
   }
 
   // ── Polling ──
@@ -176,7 +304,7 @@
       else if (newAgent) store.set('unread', String(Number(store.get('unread') || 0) + newAgent));
       setBadge();
     } catch (e: any) {
-      if (e.status === 404) { token = null; store.del('token'); store.del('seen'); list.textContent = ''; lastId = 0; startForm.classList.remove('hidden'); compose.classList.add('hidden'); compose.classList.remove('flex'); }
+      if (e.status === 404) { token = null; store.del('token'); store.del('seen'); list.textContent = ''; lastId = 0; lastSender = ''; step = 'name'; introStarted = false; if (isOpen) runIntro(); }
     }
   }
   function schedule() {
@@ -186,7 +314,7 @@
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { poll(); schedule(); } else clearTimeout(timer); });
 
-  // ── Open / close ──
+  // ── Open / close / expand ──
   function openChat() {
     isOpen = true;
     panel.classList.remove('hidden'); panel.classList.add('flex');
@@ -194,10 +322,9 @@
     launcher.setAttribute('aria-expanded', 'true');
     try { sessionStorage.setItem('fajchat_teased', '1'); } catch {}
     document.body.classList.add('max-sm:overflow-hidden');
-    if (token) { poll().then(scrollDown); seenId = lastId; store.set('unread', '0'); setBadge(); }
-    else api('status').then((r) => setOnline(r.online)).catch(() => {});
+    if (token) { poll().then(scrollDown); store.set('unread', '0'); setBadge(); setTimeout(() => input.focus(), 50); }
+    else { api('status').then((r) => setOnline(r.online)).catch(() => {}); runIntro(); }
     schedule();
-    setTimeout(() => (token ? input : (startForm.elements.namedItem('name') as HTMLInputElement)).focus(), 50);
   }
   function closeChat() {
     isOpen = false;
@@ -216,50 +343,31 @@
     openChat();
   });
   $('chat-close').addEventListener('click', closeChat);
+  $('chat-expand').addEventListener('click', () => {
+    const on = panel.classList.toggle('is-expanded');
+    $('chat-expand').setAttribute('aria-label', on ? 'Shrink chat' : 'Expand chat');
+    $('chat-expand-icon').setAttribute('d', on ? 'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7' : 'M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7');
+    scrollDown();
+  });
   panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeChat(); });
   $('chat-teaser-close').addEventListener('click', () => { teaser.classList.add('hidden'); try { sessionStorage.setItem('fajchat_teased', '1'); } catch {} });
   (window as any).fajOpenChat = openChat;
 
-  // ── Start a conversation ──
-  startForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (busy) return;
-    const err = $('chat-start-error');
-    const fd = new FormData(startForm);
-    const data = Object.fromEntries(fd.entries()) as Record<string, string>;
-    if (!data.name.trim() || !data.message.trim()) { err.textContent = 'Please enter your name and your question.'; err.classList.remove('hidden'); return; }
-    if (!/^\S+@\S+\.\S+$/.test(data.email.trim())) { err.textContent = 'Please enter a valid email so we can reply.'; err.classList.remove('hidden'); return; }
-    busy = true; err.classList.add('hidden');
-    const btn = startForm.querySelector('button[type=submit]') as HTMLButtonElement; btn.disabled = true; btn.textContent = 'Connecting…';
-    try {
-      const r = await api('start', { ...data, page: location.pathname });
-      token = r.token; store.set('token', r.token);
-      showConversation();
-      for (const m of r.messages as Msg[]) addMessage(m);
-      seenId = lastId; store.set('seen', String(seenId));
-      setOnline(r.online);
-      note(`Thanks, ${data.name.trim().split(' ')[0]}! Our team has been notified and will reply here shortly. If you leave, we'll send our answer to ${data.email.trim()}.`);
-      scrollDown(); input.focus(); schedule();
-      (window as any).fajTrack?.('chat_start');
-    } catch (ex: any) {
-      err.textContent = ex.message; err.classList.remove('hidden');
-    } finally { busy = false; btn.disabled = false; btn.textContent = 'Start chat'; }
-  });
-
-  // ── Send a message ──
+  // ── Sending ──
   async function send() {
     const text = input.value.trim();
-    if (!text || busy || !token) return;
+    if (!text || busy || input.disabled) return;
     busy = true;
     const err = $('chat-send-error'); err.classList.add('hidden');
+    input.value = ''; input.style.height = '';
     try {
+      if (step !== 'chat') { await handleIntro(text); return; }
       const r = await api('send', { token, message: text });
-      input.value = ''; input.style.height = '';
       addMessage({ id: r.id, from: 'visitor', agent: null, body: text, at: new Date().toISOString() });
       seenId = lastId; store.set('seen', String(seenId));
       scrollDown();
-    } catch (ex: any) { err.textContent = ex.message; err.classList.remove('hidden'); }
-    finally { busy = false; input.focus(); }
+    } catch (ex: any) { input.value = text; err.textContent = ex.message; err.classList.remove('hidden'); }
+    finally { busy = false; if (!input.disabled) input.focus(); }
   }
   compose.addEventListener('submit', (e) => { e.preventDefault(); send(); });
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
@@ -269,15 +377,16 @@
   const params = new URLSearchParams(location.search);
   const linkToken = params.get('chat');
   if (linkToken && /^[a-f0-9]{64}$/.test(linkToken)) {
-    token = linkToken; store.set('token', token);
+    token = linkToken; store.set('token', token); step = 'chat';
     params.delete('chat');
     history.replaceState(null, '', location.pathname + (params.toString() ? `?${params}` : '') + location.hash);
   }
   if (token) {
-    showConversation();
+    addMessage({ id: 0, from: 'bot', agent: null, body: 'Hi there! 👋 Need a question answered? We can connect you to one of our IT experts who are happy to help.', at: '' });
     poll().then(() => { setBadge(); if (linkToken) openChat(); });
     schedule();
   } else {
+    setInput('Write a message…', { enabled: false });
     let teased = false; try { teased = !!sessionStorage.getItem('fajchat_teased'); } catch {}
     if (!teased && !location.pathname.startsWith('/contact')) setTimeout(() => { if (!isOpen) teaser.classList.remove('hidden'); }, 8000);
   }

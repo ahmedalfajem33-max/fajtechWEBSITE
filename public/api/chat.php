@@ -144,15 +144,17 @@ case 'start':
     $email = str_in($in, 'email', 150);
     $text = str_in($in, 'message', 3000);
     $page = str_in($in, 'page', 300);
+    $topics = str_in($in, 'topics', 300);
     if ($name === '' || $text === '') fail(422, 'Please enter your name and your question.');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail(422, 'Please enter a valid email address so we can reply.');
     $token = bin2hex(random_bytes(32));
     $pdo->prepare('INSERT INTO chat_threads (token, name, email, page, ip, last_visitor_at, last_message_at, created_at) VALUES (?,?,?,?,?,UTC_TIMESTAMP(),UTC_TIMESTAMP(),UTC_TIMESTAMP())')
         ->execute([$token, $name, $email, $page, $ip]);
     $tid = (int) $pdo->lastInsertId();
+    if ($topics !== '') $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, body, created_at) VALUES (?, 'system', ?, UTC_TIMESTAMP())")->execute([$tid, "Wants to talk to: {$topics}"]);
     $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, body, created_at) VALUES (?, 'visitor', ?, UTC_TIMESTAMP())")->execute([$tid, $text]);
-    send_mail($mailTo, "New website chat from {$name}",
-        "New chat on fajtech.ca\n\nName: {$name}\nEmail: {$email}\nPage: {$page}\n\nMessage:\n{$text}\n\nReply in the team inbox: {$siteUrl}/agent/#chat-{$tid}\n",
+    send_mail($mailTo, "New website chat from {$name}" . ($topics !== '' ? " ({$topics})" : ''),
+        "New chat on fajtech.ca\n\nName: {$name}\nEmail: {$email}\nTeam: " . ($topics ?: '-') . "\nPage: {$page}\n\nMessage:\n{$text}\n\nReply in the team inbox: {$siteUrl}/agent/#chat-{$tid}\n",
         $mailFrom, $email);
     $st = $pdo->prepare('SELECT * FROM chat_messages WHERE thread_id = ? ORDER BY id');
     $st->execute([$tid]);
