@@ -49,6 +49,10 @@ The site has its own private live chat (no Zoho, no WhatsApp, no third party): t
   - While nobody has the inbox open, further visitor messages also ping push/Telegram (at most every 2 minutes per chat).
 - WhatsApp stays only on the Contact page and in the footer.
 
+## How the website sends email
+
+fajtech.ca mail lives on our own Exchange server (mail.fajtech.ca), which refuses mail from the internet that claims to be from @fajtech.ca. So `public/api/mailer.php` sends through Exchange itself (EWS over HTTPS) using the booking mailbox in `fajtech-config.php` (`booking.ews_user` / `ews_pass`), and only falls back to PHP `mail()` if Exchange can't be reached. Set `'mail_via' => 'php'` in `fajtech-config.php` to force the old behaviour. Used by the live chat; the contact form can use it too.
+
 ## Confirmation emails
 
 Every form submission (contact, free assessment, request-a-time) sends the visitor a branded confirmation from `info@fajtech.ca` (override with `confirm_from` in `fajtech-config.php`). To prevent abuse, it only repeats a cleaned first name and the chosen day/time, never the visitor's message. Zoho Bookings calendar bookings get Zoho's own confirmation.

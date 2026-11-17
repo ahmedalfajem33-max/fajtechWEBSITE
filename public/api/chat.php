@@ -148,9 +148,12 @@ function rate_ok(string $key, int $limit, int $window): bool {
     @file_put_contents($f, json_encode($hits), LOCK_EX);
     return true;
 }
+define('FAJMAILER', true);
+require_once __DIR__ . '/mailer.php';
+/** Email via our Exchange server (see mailer.php); $from is only used by the PHP mail() fallback. */
 function send_mail(string $to, string $subject, string $body, string $from, string $replyTo = ''): void {
-    $h = "From: FAJTech <{$from}>\r\n" . ($replyTo ? "Reply-To: {$replyTo}\r\n" : '') . "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8";
-    @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $h, '-f' . $from);
+    global $config;
+    faj_send_mail(['mail_from' => $from] + (array) $config, $to, $subject, $body, $replyTo);
 }
 function agents_online(PDO $pdo): bool {
     return (bool) $pdo->query("SELECT 1 FROM chat_agents WHERE last_seen_at > UTC_TIMESTAMP() - INTERVAL 3 MINUTE LIMIT 1")->fetchColumn();
