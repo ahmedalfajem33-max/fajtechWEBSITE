@@ -37,6 +37,6 @@ Not every provider that says "24/7" means the same thing. Ask:
 
 ## How FAJTech delivers 24/7/365
 
-Our team works across time zones — in Calgary and in Cairo, Egypt — so there is always a qualified technician on shift. Daytime calls go to our Calgary team, our night team takes over after hours, and you can [WhatsApp us at any time](/support/). Monitoring and incident response run around the clock, 365 days a year, and it is all included in our managed IT plans.
+Our team works across time zones — in Calgary and in Cairo, Egypt — so there is always a qualified technician on shift. You can [WhatsApp our support team at any time](/support/), day or night, and call our Canadian line from 8 am to 7 pm Calgary time. Monitoring and incident response run around the clock, 365 days a year, and it is all included in our managed IT plans.
 
 Want to see what round-the-clock coverage would look like for your business? [Book a free consultation](/book-a-consultation/).

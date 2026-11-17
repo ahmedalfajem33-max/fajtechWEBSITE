@@ -27,8 +27,8 @@ const orgSchema = {
   logo: `${site.url}/favicon-192x192.png`,
   areaServed: [{ '@type': 'City', name: 'Calgary' }, { '@type': 'Country', name: 'Canada' }],
   contactPoint: [
-    { '@type': 'ContactPoint', contactType: 'technical support', telephone: site.phone, areaServed: 'CA', availableLanguage: ['English'] },
-    { '@type': 'ContactPoint', contactType: 'technical support', telephone: site.afterHours.phone, description: 'WhatsApp 24/7; phone calls after hours (6 pm – 8 am Mountain Time)', availableLanguage: ['English', 'Arabic'] },
+    { '@type': 'ContactPoint', contactType: 'technical support', telephone: site.phone, areaServed: ['CA', 'US'], availableLanguage: ['English'], hoursAvailable: { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], opens: '08:00', closes: '19:00' } },
+    { '@type': 'ContactPoint', contactType: 'technical support', telephone: site.afterHours.phone, description: 'WhatsApp only, 24/7 (no regular phone calls)', availableLanguage: ['English', 'Arabic'] },
   ],
   openingHoursSpecification: [{
     '@type': 'OpeningHoursSpecification',
@@ -158,15 +158,15 @@ const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
     </a>
     <!-- Sticky call / book bar on phones -->
     <div class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 gap-2 border-t border-slate-200 bg-white/95 p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden">
-      <a id="call-now" href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} data-night={`tel:${site.afterHours.phone.replace(/[^+\d]/g, '')}`} class="btn-outline py-2.5"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>Call 24/7</a>
+      <a id="call-now" href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} data-night={site.afterHours.whatsapp} class="btn-outline py-2.5"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>Call us</a>
       <a href="/book-a-consultation/" class="btn-primary py-2.5">Book a consultation</a>
     </div>
     <script is:inline>
-      // The sticky Call button dials the team on shift: Calgary 8 am-6 pm, night team otherwise (Calgary time).
+      // The sticky button calls the Canadian line 8 am-7 pm Calgary time; outside those hours it opens WhatsApp.
       (function () {
         var a = document.getElementById('call-now'); if (!a) return;
         var h = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
-        if (h < 8 || h >= 18) a.href = a.getAttribute('data-night');
+        if (h < 8 || h >= 19) { a.href = a.getAttribute('data-night'); a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'WhatsApp us'; }
       })();
     </script>
 

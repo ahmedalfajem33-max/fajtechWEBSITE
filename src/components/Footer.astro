@@ -50,7 +50,7 @@ const location = site.showStreetAddress
       <ul class="mt-4 space-y-3 text-sm">
         <li class="flex gap-2.5"><Icon name="mail" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><a href={`mailto:${site.email}`} class="hover:text-brand-300">{site.email}</a></li>
         {site.phone && <li class="flex gap-2.5"><Icon name="phone" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="hover:text-brand-300">{site.phone}</a></li>}
-        <li class="flex gap-2.5"><Icon name="whatsapp" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><span><a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="hover:text-brand-300">{site.afterHours.phone}</a><span class="block text-xs">WhatsApp 24/7 · calls {site.afterHours.label} MT</span></span></li>
+        <li class="flex gap-2.5"><Icon name="whatsapp" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><span><a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="hover:text-brand-300">{site.afterHours.phone}</a><span class="block text-xs">WhatsApp only · 24/7</span></span></li>
         <li class="flex gap-2.5"><Icon name="pin" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />{location}</li>
         <li class="flex gap-2.5"><Icon name="clock" class="mt-0.5 h-4 w-4 shrink-0 text-brand-400" /><span><span class="block font-semibold text-white">{site.support}</span>{site.hours}</span></li>
       </ul>

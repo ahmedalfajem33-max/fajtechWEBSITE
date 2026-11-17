@@ -208,7 +208,7 @@ $bodyHtml = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;c
     . '<p>Thank you for booking a free 30-minute IT consultation with FAJTech. We look forward to speaking with you.</p>'
     . '<p><strong>When:</strong> ' . $h($whenCust) . '<br><strong>With:</strong> ' . $h($ownerName) . ', FAJTech</p>'
     . $joinHtml
-    . '<p>Need to reschedule? Reply to this email, call +1 (403) 926-4494 or WhatsApp +20 122 370 4138 (24/7).</p>'
+    . '<p>Need to reschedule? Reply to this email, call +1 (403) 926-4494 (8 am – 7 pm Calgary time) or WhatsApp +20 122 370 4138 (24/7).</p>'
     . '<hr style="border:none;border-top:1px solid #e2e8f0"><p style="color:#64748b;font-size:12px">'
     . 'Booking details — Company: ' . $h($d['company'] ?: '—') . ' · Phone: ' . $h($d['phone'] ?: '—')
     . ($d['notes'] !== '' ? '<br>Notes: ' . nl2br($h($d['notes'])) : '')

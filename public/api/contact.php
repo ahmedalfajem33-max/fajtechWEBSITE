@@ -146,7 +146,7 @@ foreach ($details as $k => $v) {
     $rowsText .= "{$k}: {$v}\n";
 }
 $text = "Hi {$first},\n\n{$lead}\n\n" . ($rowsText ? $rowsText . "\n" : '')
-    . "Need help sooner?\n- Call: +1 (403) 926-4494 (8 am – 6 pm Calgary time)\n- WhatsApp 24/7: +20 122 370 4138 (https://wa.me/201223704138)\n- Email: info@fajtech.ca\n\n"
+    . "Need help sooner?\n- Call: +1 (403) 926-4494 (8 am – 7 pm Calgary time)\n- WhatsApp 24/7: +20 122 370 4138 (https://wa.me/201223704138)\n- Email: info@fajtech.ca\n\n"
     . "Kind regards,\nThe FAJTech team\nManaged IT & Cybersecurity — 24/7/365 support\nhttps://fajtech.ca\n415 Pinewind Rd NE, Calgary, AB T1Y 2M8\n\n"
     . "You received this email because this address was used on a form at fajtech.ca. If that wasn't you, please ignore this message.";
 $html = '<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif">'
@@ -158,7 +158,7 @@ $html = '<!doctype html><html><body style="margin:0;background:#f1f5f9;font-fami
     . '<p style="margin:0 0 18px">' . $h($lead) . '</p>'
     . ($rowsHtml ? '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;font-size:15px">' . $rowsHtml . '</table>' : '')
     . '<p style="margin:0 0 8px;font-weight:700;color:#111c2a">Need help sooner?</p>'
-    . '<p style="margin:0 0 4px">Call <a href="tel:+14039264494" style="color:#0f7a64">+1 (403) 926-4494</a> (8 am – 6 pm Calgary time)</p>'
+    . '<p style="margin:0 0 4px">Call <a href="tel:+14039264494" style="color:#0f7a64">+1 (403) 926-4494</a> (8 am – 7 pm Calgary time)</p>'
     . '<p style="margin:0 0 4px">WhatsApp 24/7: <a href="https://wa.me/201223704138" style="color:#0f7a64">+20 122 370 4138</a></p>'
     . '<p style="margin:0 0 22px">Email: <a href="mailto:info@fajtech.ca" style="color:#0f7a64">info@fajtech.ca</a></p>'
     . '<p style="margin:0">Kind regards,<br><strong>The FAJTech team</strong></p>'

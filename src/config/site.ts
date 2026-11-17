@@ -14,11 +14,11 @@ export const site = {
   email: 'info@fajtech.ca',
   /** Shown in header/footer/contact when set, e.g. '+1 (403) 555-0123'. Leave '' to hide. */
   phone: '+1 (403) 926-4494',
-  /** Calgary line hours (Calgary time) */
-  dayShift: '8:00 am – 6:00 pm',
-  /** After-hours team (Cairo) — covers 6 pm – 8 am Calgary time */
+  /** Phone line hours, Calgary time (calls go to the Canadian number only) */
+  dayShift: '8:00 am – 7:00 pm',
+  /** Support WhatsApp (Cairo team) — messages and WhatsApp calls 24/7; no regular phone calls */
   afterHours: {
-    label: '6:00 pm – 8:00 am',
+    label: '24/7',
     phone: '+20 122 370 4138',
     whatsapp: 'https://wa.me/201223704138?text=' + encodeURIComponent('Hi FAJTech, I need IT support. My name and company: '),
   },
@@ -35,7 +35,7 @@ export const site = {
   /** Support availability (shown everywhere) */
   support: '24/7/365 support',
   /** Office / sales hours */
-  hours: 'Office: Mon–Fri, 8:00 am – 6:00 pm MT',
+  hours: 'Phone: 8:00 am – 7:00 pm MT · WhatsApp 24/7',
   social: {
     linkedin: '',
     facebook: '',

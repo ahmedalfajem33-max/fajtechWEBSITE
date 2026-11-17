@@ -23,7 +23,7 @@ const location = site.showStreetAddress
           <ul class="mt-5 space-y-4 text-sm text-slate-300">
             <li class="flex gap-3"><Icon name="mail" class="h-5 w-5 shrink-0 text-brand-400" /><a href={`mailto:${site.email}`} class="hover:text-white">{site.email}</a></li>
             {site.phone && <li class="flex gap-3"><Icon name="phone" class="h-5 w-5 shrink-0 text-brand-400" /><a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="hover:text-white">{site.phone}</a></li>}
-            <li class="flex gap-3"><Icon name="whatsapp" class="h-5 w-5 shrink-0 text-brand-400" /><span><a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="hover:text-white">{site.afterHours.phone}</a><span class="block text-xs text-slate-400">WhatsApp 24/7 · calls {site.afterHours.label} MT</span></span></li>
+            <li class="flex gap-3"><Icon name="whatsapp" class="h-5 w-5 shrink-0 text-brand-400" /><span><a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="hover:text-white">{site.afterHours.phone}</a><span class="block text-xs text-slate-400">WhatsApp only · 24/7</span></span></li>
             <li class="flex gap-3"><Icon name="pin" class="h-5 w-5 shrink-0 text-brand-400" />{location}</li>
             <li class="flex gap-3"><Icon name="clock" class="h-5 w-5 shrink-0 text-brand-400" /><span><span class="block font-semibold text-white">{site.support}</span>{site.hours}</span></li>
           </ul>
