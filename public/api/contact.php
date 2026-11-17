@@ -168,10 +168,10 @@ $html = '<!doctype html><html><body style="margin:0;background:#f1f5f9;font-fami
     . '<tr><td style="background:#f8fafc;padding:16px 28px;color:#64748b;font-size:12px;line-height:1.5">Managed IT &amp; Cybersecurity · 24/7/365 support<br>415 Pinewind Rd NE, Calgary, AB T1Y 2M8 · <a href="https://fajtech.ca" style="color:#0f7a64">fajtech.ca</a><br>You received this email because this address was used on a form at fajtech.ca. If that wasn\'t you, please ignore this message.</td></tr>'
     . '</table></td></tr></table></body></html>';
 
-// Sent through our Exchange server (see mailer.php) from the booking mailbox; replies go to info@.
-// To show it as from info@fajtech.ca instead, pass $replyFrom as the last argument once the booking
-// mailbox has Send As permission on info@ in Exchange.
-if (!faj_send_mail($config, $d['email'], $cSubject, $text, $replyFrom, $html)) {
+// Sent through our Exchange server (see mailer.php) by the booking mailbox, shown as from info@fajtech.ca
+// (booking has Send on Behalf / Send As permission on info@). If Exchange refuses that, it is sent from
+// the booking mailbox instead, with replies going to info@.
+if (!faj_send_mail($config, $d['email'], $cSubject, $text, $replyFrom, $html, $replyFrom)) {
     error_log('FAJTech: confirmation email to customer could not be sent');
 }
 
