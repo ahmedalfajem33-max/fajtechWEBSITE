@@ -73,7 +73,7 @@ const zoneGroups: [string, [string, string][]][] = [
       </label>
       <p class="mt-6 text-sm font-semibold text-ink-900">What time works best?</p>
       <p id="bk-dayhead" class="text-sm text-slate-600">Loading available times…</p>
-      <div id="bk-slots" class="mt-3 grid max-h-[340px] grid-cols-2 gap-2 overflow-y-auto pr-1"></div>
+      <div id="bk-slots" class="mt-3 grid grid-cols-2 gap-2 lg:max-h-[340px] lg:overflow-y-auto lg:pr-1"></div>
     </div>
   </div>
 
@@ -155,7 +155,11 @@ const zoneGroups: [string, [string, string][]][] = [
         (key === selectedDay ? 'bg-white text-brand-700' : avail ? 'text-white hover:bg-white/20 ring-1 ring-white/40' : 'text-white/35 cursor-default');
       b.disabled = !avail;
       b.setAttribute('aria-label', `${key}${avail ? ', times available' : ', unavailable'}`);
-      b.addEventListener('click', () => { selectedDay = key; renderCalendar(); renderSlots(); });
+      b.addEventListener('click', () => {
+        selectedDay = key; renderCalendar(); renderSlots();
+        // On phones the times are below the calendar: bring them into view.
+        if (window.matchMedia('(max-width: 1023px)').matches) $('bk-dayhead').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
       grid.appendChild(b);
     }
     const keys = [...days.keys()].sort();
@@ -213,7 +217,7 @@ const zoneGroups: [string, [string, string][]][] = [
     try {
       const r = await fetch(API, { method: 'POST', body: fd, headers: { Accept: 'application/json' } });
       const j = await r.json().catch(() => ({}));
-      if (r.ok && j.ok) { location.href = '/thank-you/?source=booking'; return; }
+      if (r.ok && j.ok) { (window.top || window).location.href = '/thank-you/?source=booking'; return; }
       if (j.refresh) { await load(); $('bk-step2').classList.add('hidden'); $('bk-step1').classList.remove('hidden'); }
       if (j.fallback) return fallback();
       throw new Error(j.error || 'Something went wrong.');

@@ -1,0 +1,29 @@
+---
+// Minimal page shown inside the "Book a consultation" pop-up (no header/footer). Not indexed.
+import '../styles/global.css';
+import BookingWidget from '../components/BookingWidget.astro';
+---
+<!doctype html>
+<html lang="en-CA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Book a Free IT Consultation | FAJTech</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="bg-white">
+    <main class="p-0 sm:p-2">
+      <BookingWidget />
+    </main>
+    <script is:inline>
+      // Tell the pop-up how tall the content is, so it fits without empty space.
+      (function () {
+        if (window.parent === window) return;
+        var send = function () { window.parent.postMessage({ fajBookHeight: document.documentElement.scrollHeight }, location.origin); };
+        new ResizeObserver(send).observe(document.body);
+        send();
+      })();
+    </script>
+  </body>
+</html>
