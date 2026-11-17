@@ -168,14 +168,8 @@ $html = '<!doctype html><html><body style="margin:0;background:#f1f5f9;font-fami
     . '<tr><td style="background:#f8fafc;padding:16px 28px;color:#64748b;font-size:12px;line-height:1.5">Managed IT &amp; Cybersecurity · 24/7/365 support<br>415 Pinewind Rd NE, Calgary, AB T1Y 2M8 · <a href="https://fajtech.ca" style="color:#0f7a64">fajtech.ca</a><br>You received this email because this address was used on a form at fajtech.ca. If that wasn\'t you, please ignore this message.</td></tr>'
     . '</table></td></tr></table></body></html>';
 
-$boundary = 'faj_' . bin2hex(random_bytes(8));
-$cHeaders = "From: FAJTech <{$replyFrom}>\r\nReply-To: {$replyFrom}\r\nMIME-Version: 1.0\r\n"
-    . "Auto-Submitted: auto-replied\r\nX-Auto-Response-Suppress: All\r\n"
-    . "Content-Type: multipart/alternative; boundary=\"{$boundary}\"";
-$cBody = "--{$boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text))
-    . "--{$boundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($html))
-    . "--{$boundary}--\r\n";
-if (!@mail($d['email'], '=?UTF-8?B?' . base64_encode($cSubject) . '?=', $cBody, $cHeaders, '-f' . $replyFrom)) {
+// Sent through our Exchange server (see mailer.php), shown as from info@fajtech.ca when allowed.
+if (!faj_send_mail($config, $d['email'], $cSubject, $text, $replyFrom, $html, $replyFrom)) {
     error_log('FAJTech: confirmation email to customer could not be sent');
 }
 

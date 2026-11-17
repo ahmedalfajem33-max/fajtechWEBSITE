@@ -51,7 +51,7 @@ The site has its own private live chat (no Zoho, no WhatsApp, no third party): t
 
 ## How the website sends email
 
-fajtech.ca mail lives on our own Exchange server (mail.fajtech.ca), which refuses mail from the internet that claims to be from @fajtech.ca. So `public/api/mailer.php` sends email **to @fajtech.ca addresses** (team notifications from the contact form, free-assessment and consultation requests, bookings and live chat) through Exchange itself (EWS over HTTPS) using the booking mailbox in `fajtech-config.php` (`booking.ews_user` / `ews_pass`). Email **to customers** still goes out through Hostinger (our SPF record allows it). Each route falls back to the other if it fails. Set `'mail_via' => 'php'` in `fajtech-config.php` to turn the Exchange route off.
+fajtech.ca mail lives on our own Exchange server (mail.fajtech.ca), which refuses mail from the internet that claims to be from @fajtech.ca. So `public/api/mailer.php` sends **all** website email (team notifications, customer confirmations, chat emails) through Exchange itself (EWS over HTTPS) using the booking mailbox in `fajtech-config.php` (`booking.ews_user` / `ews_pass`). Customer confirmations are shown as from `confirm_from` (info@fajtech.ca) if the booking mailbox has *Send As* permission on it in Exchange, otherwise they come from the booking mailbox. Hostinger's PHP `mail()` is only a fallback (it isn't reliably delivered: not DKIM-signed for fajtech.ca). Set `'mail_via' => 'php'` in `fajtech-config.php` to turn the Exchange route off.
 
 ## Confirmation emails
 
