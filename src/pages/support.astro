@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
+import SectionPhoto from '../components/SectionPhoto.astro';
 import { site } from '../config/site';
 const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
 ---
@@ -48,18 +49,24 @@ const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
         </ol>
       </div>
 
-      <div class="mt-12 grid gap-6 sm:grid-cols-3">
+      <div class="mt-16 grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <SectionPhoto keys={['support-onsite']} alt="FAJTech technician fixing a computer at a client's office" accent="left" />
+      <div>
+      <p class="eyebrow">What happens next</p>
+      <h2 class="mt-3 text-3xl font-extrabold">Fast help, remote or on site</h2>
+      <div class="mt-8 grid gap-4">
         {[
           ['clock', 'Urgent issues', 'Picked up right away, any time of day.'],
           ['chat', 'Normal requests', 'Handled in order of priority, usually the same day.'],
           ['pin', 'On-site help', 'Scheduled with our local technicians when needed.'],
         ].map(([icon, t, d]) => (
-          <div class="rounded-2xl border border-slate-200 p-6">
-            <span class="text-brand-600"><Icon name={icon} /></span>
-            <h3 class="mt-3 font-bold">{t}</h3>
-            <p class="mt-1 text-sm text-slate-600">{d}</p>
+          <div class="flex gap-4 rounded-2xl border border-slate-200 p-5">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Icon name={icon} class="h-5 w-5" /></span>
+            <span><span class="block font-bold text-ink-900">{t}</span><span class="mt-1 block text-sm text-slate-600">{d}</span></span>
           </div>
         ))}
+      </div>
+      </div>
       </div>
       <p class="mt-10 text-center text-slate-600">Not a client yet? <a href="/book-a-consultation/" class="font-semibold text-brand-600 hover:underline">Book a free consultation</a>.</p>
     </div>

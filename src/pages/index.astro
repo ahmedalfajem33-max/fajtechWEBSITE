@@ -7,6 +7,7 @@ import { services, industries, faqs } from '../data/services';
 import { getCollection } from 'astro:content';
 import PartnerBadges from '../components/PartnerBadges.astro';
 import HeroPhoto from '../components/HeroPhoto.astro';
+import SectionPhoto from '../components/SectionPhoto.astro';
 import { partnerBadges } from '../data/partners';
 const hasBadges = partnerBadges({ homepage: true }).length > 0;
 const latest = (await getCollection('resources')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
@@ -146,14 +147,15 @@ const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', '
 
   <!-- INTRO -->
   <section class="section">
-    <div class="container-x grid items-center gap-12 lg:grid-cols-2">
+    <div class="container-x grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <SectionPhoto keys={['home-intro']} alt="FAJTech technician helping an employee with their laptop" accent="left" badge={{ title: '24/7/365 support', text: 'Real people, day and night', icon: 'clock' }} />
       <div>
         <p class="eyebrow">An IT partner that makes your life easier</p>
         <h2 class="mt-3 text-3xl font-extrabold sm:text-4xl">Spend less time fixing technology and more time growing your business.</h2>
-      </div>
-      <div class="space-y-4 text-lg leading-relaxed text-slate-600">
+      <div class="mt-6 space-y-4 text-lg leading-relaxed text-slate-600">
         <p>Whether you're overwhelmed by day-to-day IT problems or planning a project you're not sure how to start, we work alongside you to deliver IT that makes a real difference to your business.</p>
         <p>We can run everything for you, or work with your internal team. Either way, you get proactive support, strong security and a clear technology plan.</p>
+      </div>
       </div>
     </div>
   </section>
@@ -227,12 +229,13 @@ const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', '
 
   <!-- PROCESS -->
   <section class="section" aria-labelledby="process-title">
-    <div class="container-x">
-      <div class="mx-auto max-w-2xl text-center">
+    <div class="container-x grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div>
+      <div class="max-w-2xl">
         <p class="eyebrow">How it works</p>
         <h2 id="process-title" class="mt-3 text-3xl font-extrabold sm:text-4xl">Getting started is simple</h2>
       </div>
-      <ol class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <ol class="mt-10 grid gap-8 sm:grid-cols-2">
         {steps.map((s, i) => (
           <li class="relative">
             <span class="flex h-11 w-11 items-center justify-center rounded-full bg-brand-600 text-lg font-extrabold text-white">{i + 1}</span>
@@ -241,9 +244,11 @@ const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', '
           </li>
         ))}
       </ol>
-      <div class="mt-12 text-center">
+      <div class="mt-10">
         <a href={bookHref} class="btn-primary px-6 py-3.5 text-base">Start with a free assessment</a>
       </div>
+      </div>
+      <SectionPhoto keys={['home-process']} alt="FAJTech consultant welcoming a new client" badge={{ title: 'Free IT assessment', text: 'Clear, written action plan', icon: 'handshake' }} />
     </div>
   </section>
 
