@@ -11,7 +11,8 @@
  * Team actions (PHP session login):
  *   login, logout, me, password, list, thread, reply, close, reopen, agents, agent_add, agent_remove,
  *   prefs, prefs_save, push_key, push_sub, push_unsub, push_test, push_preview,
- *   tg_status, tg_connect, tg_test, tg_disconnect (admins)
+ *   tg_me, tg_link_code, tg_unlink (any member), tg_status, tg_connect, tg_test, tg_disconnect (admins)
+ * Telegram webhook (no login, checked with a secret header): tg_webhook
  * Team alerts (email to every member, Telegram, Web Push) live in chat-notify.php.
  */
 declare(strict_types=1);
@@ -108,8 +109,20 @@ function ensure_schema(PDO $pdo): void {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     $has = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chat_agents' AND COLUMN_NAME = 'notify_email'")->fetchColumn();
     if (!$has) $pdo->exec("ALTER TABLE chat_agents ADD COLUMN notify_email TINYINT(1) NOT NULL DEFAULT 1");
+    // v3: answer from Telegram
+    $col = fn(string $t, string $c) => (int) $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$t' AND COLUMN_NAME = '$c'")->fetchColumn();
+    if (!$col('chat_agents', 'tg_user_id')) $pdo->exec("ALTER TABLE chat_agents ADD COLUMN tg_user_id VARCHAR(32) NULL, ADD KEY tg_user_id (tg_user_id)");
+    if (!$col('chat_threads', 'tg_until')) $pdo->exec("ALTER TABLE chat_threads ADD COLUMN tg_until DATETIME NULL");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS chat_tg_map (
+        chat_id VARCHAR(32) NOT NULL,
+        message_id BIGINT NOT NULL,
+        thread_id INT UNSIGNED NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (chat_id, message_id),
+        KEY thread_id (thread_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 }
-$schemaFlag = sys_get_temp_dir() . '/faj_chat_schema_v2_' . md5((string) $chatCfg['db_name']);
+$schemaFlag = sys_get_temp_dir() . '/faj_chat_schema_v3_' . md5((string) $chatCfg['db_name']);
 if (!is_file($schemaFlag)) { ensure_schema($pdo); @touch($schemaFlag); }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -161,6 +174,13 @@ require __DIR__ . '/chat-notify.php';
 
 // ── Visitor actions ─────────────────────────────────────────────────────────
 switch ($action) {
+case 'tg_webhook':
+    // Telegram → website: a team member replied to a chat alert in Telegram.
+    $secret = setting_get($pdo, 'tg_webhook_secret');
+    if (!$secret || !hash_equals($secret, (string) ($_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ?? ''))) fail(403, 'Forbidden.');
+    try { tg_handle_update($pdo, $in, $mailTo, $mailFrom, $siteUrl); } catch (Throwable $e) { error_log('FAJTech chat tg_webhook: ' . $e->getMessage()); }
+    respond(200, ['ok' => true]);
+
 case 'status':
     respond(200, ['ok' => true, 'online' => agents_online($pdo)]);
 
@@ -197,7 +217,11 @@ case 'send':
     $id = (int) $pdo->lastInsertId();
     $wasClosed = $t['status'] === 'closed';
     $pdo->prepare("UPDATE chat_threads SET status = 'open', last_visitor_at = UTC_TIMESTAMP(), last_message_at = UTC_TIMESTAMP() WHERE id = ?")->execute([$t['id']]);
-    if ($wasClosed) {
+    $viaTelegram = !empty($t['tg_until']) && strtotime($t['tg_until'] . ' UTC') > time();
+    if ($viaTelegram) {
+        // The team is answering this chat from Telegram: forward every message there right away.
+        after_response(function () use ($pdo, $t, $text) { tg_forward_visitor($pdo, $t, $text); push_agents($pdo); });
+    } elseif ($wasClosed) {
         after_response(fn() => notify_team($pdo, 'reopened', $t, $text, '', $mailTo, $mailFrom, $siteUrl));
     } elseif (!agents_online($pdo) && rate_ok("notify:{$t['id']}", 1, 120)) {
         // Nobody has the inbox open: ping phones/Telegram (at most every 2 minutes per chat).
@@ -318,18 +342,8 @@ case 'reply':
     $st->execute([$id]);
     $t = $st->fetch();
     if (!$t) fail(404, 'Conversation not found.');
-    $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, agent_name, body, created_at) VALUES (?, 'agent', ?, ?, UTC_TIMESTAMP())")->execute([$id, $a['name'], $text]);
-    $mid = (int) $pdo->lastInsertId();
-    $pdo->prepare("UPDATE chat_threads SET status = 'open', last_message_at = UTC_TIMESTAMP() WHERE id = ?")->execute([$id]);
-    // Visitor has left the page? Send the reply by email, with a link back into the conversation.
-    $away = strtotime($t['last_visitor_at'] . ' UTC') < time() - 120;
-    if ($away) {
-        $first = explode(' ', $t['name'])[0];
-        send_mail($t['email'], 'FAJTech replied to your chat',
-            "Hi {$first},\n\n{$a['name']} from FAJTech replied to your chat:\n\n{$text}\n\nContinue the conversation: {$siteUrl}/?chat={$t['token']}\nOr simply reply to this email.\n\nFAJTech · Managed IT & Cybersecurity\n",
-            $mailFrom, $mailTo);
-    }
-    respond(200, ['ok' => true, 'id' => $mid, 'emailed' => $away]);
+    $r = post_agent_reply($pdo, $t, $a['name'], $text, $mailTo, $mailFrom, $siteUrl);
+    respond(200, ['ok' => true, 'id' => $r['id'], 'emailed' => $r['emailed']]);
 
 case 'close':
 case 'reopen':
@@ -424,6 +438,7 @@ case 'push_preview':
 case 'tg_status':
     $a = current_agent($pdo);
     if (!$a['is_admin']) fail(403, 'Only admins can change Telegram alerts.');
+    if (setting_get($pdo, 'tg_token') && setting_get($pdo, 'tg_chat_id')) ensure_tg_webhook($pdo);
     respond(200, ['ok' => true, 'connected' => (bool) (setting_get($pdo, 'tg_token') && setting_get($pdo, 'tg_chat_id')),
         'bot' => setting_get($pdo, 'tg_bot'), 'chat' => setting_get($pdo, 'tg_chat_title'), 'hasToken' => (bool) setting_get($pdo, 'tg_token')]);
 
@@ -434,6 +449,8 @@ case 'tg_connect':
     $token = str_in($in, 'token', 100) ?: (string) setting_get($pdo, 'tg_token');
     $me = tg_call($token, 'getMe');
     if (!($me['ok'] ?? false)) fail(422, "That bot token didn't work. Copy it again from @BotFather (it looks like 123456789:AAH…).");
+    if (setting_get($pdo, 'tg_token')) tg_drop_webhook($pdo); // getUpdates only works without a webhook
+    tg_call($token, 'deleteWebhook');
     setting_set($pdo, 'tg_token', $token);
     setting_set($pdo, 'tg_bot', '@' . $me['result']['username']);
     $up = tg_call($token, 'getUpdates', ['allowed_updates' => ['message', 'my_chat_member', 'channel_post']]);
@@ -448,8 +465,31 @@ case 'tg_connect':
     $title = $chat['title'] ?? trim(($chat['first_name'] ?? '') . ' ' . ($chat['last_name'] ?? '')) ?: 'Telegram chat';
     setting_set($pdo, 'tg_chat_id', (string) $chat['id']);
     setting_set($pdo, 'tg_chat_title', $title);
+    ensure_tg_webhook($pdo, true);
     tg_send($pdo, "✅ <b>FAJTech website chat is connected.</b>\nNew chats from fajtech.ca will be posted here.", 'Open the inbox', 'https://fajtech.ca/agent/');
     respond(200, ['ok' => true, 'connected' => true, 'bot' => '@' . $me['result']['username'], 'chat' => $title]);
+
+case 'tg_me':
+    $a = current_agent($pdo);
+    $st = $pdo->prepare('SELECT tg_user_id FROM chat_agents WHERE id = ?'); $st->execute([$a['id']]);
+    respond(200, ['ok' => true, 'connected' => (bool) (setting_get($pdo, 'tg_token') && setting_get($pdo, 'tg_chat_id')),
+        'bot' => setting_get($pdo, 'tg_bot'), 'chat' => setting_get($pdo, 'tg_chat_title'), 'linked' => (bool) $st->fetchColumn()]);
+
+case 'tg_link_code':
+    require_post($method);
+    $a = current_agent($pdo);
+    if (!setting_get($pdo, 'tg_token')) fail(422, 'Telegram is not connected yet.');
+    ensure_tg_webhook($pdo);
+    $code = '';
+    for ($i = 0; $i < 6; $i++) $code .= 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[random_int(0, 31)];
+    setting_set($pdo, "tg_link_{$code}", json_encode(['agent' => (int) $a['id'], 'exp' => time() + 900]));
+    respond(200, ['ok' => true, 'code' => $code, 'bot' => setting_get($pdo, 'tg_bot'), 'chat' => setting_get($pdo, 'tg_chat_title')]);
+
+case 'tg_unlink':
+    require_post($method);
+    $a = current_agent($pdo);
+    $pdo->prepare('UPDATE chat_agents SET tg_user_id = NULL WHERE id = ?')->execute([$a['id']]);
+    respond(200, ['ok' => true]);
 
 case 'tg_test':
     require_post($method);
@@ -462,7 +502,9 @@ case 'tg_disconnect':
     require_post($method);
     $a = current_agent($pdo);
     if (!$a['is_admin']) fail(403, 'Only admins can change Telegram alerts.');
+    tg_drop_webhook($pdo);
     foreach (['tg_token', 'tg_bot', 'tg_chat_id', 'tg_chat_title'] as $k) setting_set($pdo, $k, null);
+    $pdo->exec('UPDATE chat_agents SET tg_user_id = NULL');
     respond(200, ['ok' => true]);
 }
 

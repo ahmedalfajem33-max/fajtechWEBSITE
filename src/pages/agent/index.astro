@@ -157,6 +157,21 @@ import '../../styles/global.css';
         <p id="push-msg" class="hidden text-sm font-medium"></p>
       </section>
 
+      <section id="tg-me" class="mt-4 hidden space-y-3 rounded-xl border border-slate-200 p-4">
+        <p class="text-sm font-bold">Reply from Telegram</p>
+        <p id="tg-me-state" class="text-sm text-slate-600"></p>
+        <div id="tg-code-box" class="hidden rounded-lg bg-brand-50 p-3 text-sm text-ink-900">
+          <p>Send this message in <strong id="tg-code-chat"></strong> (or privately to <span id="tg-code-bot"></span>) within 15 minutes:</p>
+          <p class="mt-2 flex items-center gap-2"><code id="tg-code" class="rounded-md bg-white px-3 py-1.5 font-mono text-base font-bold ring-1 ring-brand-200"></code><button type="button" id="b-tg-copy" class="rounded-lg px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-white">Copy</button></p>
+          <p class="mt-2 text-xs text-slate-500">This page updates by itself once it's linked.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="b-tg-link" class="btn-primary hidden py-2">Link my Telegram</button>
+          <button type="button" id="b-tg-unlink" class="hidden rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Unlink</button>
+        </div>
+        <p class="text-xs text-slate-500">Once linked, reply to any chat alert in Telegram (swipe left on it, or long-press → Reply) and your answer is sent to the visitor as you.</p>
+      </section>
+
       <section id="tg-box" class="mt-4 hidden space-y-3 rounded-xl border border-slate-200 p-4">
         <p class="text-sm font-bold">Telegram alerts <span class="font-normal text-slate-500">(whole team)</span></p>
         <div id="tg-on" class="hidden space-y-3">
@@ -323,6 +338,7 @@ import '../../styles/global.css';
       await refreshPush();
       $('tg-box').classList.toggle('hidden', !me!.admin);
       if (me!.admin) loadTelegram();
+      loadTgMe();
       if (!dSet().open) dSet().showModal();
     }
     $('m-settings').addEventListener('click', openSettings);
@@ -351,15 +367,36 @@ import '../../styles/global.css';
       const btn = f.querySelector('button') as HTMLButtonElement; btn.disabled = true; btn.textContent = 'Connecting…';
       try {
         const r = await api('tg_connect', { token: (f.elements.namedItem('token') as HTMLInputElement).value.trim() });
-        if (r.connected) { f.reset(); showTelegram(r); tgMsg('Connected! Check Telegram for a confirmation message.'); }
+        if (r.connected) { f.reset(); showTelegram(r); tgMsg('Connected! Check Telegram for a confirmation message.'); loadTgMe(); }
         else { const n = $('tg-next'); n.textContent = r.next; n.classList.remove('hidden'); }
       } catch (ex: any) { formErr(f, ex.message); }
       finally { btn.disabled = false; btn.textContent = 'Connect'; }
     });
+    let tgPoll: number | undefined;
+    function showTgMe(r: any) {
+      $('tg-me').classList.toggle('hidden', !r.connected);
+      $('tg-me-state').textContent = r.linked ? `✅ Your Telegram is linked. Replies you send to chat alerts in ${r.chat || 'Telegram'} go to the visitor as "${me!.name}".` : 'Not linked yet. Link your Telegram account so your replies there reach visitors.';
+      $('b-tg-link').classList.toggle('hidden', r.linked);
+      $('b-tg-unlink').classList.toggle('hidden', !r.linked);
+      if (r.linked) { $('tg-code-box').classList.add('hidden'); clearInterval(tgPoll); }
+    }
+    async function loadTgMe() { try { showTgMe(await api('tg_me')); } catch {} }
+    $('b-tg-link').addEventListener('click', async () => {
+      try {
+        const r = await api('tg_link_code', {});
+        $('tg-code').textContent = `/link ${r.code}`; $('tg-code-chat').textContent = r.chat || 'your team group'; $('tg-code-bot').textContent = r.bot || 'the bot';
+        $('tg-code-box').classList.remove('hidden');
+        clearInterval(tgPoll);
+        const until = Date.now() + 15 * 60_000;
+        tgPoll = window.setInterval(() => { if (Date.now() > until || !dSet().open) clearInterval(tgPoll); else loadTgMe(); }, 3000);
+      } catch (e: any) { $('tg-me-state').textContent = e.message; }
+    });
+    $('b-tg-copy').addEventListener('click', () => { navigator.clipboard?.writeText($('tg-code').textContent || '').then(() => { $('b-tg-copy').textContent = 'Copied ✓'; }); });
+    $('b-tg-unlink').addEventListener('click', async () => { await api('tg_unlink', {}).catch(() => {}); loadTgMe(); });
     $('b-tg-test').addEventListener('click', async () => { try { await api('tg_test', {}); tgMsg('Test sent to Telegram.'); } catch (e: any) { tgMsg(e.message, false); } });
     $('b-tg-off').addEventListener('click', async () => {
       if (!confirm('Stop posting new chats to Telegram?')) return;
-      await api('tg_disconnect', {}).catch(() => {}); loadTelegram(); tgMsg('Telegram disconnected.');
+      await api('tg_disconnect', {}).catch(() => {}); loadTelegram(); loadTgMe(); tgMsg('Telegram disconnected.');
     });
 
     // ── Conversation list ──

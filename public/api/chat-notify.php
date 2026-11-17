@@ -50,14 +50,115 @@ function tg_call(string $token, string $method, ?array $params = null): ?array {
     if (!preg_match('/^\d+:[A-Za-z0-9_-]{30,}$/', $token)) return null;
     return http_json("https://api.telegram.org/bot{$token}/{$method}", $params);
 }
-function tg_send(PDO $pdo, string $html, ?string $buttonText = null, ?string $buttonUrl = null): bool {
+/** Post to the team's Telegram chat. With $threadId, replies to this message are routed back to that website chat. */
+function tg_send(PDO $pdo, string $html, ?string $buttonText = null, ?string $buttonUrl = null, ?int $threadId = null, $chatOverride = null): bool {
     $token = setting_get($pdo, 'tg_token');
-    $chat = setting_get($pdo, 'tg_chat_id');
+    $chat = $chatOverride ?? setting_get($pdo, 'tg_chat_id');
     if (!$token || !$chat) return false;
+    ensure_tg_webhook($pdo);
     $p = ['chat_id' => $chat, 'text' => $html, 'parse_mode' => 'HTML', 'disable_web_page_preview' => true];
     if ($buttonText && $buttonUrl) $p['reply_markup'] = ['inline_keyboard' => [[['text' => $buttonText, 'url' => $buttonUrl]]]];
     $r = tg_call($token, 'sendMessage', $p);
-    return (bool) ($r['ok'] ?? false);
+    if (!($r['ok'] ?? false)) return false;
+    if ($threadId) {
+        $pdo->prepare('INSERT IGNORE INTO chat_tg_map (chat_id, message_id, thread_id) VALUES (?,?,?)')
+            ->execute([(string) $r['result']['chat']['id'], (int) $r['result']['message_id'], $threadId]);
+    }
+    return true;
+}
+/** Register the webhook that lets the team answer visitors by replying in Telegram (once). */
+function ensure_tg_webhook(PDO $pdo, bool $force = false): bool {
+    $token = setting_get($pdo, 'tg_token');
+    if (!$token) return false;
+    if (!$force && setting_get($pdo, 'tg_webhook_secret')) return true;
+    $secret = bin2hex(random_bytes(24));
+    $r = tg_call($token, 'setWebhook', [
+        'url' => 'https://fajtech.ca/api/chat.php?action=tg_webhook',
+        'secret_token' => $secret,
+        'allowed_updates' => ['message'],
+    ]);
+    if (!($r['ok'] ?? false)) { error_log('FAJTech chat: setWebhook failed ' . json_encode($r)); return false; }
+    setting_set($pdo, 'tg_webhook_secret', $secret);
+    return true;
+}
+function tg_drop_webhook(PDO $pdo): void {
+    $token = setting_get($pdo, 'tg_token');
+    if ($token) tg_call($token, 'deleteWebhook');
+    setting_set($pdo, 'tg_webhook_secret', null);
+}
+
+// ── A team reply (from the inbox or from Telegram) ──────────────────────────
+/** Saves the reply, reopens the chat, and emails it to the visitor if they have left the site. */
+function post_agent_reply(PDO $pdo, array $t, string $agentName, string $text, string $mailTo, string $mailFrom, string $siteUrl): array {
+    $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, agent_name, body, created_at) VALUES (?, 'agent', ?, ?, UTC_TIMESTAMP())")->execute([$t['id'], $agentName, $text]);
+    $mid = (int) $pdo->lastInsertId();
+    $pdo->prepare("UPDATE chat_threads SET status = 'open', last_message_at = UTC_TIMESTAMP() WHERE id = ?")->execute([$t['id']]);
+    $away = strtotime($t['last_visitor_at'] . ' UTC') < time() - 120;
+    if ($away) {
+        $first = explode(' ', (string) $t['name'])[0];
+        send_mail($t['email'], 'FAJTech replied to your chat',
+            "Hi {$first},\n\n{$agentName} from FAJTech replied to your chat:\n\n{$text}\n\nContinue the conversation: {$siteUrl}/?chat={$t['token']}\nOr simply reply to this email.\n\nFAJTech · Managed IT & Cybersecurity\n",
+            $mailFrom, $mailTo);
+    }
+    return ['id' => $mid, 'emailed' => $away];
+}
+
+/** Forward a visitor message to Telegram while the team is answering this chat from Telegram. */
+function tg_forward_visitor(PDO $pdo, array $t, string $text): void {
+    tg_send($pdo, '💬 <b>' . h((string) $t['name']) . "</b>:\n" . h(mb_substr($text, 0, 3000)) . "\n\n<i>Reply to this message to answer.</i>", null, null, (int) $t['id']);
+}
+
+/** Handle an update from Telegram (webhook). */
+function tg_handle_update(PDO $pdo, array $u, string $mailTo, string $mailFrom, string $siteUrl): void {
+    $msg = $u['message'] ?? null;
+    if (!$msg || empty($msg['from']) || !empty($msg['from']['is_bot'])) return;
+    $chatId = (string) $msg['chat']['id'];
+    $teamChat = (string) setting_get($pdo, 'tg_chat_id');
+    $isPrivate = ($msg['chat']['type'] ?? '') === 'private';
+    if ($chatId !== $teamChat && !$isPrivate) return;
+    $text = trim((string) ($msg['text'] ?? ''));
+    $fromId = (string) $msg['from']['id'];
+    $say = fn(string $html) => tg_send($pdo, $html, null, null, null, $chatId);
+
+    // /link CODE: connect this Telegram account to a team member.
+    if (preg_match('#^/link(?:@\w+)?\s+([A-Z0-9]{6})\b#i', $text, $m)) {
+        $code = strtoupper($m[1]);
+        $raw = setting_get($pdo, "tg_link_{$code}");
+        $data = $raw ? json_decode($raw, true) : null;
+        if (!$data || ($data['exp'] ?? 0) < time()) { $say('That link code is wrong or expired. Get a new one in the inbox: ☰ → Settings &amp; notifications.'); return; }
+        $pdo->prepare('UPDATE chat_agents SET tg_user_id = NULL WHERE tg_user_id = ?')->execute([$fromId]);
+        $pdo->prepare('UPDATE chat_agents SET tg_user_id = ? WHERE id = ?')->execute([$fromId, (int) $data['agent']]);
+        setting_set($pdo, "tg_link_{$code}", null);
+        $st = $pdo->prepare('SELECT name FROM chat_agents WHERE id = ?'); $st->execute([(int) $data['agent']]);
+        $say('✅ Linked! Your Telegram replies to chat alerts will be sent to visitors as <b>' . h((string) $st->fetchColumn()) . '</b>.');
+        return;
+    }
+
+    // A reply to one of our chat alerts → send it to that visitor.
+    $re = $msg['reply_to_message'] ?? null;
+    if (!$re) return;
+    $st = $pdo->prepare('SELECT thread_id FROM chat_tg_map WHERE chat_id = ? AND message_id = ?');
+    $st->execute([$chatId, (int) $re['message_id']]);
+    $threadId = (int) $st->fetchColumn();
+    if (!$threadId) return;
+    $st = $pdo->prepare('SELECT id, name FROM chat_agents WHERE tg_user_id = ?');
+    $st->execute([$fromId]);
+    $agent = $st->fetch();
+    if (!$agent) {
+        $say('⚠️ Not sent. Link your Telegram first: in the inbox open ☰ → Settings &amp; notifications → <b>Link my Telegram</b>.');
+        return;
+    }
+    if ($text === '') { $say('⚠️ Only text replies can be sent to the website chat.'); return; }
+    $st = $pdo->prepare('SELECT * FROM chat_threads WHERE id = ?');
+    $st->execute([$threadId]);
+    $t = $st->fetch();
+    if (!$t) return;
+    $r = post_agent_reply($pdo, $t, (string) $agent['name'], mb_substr($text, 0, 5000), $mailTo, $mailFrom, $siteUrl);
+    // Keep forwarding this visitor's messages to Telegram for the next 30 minutes.
+    $pdo->prepare('UPDATE chat_threads SET tg_until = UTC_TIMESTAMP() + INTERVAL 30 MINUTE WHERE id = ?')->execute([$threadId]);
+    $token = setting_get($pdo, 'tg_token');
+    $ok = tg_call($token, 'setMessageReaction', ['chat_id' => $chatId, 'message_id' => (int) $msg['message_id'], 'reaction' => [['type' => 'emoji', 'emoji' => '👍']]]);
+    if (!($ok['ok'] ?? false)) $say($r['emailed'] ? '✓ Sent (the visitor has left, so it was emailed too).' : '✓ Sent.');
 }
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 
@@ -166,5 +267,5 @@ function notify_team(PDO $pdo, string $kind, array $t, string $text, string $top
     $msg = "<b>{$title}</b>\n<b>" . h($name) . '</b> · ' . h($email)
         . ($topics !== '' ? "\nTeam: " . h($topics) : '')
         . "\n\n" . h(mb_substr($text, 0, 1500));
-    tg_send($pdo, $msg, 'Reply in the inbox', $link);
+    tg_send($pdo, $msg . "\n\n<i>Reply to this message to answer here, or use the inbox.</i>", 'Open in the inbox', $link, (int) $t['id']);
 }

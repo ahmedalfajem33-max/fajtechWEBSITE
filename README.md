@@ -45,6 +45,7 @@ The site has its own private live chat (no Zoho, no WhatsApp, no third party): t
   - **Email** to `mail_to` in `fajtech-config.php` (default info@fajtech.ca) **and** every team member who has "Email me when a new chat starts" on (inbox → ☰ → Settings & notifications).
   - **Push notifications** on each device where someone tapped "Turn on notifications" in the inbox. On iPhone: open fajtech.ca/agent/ in Safari → Share → Add to Home Screen → open the app → Turn on notifications.
   - **Telegram**: an admin connects a bot under Settings & notifications (steps are shown there). The bot token is stored in the chat database, never in this repository.
+  - **Reply from Telegram**: each member links their Telegram once (Settings & notifications → Link my Telegram → send `/link CODE` in the group). Then replying to a chat alert in Telegram sends the answer to the visitor under that member's chat name; the bot reacts 👍 when delivered. While a chat is being answered from Telegram, the visitor's next messages are posted to the group for 30 minutes. Telegram talks to `/api/chat.php?action=tg_webhook`, protected by a secret header.
   - While nobody has the inbox open, further visitor messages also ping push/Telegram (at most every 2 minutes per chat).
 - WhatsApp stays only on the Contact page and in the footer.
 
