@@ -74,8 +74,10 @@ $body = ($isBooking ? "New CONSULTATION REQUEST from fajtech.ca — please confi
     . "Company:     {$d['company']}\nEmployees:   {$d['employees']}\nInterest:    {$d['interest']}\n"
     . "Marketing consent (CASL): {$d['consent']}\n\nMessage:\n{$d['message']}\n\n"
     . "Page: {$d['page']}\nGoogle Ads click ID: {$d['gclid']}\nIP: {$ip}\nTime: " . date('c') . "\n";
-$headers = "From: FAJTech Website <{$from}>\r\nReply-To: {$d['email']}\r\nContent-Type: text/plain; charset=UTF-8";
-$mailed = @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers, '-f' . $from);
+// Our team inbox is on our own Exchange server: send through it (see mailer.php).
+define('FAJMAILER', true);
+require_once __DIR__ . '/mailer.php';
+$mailed = faj_send_mail(['mail_from' => $from] + $config, $to, $subject, $body, $d['email']);
 
 // ── 2) Zoho CRM Web-to-Lead (optional) ───────────────────
 $zohoOk = null;

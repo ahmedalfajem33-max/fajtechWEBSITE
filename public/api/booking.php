@@ -241,7 +241,8 @@ $from = $config['mail_from'] ?? 'website@fajtech.ca';
 $txt = "NEW CONSULTATION BOOKED on fajtech.ca (invite sent from the booking mailbox)\n\n"
     . "When: {$whenBiz}\nCustomer's time: {$whenCust}\n\nName: {$name}\nEmail: {$d['email']}\nPhone: {$d['phone']}\nCompany: {$d['company']}\n"
     . "Marketing consent (CASL): {$d['consent']}\nGoogle Ads click ID: {$d['gclid']}\n\nNotes:\n{$d['notes']}\n";
-@mail($to, '=?UTF-8?B?' . base64_encode('Consultation booked: ' . $name . ' — ' . $whenBiz) . '?=', $txt,
-    "From: FAJTech Website <{$from}>\r\nReply-To: {$d['email']}\r\nContent-Type: text/plain; charset=UTF-8", '-f' . $from);
+define('FAJMAILER', true);
+require_once __DIR__ . '/mailer.php';
+faj_send_mail(['mail_from' => $from] + $config, $to, 'Consultation booked: ' . $name . ' — ' . $whenBiz, $txt, $d['email']);
 
 respond(200, ['ok' => true, 'when' => $whenCust]);

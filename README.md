@@ -51,7 +51,7 @@ The site has its own private live chat (no Zoho, no WhatsApp, no third party): t
 
 ## How the website sends email
 
-fajtech.ca mail lives on our own Exchange server (mail.fajtech.ca), which refuses mail from the internet that claims to be from @fajtech.ca. So `public/api/mailer.php` sends through Exchange itself (EWS over HTTPS) using the booking mailbox in `fajtech-config.php` (`booking.ews_user` / `ews_pass`), and only falls back to PHP `mail()` if Exchange can't be reached. Set `'mail_via' => 'php'` in `fajtech-config.php` to force the old behaviour. Used by the live chat; the contact form can use it too.
+fajtech.ca mail lives on our own Exchange server (mail.fajtech.ca), which refuses mail from the internet that claims to be from @fajtech.ca. So `public/api/mailer.php` sends email **to @fajtech.ca addresses** (team notifications from the contact form, free-assessment and consultation requests, bookings and live chat) through Exchange itself (EWS over HTTPS) using the booking mailbox in `fajtech-config.php` (`booking.ews_user` / `ews_pass`). Email **to customers** still goes out through Hostinger (our SPF record allows it). Each route falls back to the other if it fails. Set `'mail_via' => 'php'` in `fajtech-config.php` to turn the Exchange route off.
 
 ## Confirmation emails
 

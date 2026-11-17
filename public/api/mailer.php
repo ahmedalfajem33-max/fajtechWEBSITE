@@ -2,8 +2,9 @@
 /**
  * FAJTech website mailer.
  * fajtech.ca mail is hosted on our own Exchange server, which refuses mail that comes from the
- * internet claiming to be from @fajtech.ca. So we send through Exchange itself (EWS, over HTTPS)
- * with the booking mailbox from fajtech-config.php, and fall back to PHP mail() if that fails.
+ * internet claiming to be from @fajtech.ca. So email to our own addresses goes through Exchange
+ * itself (EWS, over HTTPS) with the booking mailbox from fajtech-config.php; email to customers
+ * goes out through Hostinger as before. Each falls back to the other if it fails.
  * Loaded by other scripts only.
  */
 declare(strict_types=1);
@@ -38,14 +39,26 @@ function faj_ews_send(array $b, string $to, string $subject, string $body, strin
     return $ok;
 }
 
-/** Send a plain-text email: through Exchange when configured, otherwise (or on failure) with PHP mail(). */
+/**
+ * Send a plain-text email.
+ * - To @fajtech.ca (our own Exchange): through Exchange (EWS); PHP mail() only if that fails.
+ * - To anyone else: PHP mail() via Hostinger (allowed by our SPF record); Exchange only if that fails.
+ */
 function faj_send_mail(array $config, string $to, string $subject, string $body, string $replyTo = ''): bool {
     $b = (array) ($config['booking'] ?? []);
-    $useEws = ($config['mail_via'] ?? 'exchange') !== 'php'
+    $ewsReady = ($config['mail_via'] ?? 'exchange') !== 'php'
         && !empty($b['ews_url']) && !empty($b['ews_user'])
         && !empty($b['ews_pass']) && $b['ews_pass'] !== 'PASTE_PASSWORD_HERE' && empty($b['mock']);
-    if ($useEws && faj_ews_send($b, $to, $subject, $body, $replyTo)) return true;
+    $internal = (bool) preg_match('/@fajtech\.ca$/i', trim($to));
     $from = $config['mail_from'] ?? 'website@fajtech.ca';
-    $h = "From: FAJTech <{$from}>\r\n" . ($replyTo ? "Reply-To: {$replyTo}\r\n" : '') . "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8";
-    return @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $h, '-f' . $from);
+    $php = function () use ($to, $subject, $body, $replyTo, $from): bool {
+        $h = "From: FAJTech <{$from}>\r\n" . ($replyTo ? "Reply-To: {$replyTo}\r\n" : '') . "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8";
+        return @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $h, '-f' . $from);
+    };
+    if ($internal) {
+        if ($ewsReady && faj_ews_send($b, $to, $subject, $body, $replyTo)) return true;
+        return $php();
+    }
+    if ($php()) return true;
+    return $ewsReady && faj_ews_send($b, $to, $subject, $body, $replyTo);
 }
