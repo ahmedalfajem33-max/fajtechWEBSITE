@@ -3,6 +3,7 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import HeroPhoto from '../../components/HeroPhoto.astro';
 import { services } from '../../data/services';
 import { site } from '../../config/site';
 
@@ -31,6 +32,7 @@ const schema = {
 <Base title={post.data.title} description={post.data.description} schema={schema}>
   <section class="relative overflow-hidden bg-ink-900 text-white">
     <div class="grid-bg absolute inset-0" aria-hidden="true"></div>
+    <HeroPhoto keys={[`article-${post.id}`, 'resources']} strength="strong" />
     <div class="container-x relative max-w-3xl py-14 sm:py-20">
       <a href="/resources/" class="inline-flex items-center gap-1 text-sm font-semibold text-brand-300 hover:text-brand-200">← All resources</a>
       <p class="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-brand-300">{post.data.category}</p>

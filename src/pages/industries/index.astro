@@ -6,7 +6,7 @@ import CtaBand from '../../components/CtaBand.astro';
 import { industries } from '../../data/industries';
 ---
 <Base title="Industries We Serve" description="Tailored IT and cybersecurity for healthcare, finance, legal, construction, energy, manufacturing, retail, non-profits and more across Canada.">
-  <PageHero eyebrow="Industries" title="Tailored IT solutions built for your industry" text="Every industry has its own systems, regulations and risks. We bring the experience to support yours." />
+  <PageHero photo={['industries']} eyebrow="Industries" title="Tailored IT solutions built for your industry" text="Every industry has its own systems, regulations and risks. We bring the experience to support yours." />
   <section class="section">
     <div class="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {industries.map((ind) => (

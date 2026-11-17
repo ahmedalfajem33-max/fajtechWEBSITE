@@ -6,7 +6,7 @@ import CtaBand from '../../components/CtaBand.astro';
 import { services } from '../../data/services';
 ---
 <Base title="IT Services in Calgary" description="Managed IT, cybersecurity, cloud, backup, networking, vCIO consulting and automation services for Calgary and Canadian businesses.">
-  <PageHero eyebrow="Services" title="IT services built for growing businesses" text="Comprehensive IT solutions that help your business grow, stay secure and operate efficiently — delivered by a Calgary-based team." />
+  <PageHero photo={['services']} eyebrow="Services" title="IT services built for growing businesses" text="Comprehensive IT solutions that help your business grow, stay secure and operate efficiently — delivered by a Calgary-based team." />
   <section class="section">
     <div class="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {services.map((s) => (

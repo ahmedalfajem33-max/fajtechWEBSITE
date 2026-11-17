@@ -40,7 +40,7 @@ const schema = {
 };
 ---
 <Base title={loc.title} description={`${loc.title}: managed IT, cybersecurity, cloud and backup with 24/7/365 support from FAJTech. Book a free IT assessment.`} schema={schema}>
-  <PageHero eyebrow={isCanada ? 'Service area' : `${loc.name}, Alberta`} title={loc.title} text={loc.intro}>
+  <PageHero photo={[`location-${loc.slug}`, 'location-calgary']} eyebrow={isCanada ? 'Service area' : `${loc.name}, Alberta`} title={loc.title} text={loc.intro}>
     <div class="mt-8 flex flex-wrap gap-3">
       <a href="/book-a-consultation/" class="btn-primary px-6 py-3.5 text-base">Book a Free Consultation</a>
       <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="btn-ghost px-6 py-3.5 text-base"><Icon name="phone" class="h-4 w-4" /> {site.phone}</a>

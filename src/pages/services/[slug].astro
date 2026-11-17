@@ -22,7 +22,7 @@ const schema = {
 };
 ---
 <Base title={`${service.title} in Calgary`} description={`${service.short} FAJTech serves Calgary and businesses across Canada.`} schema={schema}>
-  <PageHero eyebrow="Services" title={service.title} text={service.intro}>
+  <PageHero photo={[`service-${service.slug}`, 'services']} eyebrow="Services" title={service.title} text={service.intro}>
     <div class="mt-8 flex flex-wrap gap-3">
       <a href={bookHref} class="btn-primary px-6 py-3.5 text-base">Book a Free Consultation</a>
       <a href="/services/" class="btn-ghost px-6 py-3.5 text-base">All services</a>

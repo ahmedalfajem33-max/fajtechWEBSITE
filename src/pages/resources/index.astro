@@ -9,7 +9,7 @@ const posts = (await getCollection('resources')).sort((a, b) => b.data.date.valu
 const fmt = (d: Date) => d.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
 <Base title="IT & Cybersecurity Resources" description="Practical guides on managed IT, cybersecurity, privacy compliance and IT costs for Canadian small and mid-sized businesses.">
-  <PageHero eyebrow="Resources" title="IT & cybersecurity guides for growing businesses" text="Practical, plain-language advice from the FAJTech team — no jargon." />
+  <PageHero photo={['resources']} eyebrow="Resources" title="IT & cybersecurity guides for growing businesses" text="Practical, plain-language advice from the FAJTech team — no jargon." />
   <section class="section">
     <div class="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {posts.map((p) => (
