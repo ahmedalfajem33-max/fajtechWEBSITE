@@ -1,0 +1,388 @@
+---
+/**
+ * Private team inbox for the website live chat. Not linked anywhere, not indexed.
+ * Talks to /api/chat.php (session login). Works on phones: add it to the home screen.
+ */
+import '../../styles/global.css';
+---
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#111c2a" />
+  <title>FAJTech Chat Inbox</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/favicon-192x192.png" />
+</head>
+<body class="h-full bg-slate-100 text-ink-900 antialiased">
+
+  <!-- Sign in -->
+  <main id="v-login" class="hidden min-h-full items-center justify-center p-4">
+    <form id="f-login" class="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-200">
+      <div class="flex items-center gap-3">
+        <img src="/favicon.svg" alt="" class="h-10 w-10" width="40" height="40" />
+        <div><h1 class="text-xl font-extrabold">FAJTech Chat</h1><p class="text-sm text-slate-500">Team inbox</p></div>
+      </div>
+      <label class="mt-8 block text-sm font-semibold">Email<input name="email" type="email" autocomplete="username" required class="field" /></label>
+      <label class="mt-4 block text-sm font-semibold">Password<input name="password" type="password" autocomplete="current-password" required class="field" /></label>
+      <p class="err mt-4 hidden text-sm font-medium text-red-600" role="alert"></p>
+      <button class="btn-primary mt-6 w-full">Sign in</button>
+    </form>
+  </main>
+
+  <!-- First sign-in: choose a password -->
+  <main id="v-setpw" class="hidden min-h-full items-center justify-center p-4">
+    <form id="f-setpw" class="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-200">
+      <h1 class="text-xl font-extrabold">Choose your password</h1>
+      <p class="mt-1 text-sm text-slate-500">You signed in with a temporary password. Please choose your own (at least 10 characters).</p>
+      <label class="mt-6 block text-sm font-semibold">Temporary password<input name="current" type="password" autocomplete="current-password" required class="field" /></label>
+      <label class="mt-4 block text-sm font-semibold">New password<input name="new" type="password" autocomplete="new-password" minlength="10" required class="field" /></label>
+      <p class="err mt-4 hidden text-sm font-medium text-red-600" role="alert"></p>
+      <button class="btn-primary mt-6 w-full">Save password</button>
+    </form>
+  </main>
+
+  <!-- Inbox -->
+  <div id="v-app" class="hidden h-full flex-col">
+    <header class="flex items-center gap-3 bg-ink-900 px-4 py-3 text-white">
+      <img src="/favicon.svg" alt="" class="h-8 w-8 rounded-md bg-white p-0.5" width="32" height="32" />
+      <h1 class="text-base font-bold text-white">FAJTech Chat</h1>
+      <nav class="ml-2 flex rounded-lg bg-white/10 p-0.5 text-sm" aria-label="Conversations">
+        <button data-tab="open" class="tab rounded-md px-3 py-1.5 font-semibold">Open <span id="open-count" class="ml-1 hidden rounded-full bg-red-500 px-1.5 text-xs"></span></button>
+        <button data-tab="closed" class="tab rounded-md px-3 py-1.5 font-semibold">Closed</button>
+      </nav>
+      <div class="ml-auto flex items-center gap-2">
+        <button id="b-alerts" class="hidden rounded-lg border border-white/25 px-3 py-1.5 text-xs font-semibold hover:bg-white/10 sm:block">Turn on alerts</button>
+        <details class="relative">
+          <summary class="flex cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-white/10">
+            <span id="me-name" class="hidden max-w-32 truncate sm:inline"></span>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </summary>
+          <div class="absolute right-0 z-20 mt-2 w-52 overflow-hidden rounded-xl bg-white text-sm text-ink-900 shadow-xl ring-1 ring-slate-200">
+            <button id="m-alerts" class="block w-full px-4 py-2.5 text-left hover:bg-slate-50 sm:hidden">Turn on alerts</button>
+            <button id="m-team" class="hidden w-full px-4 py-2.5 text-left hover:bg-slate-50">Team members</button>
+            <button id="m-password" class="block w-full px-4 py-2.5 text-left hover:bg-slate-50">Change password</button>
+            <button id="m-logout" class="block w-full border-t border-slate-100 px-4 py-2.5 text-left text-red-600 hover:bg-red-50">Sign out</button>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <div class="flex min-h-0 flex-1">
+      <!-- Conversation list -->
+      <aside id="pane-list" class="flex w-full flex-col border-r border-slate-200 bg-white md:w-80 lg:w-96">
+        <ul id="threads" class="flex-1 divide-y divide-slate-100 overflow-y-auto"></ul>
+        <p id="threads-empty" class="hidden p-8 text-center text-sm text-slate-500">No conversations here yet.</p>
+      </aside>
+
+      <!-- Conversation -->
+      <section id="pane-thread" class="hidden min-w-0 flex-1 flex-col bg-slate-50 md:flex">
+        <div id="thread-none" class="m-auto p-8 text-center text-slate-500">
+          <p class="font-semibold">Select a conversation</p>
+          <p class="mt-1 text-sm">New chats appear on the left. You'll also get an email for each one.</p>
+        </div>
+        <div id="thread-view" class="hidden min-h-0 flex-1 flex-col">
+          <div class="flex items-start gap-3 border-b border-slate-200 bg-white px-4 py-3">
+            <button id="b-back" class="-ml-1 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Back to conversations">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="min-w-0 flex-1">
+              <p class="flex items-center gap-2 font-bold"><span id="t-name" class="truncate"></span><span id="t-live" class="hidden rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700">On the site</span></p>
+              <p class="truncate text-sm text-slate-500"><a id="t-email" class="text-brand-600 hover:underline"></a> · <span id="t-meta"></span></p>
+            </div>
+            <button id="b-status" class="btn-outline shrink-0 px-3 py-1.5 text-sm"></button>
+          </div>
+          <div id="t-messages" class="flex-1 space-y-3 overflow-y-auto px-4 py-5"></div>
+          <p id="t-away" class="hidden border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">The visitor has left the site. Your reply will also be emailed to them.</p>
+          <form id="f-reply" class="flex items-end gap-2 border-t border-slate-200 bg-white p-3">
+            <label for="reply" class="sr-only">Reply</label>
+            <textarea id="reply" rows="1" maxlength="5000" placeholder="Type your reply…" title="Enter to send, Shift+Enter for a new line" class="max-h-40 min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none"></textarea>
+            <button class="btn-primary h-11 shrink-0 px-5">Send</button>
+          </form>
+          <p id="reply-err" class="hidden bg-red-50 px-4 py-2 text-xs font-medium text-red-700" role="alert"></p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Dialogs -->
+  <dialog id="d-password" class="m-auto w-[min(92vw,24rem)] rounded-2xl p-0 shadow-2xl backdrop:bg-ink-950/50">
+    <form id="f-password" class="p-6">
+      <h2 class="text-lg font-extrabold">Change password</h2>
+      <label class="mt-5 block text-sm font-semibold">Current password<input name="current" type="password" autocomplete="current-password" required class="field" /></label>
+      <label class="mt-4 block text-sm font-semibold">New password<input name="new" type="password" autocomplete="new-password" minlength="10" required class="field" /></label>
+      <p class="err mt-4 hidden text-sm font-medium text-red-600" role="alert"></p>
+      <div class="mt-6 flex justify-end gap-2"><button type="button" data-close class="btn-outline">Cancel</button><button class="btn-primary">Save</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="d-team" class="m-auto w-[min(92vw,30rem)] rounded-2xl p-0 shadow-2xl backdrop:bg-ink-950/50">
+    <div class="p-6">
+      <div class="flex items-center justify-between"><h2 class="text-lg font-extrabold">Team members</h2><button type="button" data-close class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Close">✕</button></div>
+      <ul id="team-list" class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-200"></ul>
+      <form id="f-agent" class="mt-6 space-y-3 rounded-xl bg-slate-50 p-4">
+        <p class="text-sm font-bold">Add a team member</p>
+        <input name="name" placeholder="Name" required maxlength="80" class="field mt-0" />
+        <input name="email" type="email" placeholder="Email" required maxlength="150" class="field mt-0" />
+        <input name="password" type="text" placeholder="Temporary password (10+ characters)" required minlength="10" class="field mt-0" autocomplete="off" />
+        <label class="flex items-center gap-2 text-sm"><input name="admin" type="checkbox" class="h-4 w-4 rounded border-slate-300" /> Can manage team members</label>
+        <p class="err hidden text-sm font-medium text-red-600" role="alert"></p>
+        <button class="btn-primary w-full">Add member</button>
+        <p class="text-xs text-slate-500">Send them the inbox link (fajtech.ca/agent/) and the temporary password. They'll choose their own password on first sign-in.</p>
+      </form>
+    </div>
+  </dialog>
+
+  <script>
+    const API = '/api/chat.php';
+    const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+    type Agent = { id: number; name: string; email: string; admin: boolean; mustChange: boolean; lastSeenAt?: string | null };
+    type Thread = { id: number; name: string; email: string; page: string; status: string; unread: number; last: string; lastFrom: string; lastAt: string; visitorSeenAt: string; createdAt: string };
+    type Msg = { id: number; from: 'visitor' | 'agent' | 'system'; agent: string | null; body: string; at: string };
+
+    let me: Agent | null = null;
+    let tab: 'open' | 'closed' = 'open';
+    let current: number | null = null;
+    let currentStatus = 'open';
+    let lastMsgId = 0;
+    let lastUnread = -1;
+    let listTimer: number | undefined, threadTimer: number | undefined;
+
+    async function api(action: string, data?: Record<string, unknown>, query = '') {
+      const res = await fetch(`${API}?action=${action}${query}`, data
+        ? { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Fajchat': '1' }, body: JSON.stringify({ ...data, action }) }
+        : { credentials: 'same-origin', cache: 'no-store' });
+      const json = await res.json().catch(() => ({ ok: false, error: 'Unexpected server response.' }));
+      if (res.status === 401 && action !== 'login') { show('login'); throw new Error('signed out'); }
+      if (!res.ok || !json.ok) throw new Error(json.error || 'Something went wrong.');
+      return json;
+    }
+    function show(view: 'login' | 'setpw' | 'app') {
+      for (const v of ['login', 'setpw', 'app']) { const el = $('v-' + v); el.classList.toggle('hidden', v !== view); el.classList.toggle('flex', v === view); }
+      if (view !== 'app') { clearTimeout(listTimer); clearTimeout(threadTimer); }
+    }
+    function formErr(form: HTMLElement, msg = '') { const p = form.querySelector('.err') as HTMLElement; p.textContent = msg; p.classList.toggle('hidden', !msg); }
+    function ago(iso: string) {
+      const s = (Date.now() - new Date(iso).getTime()) / 1000;
+      if (s < 60) return 'now';
+      if (s < 3600) return Math.floor(s / 60) + 'm';
+      if (s < 86400) return Math.floor(s / 3600) + 'h';
+      return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+    const isLive = (iso: string) => Date.now() - new Date(iso).getTime() < 60_000;
+
+    // ── Alerts ──
+    let audio: AudioContext | null = null;
+    function beep() {
+      try {
+        audio ??= new AudioContext();
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.frequency.value = 880; g.gain.setValueAtTime(0.15, audio.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.4);
+        o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime + 0.4);
+      } catch {}
+    }
+    function alertsOn() { return 'Notification' in window && Notification.permission === 'granted'; }
+    function refreshAlertButtons() {
+      const off = 'Notification' in window && Notification.permission === 'default';
+      $('b-alerts').classList.toggle('sm:block', off);
+      $('m-alerts').classList.toggle('hidden', !off);
+    }
+    async function enableAlerts() { audio ??= new AudioContext(); if ('Notification' in window) await Notification.requestPermission(); refreshAlertButtons(); beep(); }
+    $('b-alerts').addEventListener('click', enableAlerts);
+    $('m-alerts').addEventListener('click', enableAlerts);
+
+    // ── Conversation list ──
+    async function loadList() {
+      clearTimeout(listTimer);
+      try {
+        const r = await api('list', undefined, `&status=${tab}`);
+        renderList(r.threads as Thread[]);
+        const unread = r.openUnread as number;
+        const badge = $('open-count'); badge.textContent = String(unread); badge.classList.toggle('hidden', !unread);
+        document.title = (unread ? `(${unread}) ` : '') + 'FAJTech Chat Inbox';
+        if (lastUnread >= 0 && unread > lastUnread) {
+          beep();
+          const top = (r.threads as Thread[]).find((t) => t.unread);
+          if (alertsOn() && document.hidden && top) new Notification(`New message from ${top.name}`, { body: top.last, icon: '/favicon-192x192.png', tag: 'fajchat-' + top.id });
+        }
+        lastUnread = unread;
+      } catch {}
+      listTimer = window.setTimeout(loadList, 5000);
+    }
+    function renderList(threads: Thread[]) {
+      const ul = $('threads'); ul.textContent = '';
+      $('threads-empty').classList.toggle('hidden', threads.length > 0);
+      for (const t of threads) {
+        const li = document.createElement('li');
+        const b = document.createElement('button');
+        b.className = 'flex w-full gap-3 px-4 py-3.5 text-left hover:bg-slate-50 ' + (t.id === current ? 'bg-brand-50/60' : '');
+        b.addEventListener('click', () => openThread(t.id));
+        const av = document.createElement('span');
+        av.className = 'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink-800 text-sm font-bold text-white';
+        av.textContent = t.name.trim().charAt(0).toUpperCase() || '?';
+        if (isLive(t.visitorSeenAt) && t.status === 'open') { const d = document.createElement('span'); d.className = 'absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-brand-500'; av.append(d); }
+        const txt = document.createElement('span'); txt.className = 'min-w-0 flex-1';
+        const top = document.createElement('span'); top.className = 'flex items-baseline gap-2';
+        const nm = document.createElement('span'); nm.className = 'truncate ' + (t.unread ? 'font-extrabold' : 'font-semibold'); nm.textContent = t.name;
+        const tm = document.createElement('span'); tm.className = 'ml-auto shrink-0 text-xs text-slate-400'; tm.textContent = ago(t.lastAt);
+        top.append(nm, tm);
+        const last = document.createElement('span'); last.className = 'mt-0.5 flex items-center gap-2';
+        const lt = document.createElement('span'); lt.className = 'truncate text-sm ' + (t.unread ? 'text-ink-900' : 'text-slate-500');
+        lt.textContent = (t.lastFrom === 'agent' ? 'You: ' : '') + t.last;
+        last.append(lt);
+        if (t.unread) { const u = document.createElement('span'); u.className = 'ml-auto shrink-0 rounded-full bg-brand-600 px-2 text-xs font-bold leading-5 text-white'; u.textContent = String(t.unread); last.append(u); }
+        txt.append(top, last);
+        b.append(av, txt); li.append(b); ul.append(li);
+      }
+    }
+    document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.tab as 'open' | 'closed'; paintTabs(); loadList(); }));
+    function paintTabs() { document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) => b.classList.toggle('bg-white/20', b.dataset.tab === tab)); }
+
+    // ── Single conversation ──
+    function bubble(m: Msg) {
+      const row = document.createElement('div');
+      const b = document.createElement('div');
+      const meta = document.createElement('div'); meta.className = 'mt-1 text-[11px] text-slate-400';
+      const t = new Date(m.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      if (m.from === 'agent') {
+        row.className = 'flex flex-col items-end';
+        b.className = 'max-w-[80%] whitespace-pre-wrap break-words rounded-2xl rounded-br-sm bg-brand-600 px-4 py-2.5 text-sm text-white';
+        meta.textContent = `${m.agent} · ${t}`;
+      } else if (m.from === 'visitor') {
+        row.className = 'flex flex-col items-start';
+        b.className = 'max-w-[80%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm shadow-sm ring-1 ring-slate-200';
+        meta.textContent = t;
+      } else {
+        row.className = 'flex justify-center';
+        b.className = 'rounded-xl bg-slate-200/70 px-3 py-2 text-xs text-slate-600';
+      }
+      b.textContent = m.body;
+      row.append(b); if (meta.textContent) row.append(meta);
+      return row;
+    }
+    async function openThread(id: number) {
+      current = id; lastMsgId = 0;
+      history.replaceState(null, '', `#chat-${id}`);
+      $('t-messages').textContent = '';
+      $('thread-none').classList.add('hidden');
+      const view = $('thread-view'); view.classList.remove('hidden'); view.classList.add('flex');
+      $('pane-thread').classList.remove('hidden'); $('pane-thread').classList.add('flex');
+      $('pane-list').classList.add('max-md:hidden');
+      await loadThread(true);
+      loadList();
+      $('reply').focus();
+    }
+    async function loadThread(first = false) {
+      clearTimeout(threadTimer);
+      if (current == null) return;
+      try {
+        const r = await api('thread', undefined, `&id=${current}&after=${lastMsgId}`);
+        const t = r.thread;
+        $('t-name').textContent = t.name;
+        const em = $<HTMLAnchorElement>('t-email'); em.textContent = t.email; em.href = `mailto:${t.email}`;
+        $('t-meta').textContent = `started ${new Date(t.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}` + (t.page ? ` on ${t.page}` : '');
+        const live = isLive(t.visitorSeenAt);
+        $('t-live').classList.toggle('hidden', !live);
+        $('t-away').classList.toggle('hidden', Date.now() - new Date(t.visitorSeenAt).getTime() < 120_000);
+        currentStatus = t.status;
+        $('b-status').textContent = t.status === 'open' ? 'Close chat' : 'Reopen';
+        const box = $('t-messages');
+        const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+        for (const m of r.messages as Msg[]) { box.append(bubble(m)); lastMsgId = Math.max(lastMsgId, m.id); }
+        if (first || (r.messages.length && atBottom)) box.scrollTop = box.scrollHeight;
+      } catch (e: any) { if (first) { $('t-messages').textContent = e.message; } }
+      threadTimer = window.setTimeout(() => loadThread(), 3000);
+    }
+    $('b-back').addEventListener('click', () => {
+      current = null; clearTimeout(threadTimer); history.replaceState(null, '', location.pathname);
+      $('pane-list').classList.remove('max-md:hidden'); $('pane-thread').classList.add('hidden'); $('pane-thread').classList.remove('flex');
+      loadList();
+    });
+    $('b-status').addEventListener('click', async () => {
+      if (current == null) return;
+      await api(currentStatus === 'open' ? 'close' : 'reopen', { id: current }).catch((e) => alert(e.message));
+      lastMsgId = 0; $('t-messages').textContent = '';
+      loadThread(true); loadList();
+    });
+    const reply = $<HTMLTextAreaElement>('reply');
+    let sending = false;
+    async function sendReply() {
+      const text = reply.value.trim();
+      if (!text || sending || current == null) return;
+      sending = true; $('reply-err').classList.add('hidden');
+      try {
+        await api('reply', { id: current, message: text });
+        reply.value = ''; reply.style.height = '';
+        await loadThread(); $('t-messages').scrollTop = $('t-messages').scrollHeight; loadList();
+      } catch (e: any) { $('reply-err').textContent = e.message; $('reply-err').classList.remove('hidden'); }
+      finally { sending = false; reply.focus(); }
+    }
+    $('f-reply').addEventListener('submit', (e) => { e.preventDefault(); sendReply(); });
+    reply.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); } });
+    reply.addEventListener('input', () => { reply.style.height = 'auto'; reply.style.height = Math.min(reply.scrollHeight, 160) + 'px'; });
+
+    // ── Sign in / out / passwords ──
+    function startApp() {
+      show('app'); paintTabs(); refreshAlertButtons();
+      $('me-name').textContent = me!.name;
+      $('m-team').classList.toggle('hidden', !me!.admin); $('m-team').classList.toggle('block', me!.admin);
+      loadList();
+      const m = location.hash.match(/^#chat-(\d+)$/);
+      if (m) openThread(Number(m[1]));
+    }
+    function afterLogin(a: Agent) { me = a; if (a.mustChange) show('setpw'); else startApp(); }
+    $('f-login').addEventListener('submit', async (e) => {
+      e.preventDefault(); const f = e.currentTarget as HTMLFormElement; formErr(f);
+      try { const r = await api('login', Object.fromEntries(new FormData(f))); f.reset(); afterLogin(r.agent); }
+      catch (ex: any) { formErr(f, ex.message); }
+    });
+    $('f-setpw').addEventListener('submit', async (e) => {
+      e.preventDefault(); const f = e.currentTarget as HTMLFormElement; formErr(f);
+      try { await api('password', Object.fromEntries(new FormData(f))); f.reset(); me!.mustChange = false; startApp(); }
+      catch (ex: any) { formErr(f, ex.message); }
+    });
+    $('m-logout').addEventListener('click', async () => { await api('logout', {}).catch(() => {}); me = null; show('login'); });
+    const dPw = $<HTMLDialogElement>('d-password'), dTeam = $<HTMLDialogElement>('d-team');
+    document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => (b.closest('dialog') as HTMLDialogElement).close()));
+    $('m-password').addEventListener('click', () => { (document.querySelector('details') as HTMLDetailsElement).open = false; formErr($('f-password')); dPw.showModal(); });
+    $('f-password').addEventListener('submit', async (e) => {
+      e.preventDefault(); const f = e.currentTarget as HTMLFormElement; formErr(f);
+      try { await api('password', Object.fromEntries(new FormData(f))); f.reset(); dPw.close(); }
+      catch (ex: any) { formErr(f, ex.message); }
+    });
+
+    // ── Team (admins) ──
+    async function loadTeam() {
+      const r = await api('agents');
+      const ul = $('team-list'); ul.textContent = '';
+      for (const a of r.agents as Agent[]) {
+        const li = document.createElement('li'); li.className = 'flex items-center gap-3 px-4 py-3';
+        const info = document.createElement('span'); info.className = 'min-w-0 flex-1';
+        const n = document.createElement('span'); n.className = 'block truncate font-semibold'; n.textContent = a.name + (a.admin ? ' (admin)' : '');
+        const s = document.createElement('span'); s.className = 'block truncate text-xs text-slate-500';
+        s.textContent = a.email + (a.lastSeenAt ? ` · last active ${ago(a.lastSeenAt)}` : ' · never signed in');
+        info.append(n, s); li.append(info);
+        if (a.id !== me!.id) {
+          const rm = document.createElement('button'); rm.className = 'rounded-lg px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50'; rm.textContent = 'Remove';
+          rm.addEventListener('click', async () => { if (confirm(`Remove ${a.name} from the chat team?`)) { await api('agent_remove', { id: a.id }).catch((e) => alert(e.message)); loadTeam(); } });
+          li.append(rm);
+        }
+        ul.append(li);
+      }
+    }
+    $('m-team').addEventListener('click', () => { (document.querySelector('details') as HTMLDetailsElement).open = false; formErr($('f-agent')); loadTeam(); dTeam.showModal(); });
+    $('f-agent').addEventListener('submit', async (e) => {
+      e.preventDefault(); const f = e.currentTarget as HTMLFormElement; formErr(f);
+      const d = Object.fromEntries(new FormData(f)) as Record<string, unknown>; d.admin = !!d.admin;
+      try { await api('agent_add', d); f.reset(); loadTeam(); }
+      catch (ex: any) { formErr(f, ex.message); }
+    });
+
+    // ── Boot ──
+    api('me').then((r) => afterLogin(r.agent)).catch(() => show('login'));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && me && !me.mustChange) { loadList(); if (current != null) loadThread(); } });
+  </script>
+</body>
+</html>

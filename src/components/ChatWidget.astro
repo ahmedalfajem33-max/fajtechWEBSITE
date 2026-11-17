@@ -1,0 +1,284 @@
+---
+/**
+ * FAJTech live chat widget (talks to /api/chat.php; the team answers at /agent/).
+ * Any element with a `data-open-chat` attribute opens it; so does `?chat=<token>` in the URL
+ * (the link in "we replied" emails).
+ */
+---
+<div id="faj-chat" class="contents" data-api="/api/chat.php">
+  <!-- Teaser bubble -->
+  <div id="chat-teaser" class="fixed right-4 bottom-36 z-40 hidden w-72 rounded-2xl bg-white p-4 pr-9 text-sm text-ink-900 shadow-2xl ring-1 ring-slate-200 lg:right-6 lg:bottom-24" role="status">
+    <button type="button" id="chat-teaser-close" class="absolute top-2 right-2 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Dismiss">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <button type="button" data-open-chat class="text-left">
+      <span class="mb-1 flex items-center gap-2 font-bold"><span class="h-2 w-2 rounded-full bg-brand-500"></span>FAJTech support</span>
+      Need a question answered? Chat with one of our IT experts. We usually reply within minutes.
+    </button>
+  </div>
+
+  <!-- Launcher -->
+  <button type="button" id="chat-launcher" data-open-chat aria-label="Chat with FAJTech" aria-controls="chat-panel" aria-expanded="false"
+    class="group fixed right-4 bottom-20 z-40 flex items-center gap-2 rounded-full bg-brand-600 p-3.5 text-white shadow-xl shadow-brand-600/30 transition hover:bg-brand-700 lg:right-6 lg:bottom-6">
+    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></svg>
+    <span class="hidden pr-1 text-sm font-semibold lg:group-hover:inline">Chat with us</span>
+    <span id="chat-badge" class="absolute -top-1 -right-1 hidden h-5 min-w-5 rounded-full bg-red-500 px-1 text-center text-xs leading-5 font-bold text-white"></span>
+  </button>
+
+  <!-- Panel -->
+  <section id="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title"
+    class="fixed inset-0 z-[60] hidden flex-col overflow-hidden bg-white sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[620px] sm:max-h-[calc(100vh-3rem)] sm:w-[390px] sm:rounded-2xl sm:shadow-2xl sm:ring-1 sm:ring-slate-200">
+    <header class="flex items-center gap-3 bg-ink-900 px-4 py-3.5 text-white">
+      <img src="/favicon.svg" alt="" class="h-9 w-9 rounded-lg bg-white p-1" width="36" height="36" />
+      <div class="min-w-0 flex-1">
+        <h2 id="chat-title" class="text-base leading-tight font-bold text-white">FAJTech support</h2>
+        <p class="flex items-center gap-1.5 text-xs text-slate-300"><span id="chat-dot" class="h-2 w-2 rounded-full bg-brand-400"></span><span id="chat-status">Usually replies within minutes</span></p>
+      </div>
+      <button type="button" id="chat-close" class="rounded-lg p-2 text-slate-300 hover:bg-white/10 hover:text-white" aria-label="Close chat">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+
+    <div id="chat-body" class="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-4 py-5" aria-live="polite">
+      <div class="flex gap-2">
+        <div class="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm ring-1 ring-slate-200">Hi there! 👋 Need a question answered? We can connect you to one of our IT experts, who are happy to help.</div>
+      </div>
+
+      <form id="chat-start" class="space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" novalidate>
+        <p class="text-sm font-semibold text-ink-900">Tell us a little about you and we'll get started.</p>
+        <label class="block text-xs font-semibold text-slate-600">Your name
+          <input name="name" required maxlength="80" autocomplete="name" class="field mt-1 py-2 text-sm" />
+        </label>
+        <label class="block text-xs font-semibold text-slate-600">Email (in case we get disconnected)
+          <input name="email" type="email" required maxlength="150" autocomplete="email" class="field mt-1 py-2 text-sm" />
+        </label>
+        <label class="block text-xs font-semibold text-slate-600">How can we help?
+          <textarea name="message" required maxlength="3000" rows="3" class="field mt-1 resize-none py-2 text-sm"></textarea>
+        </label>
+        <input name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+        <p id="chat-start-error" class="hidden text-sm font-medium text-red-600" role="alert"></p>
+        <button type="submit" class="btn-primary w-full py-2.5">Start chat</button>
+        <p class="text-xs leading-relaxed text-slate-500">Your chat is stored securely on FAJTech's own servers and only used to help you. See our <a href="/privacy/" class="underline">privacy policy</a>.</p>
+      </form>
+
+      <div id="chat-messages" class="space-y-3"></div>
+    </div>
+
+    <form id="chat-compose" class="hidden items-end gap-2 border-t border-slate-200 bg-white p-3">
+      <label for="chat-input" class="sr-only">Type your message</label>
+      <textarea id="chat-input" rows="1" maxlength="3000" placeholder="Type your message…" class="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none"></textarea>
+      <button type="submit" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50" aria-label="Send">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </form>
+    <p id="chat-send-error" class="hidden bg-red-50 px-4 py-2 text-xs font-medium text-red-700" role="alert"></p>
+  </section>
+</div>
+
+<script>
+  const root = document.getElementById('faj-chat')!;
+  const API = root.dataset.api!;
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const panel = $('chat-panel'), launcher = $('chat-launcher'), teaser = $('chat-teaser'), badge = $('chat-badge');
+  const body = $('chat-body'), list = $('chat-messages'), startForm = $<HTMLFormElement>('chat-start');
+  const compose = $<HTMLFormElement>('chat-compose'), input = $<HTMLTextAreaElement>('chat-input');
+  const statusEl = $('chat-status'), dot = $('chat-dot');
+
+  type Msg = { id: number; from: 'visitor' | 'agent' | 'system'; agent: string | null; body: string; at: string };
+  const store = {
+    get: (k: string) => { try { return localStorage.getItem('fajchat_' + k); } catch { return null; } },
+    set: (k: string, v: string) => { try { localStorage.setItem('fajchat_' + k, v); } catch {} },
+    del: (k: string) => { try { localStorage.removeItem('fajchat_' + k); } catch {} },
+  };
+  let token = store.get('token');
+  let lastId = 0;
+  let seenId = Number(store.get('seen') || 0);
+  let isOpen = false;
+  let timer: number | undefined;
+  let busy = false;
+
+  async function api(action: string, data?: Record<string, unknown>) {
+    const res = await fetch(`${API}?action=${action}` + (data ? '' : `&token=${token}&after=${lastId}`), data
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, action }) }
+      : { cache: 'no-store' });
+    const json = await res.json().catch(() => ({ ok: false, error: 'Something went wrong. Please try again.' }));
+    if (!res.ok || !json.ok) throw Object.assign(new Error(json.error || 'Something went wrong.'), { status: res.status });
+    return json;
+  }
+
+  // ── Rendering ──
+  function linkify(el: HTMLElement, text: string) {
+    const re = /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g;
+    let last = 0;
+    for (const m of text.matchAll(re)) {
+      el.append(text.slice(last, m.index));
+      const a = document.createElement('a');
+      a.href = m[0]; a.textContent = m[0]; a.target = '_blank'; a.rel = 'noopener nofollow'; a.className = 'underline break-all';
+      el.append(a);
+      last = m.index! + m[0].length;
+    }
+    el.append(text.slice(last));
+  }
+  function time(iso: string) {
+    try { return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch { return ''; }
+  }
+  function addMessage(m: Msg) {
+    if (m.id && m.id <= lastId) return;
+    if (m.id) lastId = m.id;
+    const row = document.createElement('div');
+    const bubble = document.createElement('div');
+    const meta = document.createElement('div');
+    if (m.from === 'visitor') {
+      row.className = 'flex flex-col items-end';
+      bubble.className = 'max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-sm bg-brand-600 px-4 py-2.5 text-sm text-white';
+      meta.className = 'mt-1 text-[11px] text-slate-400';
+      meta.textContent = time(m.at);
+    } else if (m.from === 'agent') {
+      row.className = 'flex flex-col items-start';
+      bubble.className = 'max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm ring-1 ring-slate-200';
+      meta.className = 'mt-1 text-[11px] text-slate-400';
+      meta.textContent = `${m.agent || 'FAJTech'} · ${time(m.at)}`;
+    } else {
+      row.className = 'flex justify-center';
+      bubble.className = 'max-w-[90%] rounded-xl bg-slate-200/70 px-3 py-2 text-center text-xs text-slate-600';
+    }
+    linkify(bubble, m.body);
+    row.append(bubble);
+    if (meta.textContent) row.append(meta);
+    list.append(row);
+  }
+  function note(text: string) { addMessage({ id: 0, from: 'system', agent: null, body: text, at: '' }); }
+  function scrollDown() { body.scrollTop = body.scrollHeight; }
+  function setOnline(online: boolean) {
+    statusEl.textContent = online ? 'Online now · usually replies within minutes' : 'We reply here or by email';
+    dot.className = 'h-2 w-2 rounded-full ' + (online ? 'bg-brand-400' : 'bg-slate-400');
+  }
+  function setBadge() {
+    const unread = lastId > seenId && !isOpen ? Number(store.get('unread') || 0) : 0;
+    badge.textContent = String(unread);
+    badge.classList.toggle('hidden', unread === 0);
+  }
+  function showConversation() {
+    startForm.classList.add('hidden');
+    compose.classList.remove('hidden'); compose.classList.add('flex');
+  }
+
+  // ── Polling ──
+  async function poll() {
+    if (!token) return;
+    try {
+      const r = await api('poll');
+      let newAgent = 0;
+      for (const m of r.messages as Msg[]) { if (m.from === 'agent' && m.id > seenId) newAgent++; addMessage(m); }
+      setOnline(r.online);
+      if (r.messages.length && isOpen) scrollDown();
+      if (isOpen) { seenId = lastId; store.set('seen', String(seenId)); store.set('unread', '0'); }
+      else if (newAgent) store.set('unread', String(Number(store.get('unread') || 0) + newAgent));
+      setBadge();
+    } catch (e: any) {
+      if (e.status === 404) { token = null; store.del('token'); store.del('seen'); list.textContent = ''; lastId = 0; startForm.classList.remove('hidden'); compose.classList.add('hidden'); compose.classList.remove('flex'); }
+    }
+  }
+  function schedule() {
+    clearTimeout(timer);
+    if (!token || document.hidden) return;
+    timer = window.setTimeout(async () => { await poll(); schedule(); }, isOpen ? 4000 : 25000);
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { poll(); schedule(); } else clearTimeout(timer); });
+
+  // ── Open / close ──
+  function openChat() {
+    isOpen = true;
+    panel.classList.remove('hidden'); panel.classList.add('flex');
+    launcher.classList.add('hidden'); teaser.classList.add('hidden');
+    launcher.setAttribute('aria-expanded', 'true');
+    try { sessionStorage.setItem('fajchat_teased', '1'); } catch {}
+    document.body.classList.add('max-sm:overflow-hidden');
+    if (token) { poll().then(scrollDown); seenId = lastId; store.set('unread', '0'); setBadge(); }
+    else api('status').then((r) => setOnline(r.online)).catch(() => {});
+    schedule();
+    setTimeout(() => (token ? input : (startForm.elements.namedItem('name') as HTMLInputElement)).focus(), 50);
+  }
+  function closeChat() {
+    isOpen = false;
+    panel.classList.add('hidden'); panel.classList.remove('flex');
+    launcher.classList.remove('hidden');
+    launcher.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('max-sm:overflow-hidden');
+    schedule();
+    launcher.focus();
+  }
+  document.addEventListener('click', (e) => {
+    const t = (e.target as Element).closest?.('[data-open-chat]');
+    if (!t) return;
+    e.preventDefault();
+    const mm = document.getElementById('mobile-menu'); if (mm) mm.classList.add('hidden');
+    openChat();
+  });
+  $('chat-close').addEventListener('click', closeChat);
+  panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeChat(); });
+  $('chat-teaser-close').addEventListener('click', () => { teaser.classList.add('hidden'); try { sessionStorage.setItem('fajchat_teased', '1'); } catch {} });
+  (window as any).fajOpenChat = openChat;
+
+  // ── Start a conversation ──
+  startForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (busy) return;
+    const err = $('chat-start-error');
+    const fd = new FormData(startForm);
+    const data = Object.fromEntries(fd.entries()) as Record<string, string>;
+    if (!data.name.trim() || !data.message.trim()) { err.textContent = 'Please enter your name and your question.'; err.classList.remove('hidden'); return; }
+    if (!/^\S+@\S+\.\S+$/.test(data.email.trim())) { err.textContent = 'Please enter a valid email so we can reply.'; err.classList.remove('hidden'); return; }
+    busy = true; err.classList.add('hidden');
+    const btn = startForm.querySelector('button[type=submit]') as HTMLButtonElement; btn.disabled = true; btn.textContent = 'Connecting…';
+    try {
+      const r = await api('start', { ...data, page: location.pathname });
+      token = r.token; store.set('token', r.token);
+      showConversation();
+      for (const m of r.messages as Msg[]) addMessage(m);
+      seenId = lastId; store.set('seen', String(seenId));
+      setOnline(r.online);
+      note(`Thanks, ${data.name.trim().split(' ')[0]}! Our team has been notified and will reply here shortly. If you leave, we'll send our answer to ${data.email.trim()}.`);
+      scrollDown(); input.focus(); schedule();
+      (window as any).fajTrack?.('chat_start');
+    } catch (ex: any) {
+      err.textContent = ex.message; err.classList.remove('hidden');
+    } finally { busy = false; btn.disabled = false; btn.textContent = 'Start chat'; }
+  });
+
+  // ── Send a message ──
+  async function send() {
+    const text = input.value.trim();
+    if (!text || busy || !token) return;
+    busy = true;
+    const err = $('chat-send-error'); err.classList.add('hidden');
+    try {
+      const r = await api('send', { token, message: text });
+      input.value = ''; input.style.height = '';
+      addMessage({ id: r.id, from: 'visitor', agent: null, body: text, at: new Date().toISOString() });
+      seenId = lastId; store.set('seen', String(seenId));
+      scrollDown();
+    } catch (ex: any) { err.textContent = ex.message; err.classList.remove('hidden'); }
+    finally { busy = false; input.focus(); }
+  }
+  compose.addEventListener('submit', (e) => { e.preventDefault(); send(); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+  input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 128) + 'px'; });
+
+  // ── Boot ──
+  const params = new URLSearchParams(location.search);
+  const linkToken = params.get('chat');
+  if (linkToken && /^[a-f0-9]{64}$/.test(linkToken)) {
+    token = linkToken; store.set('token', token);
+    params.delete('chat');
+    history.replaceState(null, '', location.pathname + (params.toString() ? `?${params}` : '') + location.hash);
+  }
+  if (token) {
+    showConversation();
+    poll().then(() => { setBadge(); if (linkToken) openChat(); });
+    schedule();
+  } else {
+    let teased = false; try { teased = !!sessionStorage.getItem('fajchat_teased'); } catch {}
+    if (!teased && !location.pathname.startsWith('/contact')) setTimeout(() => { if (!isOpen) teaser.classList.remove('hidden'); }, 8000);
+  }
+</script>

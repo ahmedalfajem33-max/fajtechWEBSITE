@@ -172,7 +172,7 @@ const zoneGroups: [string, [string, string][]][] = [
   function renderSlots() {
     const list = $('bk-slots'); list.innerHTML = '';
     const day = byDay().get(selectedDay) || [];
-    if (!selectedDay || !day.length) { $('bk-dayhead').textContent = slots.length ? 'Select a highlighted day.' : 'No times available in the next few weeks — please call or WhatsApp us.'; return; }
+    if (!selectedDay || !day.length) { $('bk-dayhead').textContent = slots.length ? 'Select a highlighted day.' : 'No times available in the next few weeks — please call us or start a live chat.'; return; }
     const [y, m, d] = selectedDay.split('-').map(Number);
     $('bk-dayhead').innerHTML = `Showing times for <strong>${new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</strong>`;
     for (const s of day) {

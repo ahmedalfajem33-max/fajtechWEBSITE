@@ -33,6 +33,17 @@ npm run build    # outputs the site to dist/
 - **Zoho SalesIQ (live chat):** paste the widget code into `zoho.salesIqWidgetCode`.
 - **Zoho Bookings (Book a consultation):** every "Book" button goes to `/book-a-consultation/`. Until `zoho.bookingsUrl` is set, that page shows a "request a time" form that emails the team. Once set, it embeds the live Zoho Bookings calendar instead. In Zoho Bookings, set the redirect after booking to `https://fajtech.ca/thank-you/?source=booking` so each booking counts as a Google Ads conversion (`googleAds.conversions.booking`).
 
+## Live chat
+
+The site has its own private live chat (no Zoho, no WhatsApp, no third party): the chat bubble on every page, and the team inbox at **https://fajtech.ca/agent/** (not linked anywhere, not indexed).
+
+- **Visitor side:** `src/components/ChatWidget.astro`. It asks for name, email and the question, then shows the conversation. Any element with `data-open-chat` opens it. If a visitor leaves before you answer, your reply is emailed to them with a link back into the chat.
+- **Team inbox:** `src/pages/agent/index.astro`. Sign in, see open/closed chats, reply, close. Click "Turn on alerts" for a sound and browser notifications. On a phone, open the link and "Add to Home Screen".
+- **Team members:** admins add people under the ☰ menu → Team members (with a temporary password; they choose their own at first sign-in).
+- **Server:** `public/api/chat.php`, MySQL database `u954394309_fajchat` on Hostinger. The database login lives in `domains/fajtech.ca/fajtech-chat.php`, **outside** `public_html`. Never commit it. Tables are created automatically.
+- **Email alerts** for new chats go to `mail_to` in `fajtech-config.php` (or `'notify'` in `fajtech-chat.php`).
+- WhatsApp stays only on the Contact page and in the footer.
+
 ## Confirmation emails
 
 Every form submission (contact, free assessment, request-a-time) sends the visitor a branded confirmation from `info@fajtech.ca` (override with `confirm_from` in `fajtech-config.php`). To prevent abuse, it only repeats a cleaned first name and the chosen day/time, never the visitor's message. Zoho Bookings calendar bookings get Zoho's own confirmation.

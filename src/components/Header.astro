@@ -16,7 +16,7 @@ const isActive = (href: string) => path.startsWith(href);
 <div class="bg-brand-600 text-white">
   <div class="container-x flex items-center justify-center gap-2 py-1.5 text-center text-xs font-medium sm:text-sm">
     <Icon name="clock" class="h-4 w-4 shrink-0" />
-    <span><strong>24/7/365 IT support</strong><span class="hidden sm:inline"> &amp; monitoring</span> — <a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="font-bold underline-offset-2 hover:underline">WhatsApp 24/7</a><span class="hidden md:inline"> · Call <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="font-bold underline-offset-2 hover:underline">{site.phone}</a> (8 am–7 pm MT) · <a href="/support/" class="underline-offset-2 hover:underline">Client support</a></span></span>
+    <span><strong>24/7/365 IT support</strong><span class="hidden sm:inline"> &amp; monitoring</span> — <a href="#chat" data-open-chat class="font-bold underline-offset-2 hover:underline">Live chat 24/7</a><span class="hidden md:inline"> · Call <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="font-bold underline-offset-2 hover:underline">{site.phone}</a> (8 am–7 pm MT) · <a href="/support/" class="underline-offset-2 hover:underline">Client support</a></span></span>
   </div>
 </div>
 <header class="sticky top-0 z-50 border-b border-white/10 bg-ink-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-ink-900/85">

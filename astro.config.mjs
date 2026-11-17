@@ -6,6 +6,6 @@ export default defineConfig({
   site: 'https://fajtech.ca',
   trailingSlash: 'ignore',
   build: { format: 'directory' },
-  integrations: [sitemap({ filter: (page) => !page.includes('/thank-you') && !page.includes('/book-embed') })],
+  integrations: [sitemap({ filter: (page) => !page.includes('/thank-you') && !page.includes('/book-embed') && !page.includes('/agent') })],
   vite: { plugins: [tailwindcss()] },
 });

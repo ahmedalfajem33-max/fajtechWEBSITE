@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import ChatWidget from '../components/ChatWidget.astro';
 import { site, googleAds, zoho } from '../config/site';
 
 interface Props {
@@ -150,23 +151,19 @@ const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
       })();
     </script>
 
-    <!-- Floating WhatsApp button (24/7) -->
-    <a href={site.afterHours.whatsapp} target="_blank" rel="noopener" aria-label="WhatsApp FAJTech support, available 24/7"
-      class="group fixed right-4 bottom-20 z-40 flex items-center gap-2 rounded-full bg-[#25D366] p-3.5 text-white shadow-xl shadow-green-600/30 transition hover:bg-[#1ebe5b] lg:right-6 lg:bottom-6">
-      <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.6-4.7A8.5 8.5 0 1 1 7.7 19.4L3 21z"/><path d="M9 8.5c0 3.6 2.9 6.5 6.5 6.5l1-1.6-2-1-1 1a4 4 0 0 1-2.4-2.4l1-1-1-2L9 8.5z"/></svg>
-      <span class="hidden pr-1 text-sm font-semibold lg:group-hover:inline">WhatsApp 24/7</span>
-    </a>
+    <!-- Live chat (team answers at /agent/) -->
+    <ChatWidget />
     <!-- Sticky call / book bar on phones -->
     <div class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 gap-2 border-t border-slate-200 bg-white/95 p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden">
-      <a id="call-now" href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} data-night={site.afterHours.whatsapp} class="btn-outline py-2.5"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>Call us</a>
+      <a id="call-now" href={`tel:${site.phone.replace(/[^+\d]/g, '')}`} class="btn-outline py-2.5"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>Call us</a>
       <a href="/book-a-consultation/" class="btn-primary py-2.5">Book a consultation</a>
     </div>
     <script is:inline>
-      // The sticky button calls the Canadian line 8 am-7 pm Calgary time; outside those hours it opens WhatsApp.
+      // The sticky button calls the Canadian line 8 am-7 pm Calgary time; outside those hours it opens the live chat.
       (function () {
         var a = document.getElementById('call-now'); if (!a) return;
         var h = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
-        if (h < 8 || h >= 19) { a.href = a.getAttribute('data-night'); a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'WhatsApp us'; }
+        if (h < 8 || h >= 19) { a.href = '#chat'; a.setAttribute('data-open-chat', ''); a.textContent = 'Chat with us'; }
       })();
     </script>
 

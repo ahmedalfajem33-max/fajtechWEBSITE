@@ -6,20 +6,20 @@ import SectionPhoto from '../components/SectionPhoto.astro';
 import { site } from '../config/site';
 const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
 ---
-<Base title="Get IT Support" description="FAJTech clients: get help 24/7 on WhatsApp, by phone from 8 am to 7 pm Calgary time, or by email.">
-  <PageHero photo={['support']} eyebrow="Client support" title="Need help? We're here 24/7/365." text="WhatsApp our support team any time — day, night, weekends and holidays — or call us from 8 am to 7 pm Calgary time." />
+<Base title="Get IT Support" description="FAJTech clients: get help 24/7 by live chat, by phone from 8 am to 7 pm Calgary time, or by email.">
+  <PageHero photo={['support']} eyebrow="Client support" title="Need help? We're here 24/7/365." text="Chat with our support team any time — day, night, weekends and holidays — or call us from 8 am to 7 pm Calgary time." />
   <section class="section">
     <div class="container-x">
       <p id="shift-now" class="mb-6 hidden rounded-xl bg-brand-50 px-4 py-3 text-center text-sm font-semibold text-brand-700"></p>
-      <a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="mb-6 flex flex-col items-start gap-4 rounded-2xl bg-[#25D366] p-6 text-white shadow-lg shadow-green-500/20 transition hover:bg-[#1ebe5b] sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <a href="#chat" data-open-chat class="mb-6 flex flex-col items-start gap-4 rounded-2xl bg-brand-600 p-6 text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <span class="flex items-center gap-4">
-          <Icon name="whatsapp" class="h-10 w-10 shrink-0" />
+          <Icon name="chat" class="h-10 w-10 shrink-0" />
           <span>
-            <span class="block text-2xl font-extrabold">WhatsApp us — 24/7</span>
-            <span class="block text-green-50">Message or WhatsApp-call our support team any time, day or night: {site.afterHours.phone}</span>
+            <span class="block text-2xl font-extrabold">Live chat — 24/7</span>
+            <span class="block text-brand-50">Chat with our support team any time, day or night. A real technician replies, usually within minutes.</span>
           </span>
         </span>
-        <span class="btn bg-white text-green-700 hover:bg-green-50">Open WhatsApp</span>
+        <span class="btn bg-white text-brand-700 hover:bg-brand-50">Start a chat</span>
       </a>
 
       <div class="grid gap-6 lg:grid-cols-2">
@@ -29,7 +29,7 @@ const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
           <p class="mt-1 font-semibold text-slate-500">{site.dayShift} Calgary time</p>
           <a href={tel} class="mt-6 block text-3xl font-extrabold tracking-tight text-ink-900 hover:text-brand-600">{site.phone}</a>
           <a href={tel} class="btn-primary mt-6 w-full sm:w-auto">Call FAJTech</a>
-          <p class="mt-4 text-xs text-slate-500">Outside these hours, please WhatsApp us — we reply 24/7.</p>
+          <p class="mt-4 text-xs text-slate-500">Outside these hours, please use the live chat — we reply 24/7.</p>
         </div>
         <a href={`mailto:${site.email}?subject=Support%20request`} class="flex flex-col rounded-2xl border-2 border-slate-200 p-8 transition hover:border-brand-400 hover:shadow-lg">
           <span class="text-brand-600"><Icon name="mail" class="h-8 w-8" /></span>
@@ -43,7 +43,7 @@ const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
       <div class="mt-12 rounded-2xl border border-red-200 bg-red-50 p-6 sm:p-8">
         <h2 class="flex items-center gap-2 text-xl font-extrabold text-red-800"><Icon name="shield" class="h-6 w-6" /> Think you've been hacked or clicked a suspicious link?</h2>
         <ol class="mt-4 list-decimal space-y-2 pl-6 text-red-900">
-          <li><strong>Contact us right away</strong> — <a href={site.afterHours.whatsapp} target="_blank" rel="noopener" class="underline">WhatsApp us (24/7)</a>, or call <a href={tel} class="underline">{site.phone}</a> ({site.dayShift} Calgary time).</li>
+          <li><strong>Contact us right away</strong> — <a href="#chat" data-open-chat class="underline">start a live chat (24/7)</a>, or call <a href={tel} class="underline">{site.phone}</a> ({site.dayShift} Calgary time).</li>
           <li>Disconnect the affected computer from the network (unplug the cable or turn off Wi-Fi). Do not turn it off.</li>
           <li>Don't enter any passwords or approve any sign-in prompts you didn't start.</li>
         </ol>
@@ -81,7 +81,7 @@ const tel = `tel:${site.phone.replace(/[^+\d]/g, '')}`;
       card?.classList.add('border-brand-500', 'shadow-xl', 'shadow-brand-500/10');
     }
     const note = document.getElementById('shift-now')!;
-    note.textContent = open ? 'Right now: our phone line is open — call us, or WhatsApp us any time.' : 'Our phone line is closed right now (opens 8 am Calgary time) — WhatsApp us and we will reply right away.';
+    note.textContent = open ? 'Right now: our phone line is open — call us, or use the live chat any time.' : 'Our phone line is closed right now (opens 8 am Calgary time) — start a live chat and we will reply right away.';
     note.classList.remove('hidden');
   </script>
 </Base>

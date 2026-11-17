@@ -3,5 +3,6 @@ Allow: /
 Disallow: /api/
 Disallow: /thank-you/
 Disallow: /book-embed/
+Disallow: /agent/
 
 Sitemap: https://fajtech.ca/sitemap-index.xml
