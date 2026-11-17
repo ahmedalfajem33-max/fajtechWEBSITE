@@ -11,7 +11,9 @@ export const partners = [
   { slug: 'cisco', name: 'Cisco', program: 'Cisco Partner', homepage: true },
   { slug: 'fortinet', name: 'Fortinet', program: 'Fortinet Engage Partner', homepage: true },
   { slug: 'dell', name: 'Dell Technologies', program: 'Dell Technologies Partner', homepage: true },
-  { slug: 'kaspersky', name: 'Kaspersky', program: 'Kaspersky United Partner', homepage: true },
+  { slug: 'sentinelone', name: 'SentinelOne', program: 'SentinelOne Partner', homepage: true },
+  // Kept for existing clients (mainly Middle East); not shown on the homepage because of US/Canadian government restrictions.
+  { slug: 'kaspersky', name: 'Kaspersky', program: 'Kaspersky United Partner', homepage: false },
 ];
 
 const dir = path.join(process.cwd(), 'public', 'partners');
