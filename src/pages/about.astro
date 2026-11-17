@@ -3,6 +3,9 @@ import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import Icon from '../components/Icon.astro';
 import CtaBand from '../components/CtaBand.astro';
+import PartnerBadges from '../components/PartnerBadges.astro';
+import { partnerBadges } from '../data/partners';
+const badges = partnerBadges();
 const values = [
   { icon: 'clock', title: 'Always available', text: 'Our team is on shift 24/7/365. We answer quickly and keep you informed until the job is done.' },
   { icon: 'shield', title: 'Reliable', text: 'Proactive monitoring and maintenance mean fewer problems in the first place.' },
@@ -41,5 +44,15 @@ const values = [
       </div>
     </div>
   </section>
+  {badges.length > 0 && (
+    <section class="section">
+      <div class="container-x text-center">
+        <p class="eyebrow">Partners</p>
+        <h2 class="mt-3 text-3xl font-extrabold">Our technology partners</h2>
+        <p class="mx-auto mt-4 max-w-2xl text-slate-600">FAJTech is an authorized partner of leading technology vendors, giving our clients access to genuine products, licensing and vendor support.</p>
+        <div class="mt-10"><PartnerBadges tone="card" /></div>
+      </div>
+    </section>
+  )}
   <CtaBand title="Want to work with FAJTech?" />
 </Base>

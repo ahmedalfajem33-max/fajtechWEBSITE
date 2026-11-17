@@ -5,6 +5,9 @@ import Faq from '../components/Faq.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { services, industries, faqs } from '../data/services';
 import { getCollection } from 'astro:content';
+import PartnerBadges from '../components/PartnerBadges.astro';
+import { partnerBadges } from '../data/partners';
+const hasBadges = partnerBadges({ homepage: true }).length > 0;
 const latest = (await getCollection('resources')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
 
 const bookHref = '/book-a-consultation/';
@@ -122,6 +125,14 @@ const tech = ['Microsoft 365', 'Azure', 'AWS', 'Google Workspace', 'Fortinet', '
   </section>
 
   <!-- TECHNOLOGIES -->
+  {hasBadges && (
+    <section class="border-b border-slate-200 bg-white" aria-labelledby="partners-title">
+      <div class="container-x py-10">
+        <p id="partners-title" class="text-center text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Authorized technology partner</p>
+        <div class="mt-6"><PartnerBadges homepage /></div>
+      </div>
+    </section>
+  )}
   <section class="border-b border-slate-200 bg-white" aria-label="Technologies we support">
     <div class="container-x flex flex-col items-center gap-4 py-8 sm:flex-row sm:justify-between">
       <p class="shrink-0 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Technologies we support</p>
