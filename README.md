@@ -49,6 +49,14 @@ The site has its own private live chat (no Zoho, no WhatsApp, no third party): t
   - While nobody has the inbox open, further visitor messages also ping push/Telegram (at most every 2 minutes per chat).
 - WhatsApp stays only on the Contact page and in the footer.
 
+## Contacts & marketing consent (CASL)
+
+- Everyone who uses the **contact form, free assessment, consultation booking or live chat** is saved in the `contacts` table (same database as the chat), matched by email so repeat visitors update one record.
+- If they tick **"Yes, send me occasional IT tips and news from FAJTech…"**, a consent record is stored: date/time, form, page, IP and the exact wording (`contact_consent_log` keeps the history). A later form without the tick does **not** remove consent; only unsubscribing does.
+- **Team inbox → ☰ → Contacts** (admins): search, filter (Agreed / Not agreed / Unsubscribed), unsubscribe or delete someone, and **export CSV** for Brevo, Mailchimp or Hostinger Reach. The export includes each person's personal unsubscribe link (`https://fajtech.ca/unsubscribe/?t=…`).
+- Only send marketing to people marked **Agreed**. Every marketing email must show FAJTech's name and mailing address and a working unsubscribe link (process unsubscribes within 10 business days). When you start using a newsletter tool, import the CSV and keep both lists in sync (unsubscribes in the tool should also be marked in the inbox, and vice versa).
+- Code: `public/api/leads.php` (saving, consent, unsubscribe), actions `contacts`, `contacts_export`, `contact_unsubscribe`, `contact_delete`, `unsubscribe` in `public/api/chat.php`, page `src/pages/unsubscribe.astro`.
+
 ## How the website sends email
 
 fajtech.ca mail lives on our own Exchange server (mail.fajtech.ca), which refuses mail from the internet that claims to be from @fajtech.ca. So `public/api/mailer.php` sends **all** website email (team notifications, customer confirmations, chat emails) through Exchange itself (EWS over HTTPS) using the booking mailbox in `fajtech-config.php` (`booking.ews_user` / `ews_pass`). Customer confirmations are shown as from `confirm_from` (info@fajtech.ca) if the booking mailbox has *Send As* permission on it in Exchange, otherwise they come from the booking mailbox. Hostinger's PHP `mail()` is only a fallback (it isn't reliably delivered: not DKIM-signed for fajtech.ca). Set `'mail_via' => 'php'` in `fajtech-config.php` to turn the Exchange route off.

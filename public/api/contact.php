@@ -79,6 +79,14 @@ define('FAJMAILER', true);
 require_once __DIR__ . '/mailer.php';
 $mailed = faj_send_mail(['mail_from' => $from] + $config, $to, $subject, $body, $d['email']);
 
+// Save to the contacts list (with CASL consent record when the box was ticked). Never blocks the form.
+define('FAJLEADS', true);
+require_once __DIR__ . '/leads.php';
+faj_lead_save_safe(null, [
+    'email' => $d['email'], 'name' => $name, 'company' => $d['company'], 'phone' => $d['phone'],
+    'source' => $d['form_type'], 'page' => $d['page'], 'ip' => $ip, 'consent' => $d['consent'] === 'Yes',
+]);
+
 // ── 2) Zoho CRM Web-to-Lead (optional) ───────────────────
 $zohoOk = null;
 $z = $config['zoho_web_to_lead'] ?? null;

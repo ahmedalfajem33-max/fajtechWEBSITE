@@ -245,4 +245,12 @@ define('FAJMAILER', true);
 require_once __DIR__ . '/mailer.php';
 faj_send_mail(['mail_from' => $from] + $config, $to, 'Consultation booked: ' . $name . ' — ' . $whenBiz, $txt, $d['email']);
 
+// Save to the contacts list (with CASL consent record when the box was ticked).
+define('FAJLEADS', true);
+require_once __DIR__ . '/leads.php';
+faj_lead_save_safe(null, [
+    'email' => $d['email'], 'name' => $name, 'company' => $d['company'], 'phone' => $d['phone'],
+    'source' => 'booking', 'page' => '/book-a-consultation/', 'ip' => $_SERVER['REMOTE_ADDR'] ?? '', 'consent' => $d['consent'] === 'Yes',
+]);
+
 respond(200, ['ok' => true, 'when' => $whenCust]);

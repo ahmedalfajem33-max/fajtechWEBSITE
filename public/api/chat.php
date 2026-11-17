@@ -174,6 +174,8 @@ function require_post(string $method): void { if ($method !== 'POST') fail(405, 
 
 define('FAJCHAT', true);
 require __DIR__ . '/chat-notify.php';
+define('FAJLEADS', true);
+require_once __DIR__ . '/leads.php';
 
 // ── Visitor actions ─────────────────────────────────────────────────────────
 switch ($action) {
@@ -186,6 +188,15 @@ case 'tg_webhook':
 
 case 'status':
     respond(200, ['ok' => true, 'online' => agents_online($pdo)]);
+
+case 'unsubscribe':
+    // Public: the personal link fajtech.ca/unsubscribe/?t=... (CASL: works without signing in).
+    require_post($method);
+    if (!rate_ok("unsub:$ip", 20, 600)) fail(429, 'Too many requests. Please try again in a few minutes.');
+    $email = faj_lead_unsubscribe($pdo, str_in($in, 't', 32), $ip);
+    if ($email === null) fail(404, 'This unsubscribe link is not valid. Email info@fajtech.ca and we will remove you.');
+    $masked = preg_replace('/^(.).*(@.*)$/', '$1•••$2', $email);
+    respond(200, ['ok' => true, 'email' => $masked]);
 
 case 'start':
     require_post($method);
@@ -205,6 +216,7 @@ case 'start':
     if ($topics !== '') $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, body, created_at) VALUES (?, 'system', ?, UTC_TIMESTAMP())")->execute([$tid, "Wants to talk to: {$topics}"]);
     $pdo->prepare("INSERT INTO chat_messages (thread_id, sender, body, created_at) VALUES (?, 'visitor', ?, UTC_TIMESTAMP())")->execute([$tid, $text]);
     $thread = ['id' => $tid, 'name' => $name, 'email' => $email, 'page' => $page];
+    faj_lead_save_safe($pdo, ['email' => $email, 'name' => $name, 'source' => 'chat', 'page' => $page, 'ip' => $ip, 'consent' => false]);
     after_response(fn() => notify_team($pdo, 'new', $thread, $text, $topics, $mailTo, $mailFrom, $siteUrl));
     $st = $pdo->prepare('SELECT * FROM chat_messages WHERE thread_id = ? ORDER BY id');
     $st->execute([$tid]);
@@ -472,6 +484,69 @@ case 'tg_connect':
     ensure_tg_webhook($pdo, true);
     tg_send($pdo, "✅ <b>FAJTech website chat is connected.</b>\nNew chats from fajtech.ca will be posted here.", 'Open the inbox', 'https://fajtech.ca/agent/');
     respond(200, ['ok' => true, 'connected' => true, 'bot' => '@' . $me['result']['username'], 'chat' => $title]);
+
+case 'contacts':
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can see the contacts list.');
+    faj_leads_schema($pdo);
+    $q = str_in($_GET, 'q', 100);
+    $filter = (string) ($_GET['filter'] ?? 'all');
+    $where = ['1=1']; $args = [];
+    if ($q !== '') { $where[] = '(email LIKE ? OR name LIKE ? OR company LIKE ?)'; array_push($args, "%$q%", "%$q%", "%$q%"); }
+    if ($filter === 'consent') $where[] = 'consent = 1 AND unsubscribed_at IS NULL';
+    elseif ($filter === 'noconsent') $where[] = 'consent = 0 AND unsubscribed_at IS NULL';
+    elseif ($filter === 'unsub') $where[] = 'unsubscribed_at IS NOT NULL';
+    $st = $pdo->prepare('SELECT id, email, name, company, phone, sources, interactions, first_seen, last_seen, consent, consent_at, consent_source, consent_page, unsubscribed_at FROM contacts WHERE ' . implode(' AND ', $where) . ' ORDER BY last_seen DESC LIMIT 1000');
+    $st->execute($args);
+    $rows = array_map(fn($r) => [
+        'id' => (int) $r['id'], 'email' => $r['email'], 'name' => $r['name'], 'company' => $r['company'], 'phone' => $r['phone'],
+        'sources' => $r['sources'] === '' ? [] : explode(',', $r['sources']), 'interactions' => (int) $r['interactions'],
+        'firstSeen' => iso($r['first_seen']), 'lastSeen' => iso($r['last_seen']),
+        'consent' => (bool) $r['consent'], 'consentAt' => iso($r['consent_at']), 'consentSource' => $r['consent_source'], 'consentPage' => $r['consent_page'],
+        'unsubscribedAt' => iso($r['unsubscribed_at']),
+    ], $st->fetchAll());
+    $counts = $pdo->query("SELECT COUNT(*) AS total, SUM(consent = 1 AND unsubscribed_at IS NULL) AS consent, SUM(unsubscribed_at IS NOT NULL) AS unsub FROM contacts")->fetch();
+    respond(200, ['ok' => true, 'contacts' => $rows, 'counts' => array_map('intval', $counts)]);
+
+case 'contacts_export':
+    // CSV for Brevo / Mailchimp / Hostinger Reach. Default: only people who agreed to marketing.
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can export contacts.');
+    faj_leads_schema($pdo);
+    $all = ($_GET['which'] ?? 'consent') === 'all';
+    $rows = $pdo->query('SELECT * FROM contacts' . ($all ? '' : ' WHERE consent = 1 AND unsubscribed_at IS NULL') . ' ORDER BY first_seen')->fetchAll();
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="fajtech-' . ($all ? 'all-contacts' : 'marketing-contacts') . '-' . gmdate('Y-m-d') . '.csv"');
+    $out = fopen('php://output', 'w');
+    fwrite($out, "\xEF\xBB\xBF"); // Excel-friendly UTF-8
+    fputcsv($out, ['EMAIL', 'FIRSTNAME', 'LASTNAME', 'COMPANY', 'PHONE', 'SOURCES', 'FIRST_CONTACT_UTC', 'LAST_CONTACT_UTC', 'MARKETING_CONSENT', 'CONSENT_DATE_UTC', 'CONSENT_FORM', 'CONSENT_PAGE', 'CONSENT_IP', 'CONSENT_WORDING', 'UNSUBSCRIBED_UTC', 'UNSUBSCRIBE_LINK']);
+    foreach ($rows as $r) {
+        $parts = preg_split('/\s+/', trim((string) $r['name']), 2);
+        fputcsv($out, [
+            $r['email'], $parts[0] ?? '', $parts[1] ?? '', $r['company'], $r['phone'], $r['sources'], $r['first_seen'], $r['last_seen'],
+            $r['consent'] && !$r['unsubscribed_at'] ? 'yes' : 'no', $r['consent_at'], $r['consent_source'], $r['consent_page'], $r['consent_ip'], $r['consent_text'],
+            $r['unsubscribed_at'], "{$siteUrl}/unsubscribe/?t={$r['unsub_token']}",
+        ]);
+    }
+    fclose($out);
+    exit;
+
+case 'contact_unsubscribe':
+    require_post($method);
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can change contacts.');
+    $st = $pdo->prepare('SELECT unsub_token FROM contacts WHERE id = ?');
+    $st->execute([(int) ($in['id'] ?? 0)]);
+    $tok = (string) $st->fetchColumn();
+    if ($tok === '' || faj_lead_unsubscribe($pdo, $tok, $ip, 'Unsubscribed by ' . $a['name'] . ' (team inbox)') === null) fail(404, 'Contact not found.');
+    respond(200, ['ok' => true]);
+
+case 'contact_delete':
+    require_post($method);
+    $a = current_agent($pdo);
+    if (!$a['is_admin']) fail(403, 'Only admins can change contacts.');
+    $pdo->prepare('DELETE FROM contacts WHERE id = ?')->execute([(int) ($in['id'] ?? 0)]);
+    respond(200, ['ok' => true]);
 
 case 'tg_me':
     $a = current_agent($pdo);

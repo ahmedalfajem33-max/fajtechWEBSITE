@@ -1,0 +1,38 @@
+---
+/**
+ * One-click unsubscribe from FAJTech marketing emails (CASL). Each contact gets a personal link
+ * fajtech.ca/unsubscribe/?t=<token> (in the contacts export, for use in newsletter footers).
+ */
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+---
+<Base title="Unsubscribe" description="Unsubscribe from FAJTech emails." noindex>
+  <section class="section">
+    <div class="container-x max-w-xl text-center">
+      <span id="us-icon" class="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500"><Icon name="mail" class="h-8 w-8" /></span>
+      <h1 id="us-title" class="mt-6 text-3xl font-extrabold sm:text-4xl">Unsubscribing…</h1>
+      <p id="us-text" class="mt-4 text-lg text-slate-600">One moment please.</p>
+      <a href="/" class="btn-outline mt-8">Back to fajtech.ca</a>
+    </div>
+  </section>
+  <script>
+    const token = new URLSearchParams(location.search).get('t') || '';
+    const title = document.getElementById('us-title')!;
+    const text = document.getElementById('us-text')!;
+    const icon = document.getElementById('us-icon')!;
+    function done(ok: boolean, t: string, p: string) {
+      title.textContent = t; text.textContent = p;
+      icon.className = 'mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full ' + (ok ? 'bg-brand-100 text-brand-600' : 'bg-red-50 text-red-500');
+    }
+    if (!/^[a-f0-9]{32}$/.test(token)) {
+      done(false, 'This link looks incomplete', 'Please use the full unsubscribe link from our email, or email info@fajtech.ca and we will remove you right away.');
+    } else {
+      fetch('/api/chat.php?action=unsubscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ t: token }) })
+        .then((r) => r.json())
+        .then((j) => j.ok
+          ? done(true, "You're unsubscribed", `${j.email} will no longer receive marketing emails from FAJTech. We'll still reply if you contact us about an enquiry or your services.`)
+          : done(false, "We couldn't unsubscribe you", j.error || 'Please email info@fajtech.ca and we will remove you right away.'))
+        .catch(() => done(false, "We couldn't unsubscribe you", 'Please try again, or email info@fajtech.ca and we will remove you right away.'));
+    }
+  </script>
+</Base>

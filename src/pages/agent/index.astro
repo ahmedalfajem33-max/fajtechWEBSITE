@@ -70,6 +70,7 @@ import '../../styles/global.css';
           </summary>
           <div class="absolute right-0 z-20 mt-2 w-52 overflow-hidden rounded-xl bg-white text-sm text-ink-900 shadow-xl ring-1 ring-slate-200">
             <button id="m-settings" class="block w-full px-4 py-2.5 text-left hover:bg-slate-50">Settings &amp; notifications</button>
+            <button id="m-contacts" class="hidden w-full px-4 py-2.5 text-left hover:bg-slate-50">Contacts</button>
             <button id="m-team" class="hidden w-full px-4 py-2.5 text-left hover:bg-slate-50">Team members</button>
             <button id="m-password" class="block w-full px-4 py-2.5 text-left hover:bg-slate-50">Change password</button>
             <button id="m-logout" class="block w-full border-t border-slate-100 px-4 py-2.5 text-left text-red-600 hover:bg-red-50">Sign out</button>
@@ -192,6 +193,39 @@ import '../../styles/global.css';
         </form>
         <p id="tg-msg" class="hidden text-sm font-medium"></p>
       </section>
+    </div>
+  </dialog>
+
+  <dialog id="d-contacts" class="m-auto h-[90vh] w-[min(96vw,72rem)] rounded-2xl p-0 shadow-2xl backdrop:bg-ink-950/50">
+    <div class="flex h-full flex-col">
+      <div class="flex flex-wrap items-center gap-3 border-b border-slate-200 px-5 py-4">
+        <h2 class="text-lg font-extrabold">Contacts</h2>
+        <p id="ct-counts" class="text-sm text-slate-500"></p>
+        <button type="button" data-close class="ml-auto rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Close">✕</button>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-5 py-3">
+        <input id="ct-q" type="search" placeholder="Search name, email or company…" class="field mt-0 w-full py-2 text-sm sm:w-72" />
+        <select id="ct-filter" class="field mt-0 w-auto py-2 text-sm">
+          <option value="all">Everyone</option>
+          <option value="consent">Agreed to marketing</option>
+          <option value="noconsent">Not agreed</option>
+          <option value="unsub">Unsubscribed</option>
+        </select>
+        <div class="ml-auto flex gap-2">
+          <a id="ct-export" href="/api/chat.php?action=contacts_export&amp;which=consent" class="btn-primary py-2 text-sm">Export marketing list (CSV)</a>
+          <a href="/api/chat.php?action=contacts_export&amp;which=all" class="btn-outline py-2 text-sm">Export all</a>
+        </div>
+      </div>
+      <div class="min-h-0 flex-1 overflow-y-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="sticky top-0 bg-white text-xs font-semibold tracking-wide text-slate-500 uppercase shadow-[0_1px_0_#e2e8f0]">
+            <tr><th class="px-5 py-3">Contact</th><th class="hidden px-3 py-3 md:table-cell">Company / phone</th><th class="hidden px-3 py-3 sm:table-cell">Came from</th><th class="px-3 py-3">Marketing</th><th class="hidden px-3 py-3 lg:table-cell">Last contact</th><th class="px-3 py-3"></th></tr>
+          </thead>
+          <tbody id="ct-rows" class="divide-y divide-slate-100"></tbody>
+        </table>
+        <p id="ct-empty" class="hidden p-10 text-center text-sm text-slate-500">No contacts yet. Everyone who uses the contact form, free assessment, booking or chat will appear here.</p>
+      </div>
+      <p class="border-t border-slate-200 px-5 py-3 text-xs text-slate-500">Only email marketing to people marked <strong>Agreed</strong> (CASL). Every marketing email must include your name, address and an unsubscribe link: each person's personal link is in the CSV (UNSUBSCRIBE_LINK).</p>
     </div>
   </dialog>
 
@@ -399,6 +433,55 @@ import '../../styles/global.css';
       await api('tg_disconnect', {}).catch(() => {}); loadTelegram(); loadTgMe(); tgMsg('Telegram disconnected.');
     });
 
+    // ── Contacts (admins) ──
+    type Contact = { id: number; email: string; name: string; company: string; phone: string; sources: string[]; interactions: number; firstSeen: string; lastSeen: string; consent: boolean; consentAt: string | null; consentSource: string | null; consentPage: string | null; unsubscribedAt: string | null };
+    const dContacts = () => $<HTMLDialogElement>('d-contacts');
+    const sourceLabel: Record<string, string> = { contact: 'Contact form', assessment: 'Free assessment', booking: 'Consultation', chat: 'Chat' };
+    let ctTimer: number | undefined;
+    async function loadContacts() {
+      const q = $<HTMLInputElement>('ct-q').value.trim();
+      const filter = $<HTMLSelectElement>('ct-filter').value;
+      try {
+        const r = await api('contacts', undefined, `&filter=${encodeURIComponent(filter)}&q=${encodeURIComponent(q)}`);
+        const c = r.counts;
+        $('ct-counts').textContent = `${c.total} total · ${c.consent} agreed to marketing · ${c.unsub} unsubscribed`;
+        const tb = $('ct-rows'); tb.textContent = '';
+        $('ct-empty').classList.toggle('hidden', r.contacts.length > 0);
+        for (const ct of r.contacts as Contact[]) {
+          const tr = document.createElement('tr'); tr.className = 'align-top hover:bg-slate-50';
+          const td = (cls = '') => { const d = document.createElement('td'); d.className = 'px-3 py-3 ' + cls; tr.append(d); return d; };
+          const who = td('pl-5');
+          const nm = document.createElement('p'); nm.className = 'font-semibold text-ink-900'; nm.textContent = ct.name || '—';
+          const em = document.createElement('a'); em.className = 'break-all text-brand-600 hover:underline'; em.href = `mailto:${ct.email}`; em.textContent = ct.email;
+          who.append(nm, em);
+          const co = td('hidden md:table-cell text-slate-600'); co.textContent = [ct.company, ct.phone].filter(Boolean).join(' · ') || '—';
+          const src = td('hidden sm:table-cell');
+          for (const s of ct.sources) { const b = document.createElement('span'); b.className = 'mr-1 mb-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700'; b.textContent = sourceLabel[s] || s; src.append(b); }
+          const mk = td();
+          const badge = document.createElement('span');
+          if (ct.unsubscribedAt) { badge.className = 'rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700'; badge.textContent = 'Unsubscribed'; badge.title = 'Unsubscribed ' + new Date(ct.unsubscribedAt).toLocaleString(); }
+          else if (ct.consent) { badge.className = 'rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700'; badge.textContent = 'Agreed'; badge.title = `Ticked the box on ${new Date(ct.consentAt!).toLocaleString()} (${sourceLabel[ct.consentSource || ''] || ct.consentSource}, ${ct.consentPage || ''})`; }
+          else { badge.className = 'rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600'; badge.textContent = 'Not agreed'; }
+          mk.append(badge);
+          if (ct.consent && ct.consentAt && !ct.unsubscribedAt) { const d = document.createElement('p'); d.className = 'mt-1 text-xs text-slate-400'; d.textContent = new Date(ct.consentAt).toLocaleDateString(); mk.append(d); }
+          const last = td('hidden lg:table-cell text-slate-600'); last.textContent = new Date(ct.lastSeen).toLocaleDateString() + (ct.interactions > 1 ? ` · ${ct.interactions}×` : '');
+          const act = td('pr-5 text-right whitespace-nowrap');
+          if (!ct.unsubscribedAt) {
+            const u = document.createElement('button'); u.className = 'rounded-lg px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100'; u.textContent = 'Unsubscribe';
+            u.addEventListener('click', async () => { if (confirm(`Unsubscribe ${ct.email} from marketing emails?`)) { await api('contact_unsubscribe', { id: ct.id }).catch((e) => alert(e.message)); loadContacts(); } });
+            act.append(u);
+          }
+          const del = document.createElement('button'); del.className = 'rounded-lg px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50'; del.textContent = 'Delete';
+          del.addEventListener('click', async () => { if (confirm(`Permanently delete ${ct.email} and their consent record? (Use this for privacy deletion requests.)`)) { await api('contact_delete', { id: ct.id }).catch((e) => alert(e.message)); loadContacts(); } });
+          act.append(del);
+          tb.append(tr);
+        }
+      } catch (e: any) { $('ct-counts').textContent = e.message; }
+    }
+    $('m-contacts').addEventListener('click', () => { (document.querySelector('details') as HTMLDetailsElement).open = false; loadContacts(); dContacts().showModal(); });
+    $('ct-q').addEventListener('input', () => { clearTimeout(ctTimer); ctTimer = window.setTimeout(loadContacts, 300); });
+    $('ct-filter').addEventListener('change', loadContacts);
+
     // ── Conversation list ──
     async function loadList() {
       clearTimeout(listTimer);
@@ -534,6 +617,7 @@ import '../../styles/global.css';
       show('app'); paintTabs(); refreshPush();
       $('me-name').textContent = me!.name;
       $('m-team').classList.toggle('hidden', !me!.admin); $('m-team').classList.toggle('block', me!.admin);
+      $('m-contacts').classList.toggle('hidden', !me!.admin); $('m-contacts').classList.toggle('block', me!.admin);
       loadList();
       const m = location.hash.match(/^#chat-(\d+)$/);
       if (m) openThread(Number(m[1]));
