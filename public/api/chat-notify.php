@@ -136,7 +136,10 @@ function tg_handle_update(PDO $pdo, array $u, string $mailTo, string $mailFrom, 
 
     // A reply to one of our chat alerts → send it to that visitor.
     $re = $msg['reply_to_message'] ?? null;
-    if (!$re) return;
+    if (!$re) {
+        if ($isPrivate && $text !== '' && $text[0] !== '/') $say('To answer a visitor, <b>reply</b> to their chat alert: swipe left on it (or long-press → Reply), then type your answer.');
+        return;
+    }
     $st = $pdo->prepare('SELECT thread_id FROM chat_tg_map WHERE chat_id = ? AND message_id = ?');
     $st->execute([$chatId, (int) $re['message_id']]);
     $threadId = (int) $st->fetchColumn();
@@ -144,6 +147,16 @@ function tg_handle_update(PDO $pdo, array $u, string $mailTo, string $mailFrom, 
     $st = $pdo->prepare('SELECT id, name FROM chat_agents WHERE tg_user_id = ?');
     $st->execute([$fromId]);
     $agent = $st->fetch();
+    if (!$agent && $isPrivate && $chatId === $teamChat) {
+        // Alerts go to a private chat with the bot: the person there is the admin who connected it.
+        $owner = (int) (setting_get($pdo, 'tg_owner_agent') ?? 0);
+        if (!$owner) $owner = (int) $pdo->query('SELECT id FROM chat_agents WHERE is_admin = 1 ORDER BY id LIMIT 1')->fetchColumn();
+        if ($owner) {
+            $pdo->prepare('UPDATE chat_agents SET tg_user_id = ? WHERE id = ?')->execute([$fromId, $owner]);
+            $st->execute([$fromId]);
+            $agent = $st->fetch();
+        }
+    }
     if (!$agent) {
         $say('⚠️ Not sent. Link your Telegram first: in the inbox open ☰ → Settings &amp; notifications → <b>Link my Telegram</b>.');
         return;

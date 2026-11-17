@@ -465,6 +465,7 @@ case 'tg_connect':
     $title = $chat['title'] ?? trim(($chat['first_name'] ?? '') . ' ' . ($chat['last_name'] ?? '')) ?: 'Telegram chat';
     setting_set($pdo, 'tg_chat_id', (string) $chat['id']);
     setting_set($pdo, 'tg_chat_title', $title);
+    setting_set($pdo, 'tg_owner_agent', (string) $a['id']);
     ensure_tg_webhook($pdo, true);
     tg_send($pdo, "✅ <b>FAJTech website chat is connected.</b>\nNew chats from fajtech.ca will be posted here.", 'Open the inbox', 'https://fajtech.ca/agent/');
     respond(200, ['ok' => true, 'connected' => true, 'bot' => '@' . $me['result']['username'], 'chat' => $title]);
