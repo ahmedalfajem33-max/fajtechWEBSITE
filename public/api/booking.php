@@ -40,6 +40,7 @@ $notice   = (int) ($b['min_notice_hours'] ?? 4);
 $horizon  = (int) ($b['horizon_days'] ?? 30);
 $owner    = $b['owner'] ?? 'ahmed.alfajem@fajtech.ca'; // whose calendar is checked & invited
 $ownerName = $b['owner_name'] ?? 'Ahmed Alfajem';
+$provider = $b['meeting_provider'] ?? 'Cisco Webex';
 
 // ── EWS helpers ────────────────────────────────────────────────────────────
 function ews(array $b, string $body): DOMXPath {
@@ -152,6 +153,7 @@ if ($method === 'GET' && $action === 'slots') {
         'duration' => $len,
         'businessTimeZone' => $tzBiz->getName(),
         'consultant' => $ownerName,
+        'provider' => $provider,
         'slots' => array_map(fn($t) => gmdate('Y-m-d\TH:i:s\Z', $t), $slots),
     ]);
 }
@@ -199,7 +201,7 @@ $whenCust = (new DateTimeImmutable('@' . $start))->setTimezone(new DateTimeZone(
 $whenBiz  = (new DateTimeImmutable('@' . $start))->setTimezone($tzBiz)->format('l, F j, Y \a\t g:i A T');
 
 $joinHtml = $link
-    ? '<p><strong>Join the meeting:</strong> <a href="' . $h($link) . '">' . $h($link) . '</a></p>'
+    ? '<p><strong>Join the ' . $h($provider) . ' meeting:</strong> <a href="' . $h($link) . '">' . $h($link) . '</a><br><span style="color:#64748b;font-size:12px">Join from your browser — no account needed. You may wait briefly in the lobby until we let you in.</span></p>'
     : '<p>We will send you the meeting link before the call. If you prefer a phone call, just reply with your number.</p>';
 $bodyHtml = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1e293b">'
     . '<p>Hi ' . $h($d['first_name']) . ',</p>'
@@ -218,7 +220,7 @@ $create = '<m:CreateItem SendMeetingInvitations="SendToAllAndSaveCopy"><m:Items>
     . '<t:Body BodyType="HTML">' . $x($bodyHtml) . '</t:Body>'
     . '<t:ReminderIsSet>true</t:ReminderIsSet><t:ReminderMinutesBeforeStart>15</t:ReminderMinutesBeforeStart>'
     . '<t:Start>' . gmdate('Y-m-d\TH:i:s\Z', $start) . '</t:Start><t:End>' . gmdate('Y-m-d\TH:i:s\Z', $end) . '</t:End>'
-    . '<t:Location>' . $x($link ? 'Microsoft Teams — ' . $link : 'Online / phone (link to follow)') . '</t:Location>'
+    . '<t:Location>' . $x($link ? $provider . ' — ' . $link : 'Online / phone (link to follow)') . '</t:Location>'
     . '<t:RequiredAttendees>'
     . '<t:Attendee><t:Mailbox><t:Name>' . $x($name) . '</t:Name><t:EmailAddress>' . $x($d['email']) . '</t:EmailAddress></t:Mailbox></t:Attendee>'
     . '<t:Attendee><t:Mailbox><t:Name>' . $x($ownerName) . '</t:Name><t:EmailAddress>' . $x($owner) . '</t:EmailAddress></t:Mailbox></t:Attendee>'

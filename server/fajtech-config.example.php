@@ -27,7 +27,8 @@ return [
         'buffer'       => 15,                        // free minutes kept around existing meetings
         'min_notice_hours' => 4,
         'horizon_days' => 30,
-        'meeting_link' => '',                        // e.g. your reusable Microsoft Teams link
+        'meeting_provider' => 'Cisco Webex',
+        'meeting_link' => '',                        // e.g. your Webex Personal Room link: https://NAME.my.webex.com/meet/NAME
         'mock'         => false,                     // true = fake calendar for testing without Exchange
     ],
 

@@ -120,7 +120,7 @@ $first = mb_substr($first, 0, 20) ?: 'there';
 $h = fn(string $s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
 $allowedTimes = ['Morning (8–10 am)', 'Late morning (10 am–12 pm)', 'Early afternoon (12–2 pm)', 'Afternoon (2–4 pm)', 'Late afternoon (4–6 pm)'];
-$allowedMeet  = ['Video call (Zoom / Teams)', 'Phone call', 'In person (Calgary area)'];
+$allowedMeet  = ['Video call (Cisco Webex)', 'Phone call', 'In person (Calgary area)'];
 $prefDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $d['pref_date']) ? date('l, F j, Y', strtotime($d['pref_date'])) : '';
 $prefTime = in_array($d['pref_time'], $allowedTimes, true) ? $d['pref_time'] : '';
 $meeting  = in_array($d['meeting'], $allowedMeet, true) ? $d['meeting'] : '';

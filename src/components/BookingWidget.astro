@@ -36,7 +36,7 @@ const zones = [
 
     <div class="flex flex-col p-6 sm:p-8">
       <p class="text-sm font-semibold text-ink-900">Meeting</p>
-      <p class="text-sm text-slate-600">Video call (Microsoft Teams) or phone · 30 minutes · Free</p>
+      <p class="text-sm text-slate-600">Video call (<span id="bk-provider">Cisco Webex</span>) or phone · 30 minutes · Free</p>
       <label class="mt-5 block text-sm font-semibold text-ink-900">Your time zone
         <select id="bk-tz" class="field mt-1 text-sm">
           {zones.map(([v, l]) => <option value={v}>{l}</option>)}
@@ -145,6 +145,7 @@ const zones = [
       const j = await r.json();
       if (!r.ok || !j.ok) return fallback();
       if (j.consultant) $('bk-consultant').textContent = j.consultant;
+      if (j.provider) $('bk-provider').textContent = j.provider;
       slots = j.slots.map((s: string) => new Date(s));
       const first = slots[0];
       if (first) { selectedDay = dayKey(first); const [y, m] = selectedDay.split('-').map(Number); view = new Date(y, m - 1, 1); }
