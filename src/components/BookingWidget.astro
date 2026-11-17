@@ -1,17 +1,42 @@
 ---
 import ContactForm from './ContactForm.astro';
 import { site } from '../config/site';
-const zones = [
-  ['America/Edmonton', 'Calgary / Edmonton (Mountain)'],
-  ['America/Vancouver', 'Vancouver (Pacific)'],
-  ['America/Winnipeg', 'Winnipeg (Central)'],
-  ['America/Toronto', 'Toronto / Ottawa (Eastern)'],
-  ['America/Halifax', 'Halifax (Atlantic)'],
-  ['America/St_Johns', "St. John's (Newfoundland)"],
-  ['Asia/Riyadh', 'Riyadh'],
-  ['Asia/Dubai', 'Dubai'],
-  ['Africa/Cairo', 'Cairo'],
-  ['Europe/London', 'London'],
+// Time zones offered to customers. Each label gets its current local time added in the browser.
+const zoneGroups: [string, [string, string][]][] = [
+  ['Canada', [
+    ['America/St_Johns', 'Newfoundland Time — St. John\'s'],
+    ['America/Halifax', 'Atlantic Time — Halifax, Moncton, Charlottetown'],
+    ['America/Toronto', 'Eastern Time — Toronto, Ottawa, Montréal, Québec City'],
+    ['America/Atikokan', 'Eastern Standard Time (no DST) — Atikokan, Southampton Island'],
+    ['America/Winnipeg', 'Central Time — Winnipeg, Thunder Bay (west)'],
+    ['America/Regina', 'Saskatchewan — Regina, Saskatoon'],
+    ['America/Edmonton', 'Alberta — Calgary, Edmonton, Red Deer'],
+    ['America/Cambridge_Bay', 'Mountain Time — Yellowknife, Cambridge Bay'],
+    ['America/Dawson_Creek', 'Northeast BC — Dawson Creek, Fort St. John'],
+    ['America/Creston', 'Creston, BC'],
+    ['America/Whitehorse', 'Yukon — Whitehorse, Dawson City'],
+    ['America/Vancouver', 'Pacific Time — Vancouver, Victoria, Kelowna'],
+  ]],
+  ['United States', [
+    ['America/New_York', 'Eastern Time — New York, Washington DC, Atlanta, Miami'],
+    ['America/Detroit', 'Eastern Time — Detroit'],
+    ['America/Chicago', 'Central Time — Chicago, Dallas, Houston'],
+    ['America/Denver', 'Mountain Time — Denver, Salt Lake City'],
+    ['America/Boise', 'Mountain Time — Boise'],
+    ['America/Phoenix', 'Arizona — Phoenix (no DST)'],
+    ['America/Los_Angeles', 'Pacific Time — Los Angeles, Seattle, San Francisco, Las Vegas'],
+    ['America/Anchorage', 'Alaska — Anchorage, Juneau'],
+    ['America/Adak', 'Hawaii–Aleutian — Adak'],
+    ['Pacific/Honolulu', 'Hawaii — Honolulu'],
+    ['America/Puerto_Rico', 'Atlantic Time — Puerto Rico, US Virgin Islands'],
+    ['Pacific/Guam', 'Chamorro Time — Guam'],
+  ]],
+  ['Other', [
+    ['Asia/Riyadh', 'Saudi Arabia — Riyadh, Jeddah'],
+    ['Asia/Dubai', 'UAE — Dubai, Abu Dhabi'],
+    ['Africa/Cairo', 'Egypt — Cairo'],
+    ['Europe/London', 'United Kingdom — London'],
+  ]],
 ];
 ---
 <div id="bk" class="scroll-mt-32 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200">
@@ -39,7 +64,11 @@ const zones = [
       <p class="text-sm text-slate-600">Video call (<span id="bk-provider">Cisco Webex</span>) or phone · 30 minutes · Free</p>
       <label class="mt-5 block text-sm font-semibold text-ink-900">Your time zone
         <select id="bk-tz" class="field mt-1 text-sm">
-          {zones.map(([v, l]) => <option value={v}>{l}</option>)}
+          {zoneGroups.map(([group, list]) => (
+            <optgroup label={group}>
+              {list.map(([v, l]) => <option value={v} data-label={l}>{l}</option>)}
+            </optgroup>
+          ))}
         </select>
       </label>
       <p class="mt-6 text-sm font-semibold text-ink-900">What time works best?</p>
@@ -85,7 +114,19 @@ const zones = [
   const tzSel = $('bk-tz') as HTMLSelectElement;
   let slots: Date[] = [];
   let tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Edmonton';
-  if (![...tzSel.options].some((o) => o.value === tz)) tzSel.add(new Option(tz.replace(/_/g, ' '), tz), 0);
+  // Show each zone's current local time, e.g. "Alberta — Calgary, Edmonton (9:15 am)".
+  const now = new Date();
+  for (const o of [...tzSel.options]) {
+    try {
+      const t = new Intl.DateTimeFormat('en-US', { timeZone: o.value, hour: 'numeric', minute: '2-digit' }).format(now).toLowerCase();
+      o.textContent = `${o.dataset.label || o.textContent} (${t})`;
+    } catch { /* unknown zone in an old browser: keep the plain label */ }
+  }
+  if (![...tzSel.options].some((o) => o.value === tz)) {
+    let t = '';
+    try { t = ' (' + new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit' }).format(new Date()).toLowerCase() + ')'; } catch {}
+    tzSel.insertBefore(new Option(`Detected — ${tz.split('/').pop()!.replace(/_/g, ' ')}${t}`, tz), tzSel.firstElementChild);
+  }
   tzSel.value = tz;
   let view = new Date(); view.setDate(1);
   let selectedDay = '';
