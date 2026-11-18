@@ -13,23 +13,26 @@ import Icon from '../components/Icon.astro';
   </section>
   <script>
     const src = new URLSearchParams(location.search).get('source');
+    // Email/phone from the form just sent (for Google Ads enhanced conversions); read once, then removed.
+    let user: { email?: string; phone?: string } | undefined;
+    try { user = JSON.parse(sessionStorage.getItem('faj_conv_user') || 'null') || undefined; sessionStorage.removeItem('faj_conv_user'); } catch {}
     const title = document.getElementById('ty-title')!;
     const text = document.getElementById('ty-text')!;
     if (src === 'booking') {
       // Zoho Bookings redirects here after a confirmed booking.
       title.textContent = 'Your consultation is booked!';
       text.textContent = 'A confirmation with the meeting details is on its way to your inbox. We look forward to speaking with you.';
-      (window as any).fajTrack?.('booking', { value: 1.0, currency: 'CAD' });
+      (window as any).fajTrack?.('booking', { value: 1.0, currency: 'CAD' }, user);
     } else if (src === 'booking-request') {
       title.textContent = 'Request received — thank you!';
       text.textContent = 'We will confirm your consultation time by email within one business day.';
-      (window as any).fajTrack?.('booking', { value: 1.0, currency: 'CAD' });
+      (window as any).fajTrack?.('booking', { value: 1.0, currency: 'CAD' }, user);
     } else if (src === 'assessment') {
       title.textContent = 'Assessment request received!';
       text.textContent = 'We will contact you within one business day to arrange your free IT & cybersecurity assessment.';
-      (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' });
+      (window as any).fajTrack?.('assessment', { value: 1.0, currency: 'CAD' }, user);
     } else if (src === 'contact') {
-      (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' });
+      (window as any).fajTrack?.('contactForm', { value: 1.0, currency: 'CAD' }, user);
     }
   </script>
 </Base>

@@ -180,9 +180,16 @@ const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
 
     <!-- Conversion tracking: phone & email clicks, and a helper for the contact form -->
     <script is:inline define:vars={{ tracking }}>
-      window.fajTrack = function (key, extra) {
+      // Conversions. user = { email, phone } is sent for Google Ads enhanced conversions (Google hashes it).
+      window.fajTrack = function (key, extra, user) {
         if (typeof gtag !== 'function') return;
-        var label = tracking.conversions[key];
+        var label = tracking.conversions[key] || (key === 'assessment' ? tracking.conversions.contactForm : '');
+        if (user && (user.email || user.phone)) {
+          var ud = {};
+          if (user.email) ud.email = String(user.email).trim().toLowerCase();
+          if (user.phone) { var p = String(user.phone).replace(/[^\d+]/g, ''); if (p.length >= 10) ud.phone_number = p.charAt(0) === '+' ? p : (p.length === 10 ? '+1' + p : '+' + p); }
+          gtag('set', 'user_data', ud);
+        }
         if (label) gtag('event', 'conversion', Object.assign({ send_to: label }, extra || {}));
         gtag('event', key, extra || {});
       };

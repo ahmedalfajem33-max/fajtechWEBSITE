@@ -53,11 +53,18 @@ export const googleAds = {
    * Format: 'AW-18491599744/AbCdEfGhIj'. Leave '' until created.
    */
   conversions: {
+    /** Contact form sent (/thank-you/?source=contact). */
     contactForm: '',
-    phoneClick: '',
-    emailClick: '',
-    /** Fired on /thank-you/?source=booking — set that as the redirect URL in Zoho Bookings. */
+    /** Free IT assessment requested (/thank-you/?source=assessment). Falls back to contactForm if empty. */
+    assessment: '',
+    /** Consultation booked or requested (/thank-you/?source=booking or booking-request). */
     booking: '',
+    /** Live chat started (visitor sent their first question). */
+    chatStart: '',
+    /** Click on the phone number. */
+    phoneClick: '',
+    /** Click on the email address (usually a secondary conversion). */
+    emailClick: '',
   },
   /** Optional Google Analytics 4 ID, e.g. 'G-XXXXXXXXXX'. */
   ga4Id: '',

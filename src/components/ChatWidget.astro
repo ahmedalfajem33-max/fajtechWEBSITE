@@ -283,7 +283,7 @@ const topics = [
           : `Thanks, ${intro.name.split(' ')[0]}! Our team has been notified and will reply here shortly. If you leave, we'll email our answer to ${intro.email}.`);
         setInput('Write a message…');
         schedule();
-        (window as any).fajTrack?.('chat_start');
+        (window as any).fajTrack?.('chatStart', { value: 1.0, currency: 'CAD' }, { email: intro.email });
       } catch (ex: any) {
         await botSay(`Sorry, something went wrong: ${ex.message}`);
         setInput('Type your question…');

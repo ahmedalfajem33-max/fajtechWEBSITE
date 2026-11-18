@@ -217,7 +217,10 @@ const zoneGroups: [string, [string, string][]][] = [
     try {
       const r = await fetch(API, { method: 'POST', body: fd, headers: { Accept: 'application/json' } });
       const j = await r.json().catch(() => ({}));
-      if (r.ok && j.ok) { (window.top || window).location.href = '/thank-you/?source=booking'; return; }
+      if (r.ok && j.ok) {
+        try { sessionStorage.setItem('faj_conv_user', JSON.stringify({ email: String(fd.get('email') || ''), phone: String(fd.get('phone') || '') })); } catch {}
+        (window.top || window).location.href = '/thank-you/?source=booking'; return;
+      }
       if (j.refresh) { await load(); $('bk-step2').classList.add('hidden'); $('bk-step1').classList.remove('hidden'); }
       if (j.fallback) return fallback();
       throw new Error(j.error || 'Something went wrong.');

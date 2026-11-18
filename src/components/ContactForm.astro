@@ -104,6 +104,8 @@ const label = booking ? 'Request this time' : variant === 'assessment' ? 'Reques
       const isBooking = (form.elements.namedItem('form_type') as HTMLInputElement).value === 'booking';
       // The conversion is recorded on the thank-you page, so it isn't lost when this page unloads.
       const type = (form.elements.namedItem('form_type') as HTMLInputElement).value;
+      // Hand email/phone to the thank-you page for enhanced conversions (this tab only, removed right after).
+      try { sessionStorage.setItem('faj_conv_user', JSON.stringify({ email: (form.elements.namedItem('email') as HTMLInputElement).value, phone: (form.elements.namedItem('phone') as HTMLInputElement)?.value || '' })); } catch {}
       (window.top || window).location.href = isBooking ? '/thank-you/?source=booking-request' : `/thank-you/?source=${type}`;
     } catch (ex) {
       err.textContent = (ex as Error).message + ' Please try again, or email us directly.';
