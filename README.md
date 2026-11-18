@@ -24,7 +24,8 @@ npm run build    # outputs the site to dist/
 ## Google Ads
 
 - The tag `AW-18491599744` (the one from the old site) loads on every page.
-- Conversions are sent for **contact form submissions**, **phone clicks** and **email clicks** once you paste their labels into `googleAds.conversions` (Google Ads → Goals → Conversions → *action* → Tag setup → "Use Google tag" → copy the `send_to` value, e.g. `AW-18491599744/AbCdEf`).
+- **Campaign management, budget rules and plan: see [`docs/google-ads-plan.md`](docs/google-ads-plan.md).**
+- Conversions are sent for the **free assessment**, **consultation booking**, **contact form**, **chat started**, **phone clicks** and **email clicks** (with enhanced conversions) once you paste their labels into `googleAds.conversions` (Google Ads → Goals → Conversions → *action* → Tag setup → "Use Google tag" → copy the `send_to` value, e.g. `AW-18491599744/AbCdEf`).
 - The Google Ads click ID (`gclid`) is captured and attached to each lead (email and Zoho CRM) for offline-conversion tracking.
 
 ## Zoho
