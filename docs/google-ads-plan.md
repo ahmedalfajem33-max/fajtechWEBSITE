@@ -10,6 +10,18 @@ _Last updated: 2026-11-18. Read this first in any new session that manages FAJTe
 - Send a short weekly report: spend, clicks, conversions (leads), cost per lead, and every change made.
 - The owner is in Cairo (Africa/Cairo); the business and ads target **Calgary, Alberta** (America/Edmonton).
 
+## Current state (2026-11-18)
+
+- Account: **FajTech, customer ID 7617903566** (connected through Adspirer; Adspirer is on the **free plan: 15 actions/month**, resets the 2nd of each month, so use calls sparingly).
+- **Old campaign** "FajTech | Alberta + Toronto | Search | Leads" (ID 24332411214): **PAUSED** on 2026-11-18. It spent CAD 1,881.99 in 30 days for 62 clicks (about CAD 30/click) and 0 recorded conversions: 20 broad generic keywords, Alberta + Toronto, no negative keywords, Maximize Conversions with no working conversion tracking, CAD 50/day. Keep paused; remove once the new campaign performs.
+- **New campaign** "FajTech | Calgary | Search | IT Support + Free Assessment" (ID **24487330043**): created **PAUSED**, CAD 16/day, Calgary + Airdrie + Cochrane + Chestermere + Okotoks, 3 ad groups (Managed IT Support Calgary → /free-it-assessment/, Cybersecurity Calgary → /services/cybersecurity/, Microsoft 365 & Cloud Calgary → /services/cloud-services/), 43 keywords (Adspirer adds them as broad match), 35 negative keywords, 4 sitelinks, Maximize Conversions.
+- **Conversion actions created** (2026-11-18): Website - Free assessment request (ID 7908128538, CAD 300, primary), Website - Consultation booked (7908129069, CAD 300, primary), Website - Contact form (7908129018, CAD 100, primary), Website - Chat started (7908129282, CAD 50, secondary), Website - Phone number click (7908129963, CAD 50, secondary). The pre-existing "Calls from ads" action remains.
+- **Before launching the new campaign:**
+  1. Paste the five `send_to` labels into `src/config/site.ts → googleAds.conversions` (assessment, booking, contactForm, chatStart, phoneClick) and deploy. Adspirer can't read the labels; the owner copies them from Google Ads → Goals → Conversions → action → Tag setup → "Use Google tag" → install yourself → event snippet.
+  2. Turn on Enhanced conversions for web (Google tag method) in Google Ads.
+  3. Test conversions with Google Tag Assistant.
+  4. Check location targeting is "Presence" only and consider a max-CPC safeguard (e.g. switch to Maximize clicks with a CPC cap of about CAD 8 until 15+ conversions), then resume with the owner's OK.
+
 ## Account & tracking status
 
 - Google Ads tag on every page: **AW-18491599744** (`src/config/site.ts` → `googleAds.id`).
