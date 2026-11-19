@@ -37,7 +37,8 @@ _Last updated: 2026-11-18. Read this first in any new session that manages FAJTe
 
 - **TODO:** the conversion **labels** (`AW-18491599744/xxxx`) in `site.ts → googleAds.conversions` are still empty. Create the conversion actions (via Adspirer or in the Google Ads UI), paste the `send_to` values into `site.ts`, deploy (push to `main`; Hostinger auto-deploys), and test with Google Tag Assistant.
 - **Enhanced conversions** are implemented on the website (email/phone sent to `gtag('set','user_data')` at conversion). Turn on "Enhanced conversions for web → Google tag" in Google Ads.
-- The Google Ads click ID (`gclid`) is stored and sent with every lead email and to Zoho (if configured).
+- The Google Ads click ID (`gclid`, or `gbraid`/`wbraid` on iOS) is saved on **any** landing page and sent with every lead email and booking.
+- Tag loading: immediately for visitors arriving from an ad (`gclid`/`gbraid`/`wbraid` in the URL) and on `/thank-you/`; otherwise 1.5 s after page load or on the first tap/click (2026-11-19 website readiness check).
 
 ## Campaign plan (draft, to confirm with the owner before launch)
 

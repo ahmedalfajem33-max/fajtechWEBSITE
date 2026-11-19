@@ -78,21 +78,35 @@ const tracking = { adsId: googleAds.id, conversions: googleAds.conversions };
 
 
     <!-- Google Ads tag (kept from the previous fajtech.ca site) -->
-    <!-- Events queue in dataLayer immediately; the gtag library loads once the page has rendered (faster first paint). -->
+    <!-- Events queue in dataLayer immediately. The gtag library loads right away for visitors arriving
+         from an ad (so the ad click is always recorded) and on the thank-you page (so the conversion is
+         always sent); for everyone else it loads once the page has rendered (faster first paint). -->
     <script is:inline define:vars={{ adsId: googleAds.id, ga4Id: googleAds.ga4Id }}>
       window.dataLayer = window.dataLayer || [];
       window.gtag = function () { dataLayer.push(arguments); };
       gtag('js', new Date());
       gtag('config', adsId);
       if (ga4Id) gtag('config', ga4Id);
-      window.addEventListener('load', function () {
-        setTimeout(function () {
+      (function () {
+        var q = new URLSearchParams(location.search);
+        // Keep the ad click ID for lead emails / CRM, whichever page the visitor lands on.
+        try {
+          var id = q.get('gclid') || q.get('gbraid') || q.get('wbraid');
+          if (id) localStorage.setItem('faj_gclid', id);
+        } catch (e) {}
+        var urgent = q.has('gclid') || q.has('gbraid') || q.has('wbraid') || location.pathname.indexOf('/thank-you') === 0;
+        function load() {
+          if (window.__fajGtag) return; window.__fajGtag = true;
           var s = document.createElement('script');
           s.async = true;
           s.src = 'https://www.googletagmanager.com/gtag/js?id=' + adsId;
           document.head.appendChild(s);
-        }, 1500);
-      });
+        }
+        if (urgent) load();
+        else window.addEventListener('load', function () { setTimeout(load, 1500); });
+        // A visitor who clicks or taps early (e.g. a phone number) still gets tracked.
+        ['pointerdown', 'keydown'].forEach(function (ev) { window.addEventListener(ev, load, { once: true, passive: true }); });
+      })();
     </script>
 
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}

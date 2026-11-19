@@ -268,7 +268,7 @@ export const locations = [
   {
     slug: 'calgary',
     name: 'Calgary',
-    title: 'Managed IT Services in Calgary',
+    title: 'IT Support & Cybersecurity in Calgary',
     intro:
       'FAJTech is a Calgary-based IT company. We provide managed IT, cybersecurity and cloud services to businesses across the city — from downtown offices to the industrial parks in the northeast and southeast — with 24/7/365 remote support and local technicians for on-site work.',
     onsite: 'On-site support across all Calgary quadrants.',
