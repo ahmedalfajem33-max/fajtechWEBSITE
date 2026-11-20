@@ -37,7 +37,8 @@ _Last updated: 2026-11-20. Read this first in any new session that manages FAJTe
   - 37 campaign-level negative keywords (jobs, courses, home, DIY, repair, etc.). "free" is deliberately NOT negative (the offer is a free assessment).
   - Ads use final URL suffix `utm_source=google&utm_medium=cpc&utm_campaign=calgary_search`.
   - **Not created (Windsor.ai has no action for them):** sitelinks, callouts, call asset. Add in the Google Ads UI (Assets) or later.
-- **To launch (each step needs the owner's OK):** conversion labels in `site.ts` + deploy; enhanced conversions on; Presence setting; apply CPC cap; then enable campaign → ad groups → ads → keywords.
+- **Conversion labels: DONE 2026-11-20** — all five `send_to` labels are in `site.ts` and live (assessment VcJGCJru8bodEIDXvfFE, booking _v3FCK3y8bodEIDXvfFE, contactForm wp3uCPrx8bodEIDXvfFE, chatStart Tle0CIL08bodEIDXvfFE, phoneClick sr_bCKv58bodEIDXvfFE), each tested.
+- **To launch (each step needs the owner's OK):** enhanced conversions on; Presence setting; apply CPC cap; test with Tag Assistant; then enable campaign → ad groups → ads → keywords.
 
 ## Account & tracking status
 
@@ -52,7 +53,7 @@ _Last updated: 2026-11-20. Read this first in any new session that manages FAJTe
   | `chatStart` | visitor sends first chat question | Chat started | CAD 50 | Secondary |
   | `phoneClick` | click on the phone number | Phone click | CAD 50 | Secondary |
 
-- **TODO:** the conversion **labels** (`AW-18491599744/xxxx`) in `site.ts → googleAds.conversions` are still empty. Create the conversion actions (via Adspirer or in the Google Ads UI), paste the `send_to` values into `site.ts`, deploy (push to `main`; Hostinger auto-deploys), and test with Google Tag Assistant.
+- ~~TODO: conversion labels~~ — done 2026-11-20 (see above). Old note: Create the conversion actions (via Adspirer or in the Google Ads UI), paste the `send_to` values into `site.ts`, deploy (push to `main`; Hostinger auto-deploys), and test with Google Tag Assistant.
 - **Enhanced conversions** are implemented on the website (email/phone sent to `gtag('set','user_data')` at conversion). Turn on "Enhanced conversions for web → Google tag" in Google Ads.
 - The Google Ads click ID (`gclid`, or `gbraid`/`wbraid` on iOS) is saved on **any** landing page and sent with every lead email and booking.
 - Tag loading: immediately for visitors arriving from an ad (`gclid`/`gbraid`/`wbraid` in the URL) and on `/thank-you/`; otherwise 1.5 s after page load or on the first tap/click (2026-11-19 website readiness check).
