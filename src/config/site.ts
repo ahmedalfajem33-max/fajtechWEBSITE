@@ -56,7 +56,7 @@ export const googleAds = {
     /** Contact form sent (/thank-you/?source=contact). */
     contactForm: '',
     /** Free IT assessment requested (/thank-you/?source=assessment). Falls back to contactForm if empty. */
-    assessment: '',
+    assessment: 'AW-18491599744/VcJGCJru8bodEIDXvfFE',
     /** Consultation booked or requested (/thank-you/?source=booking or booking-request). */
     booking: '',
     /** Live chat started (visitor sent their first question). */
