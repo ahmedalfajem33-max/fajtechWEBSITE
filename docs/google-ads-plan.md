@@ -28,7 +28,7 @@ _Last updated: 2026-11-20. Read this first in any new session that manages FAJTe
 - The owner **deleted all previous campaigns** on 2026-11-19 (the old Alberta + Toronto campaign and the paused Calgary campaign 24487330043 are REMOVED and cannot be restored).
 - **New campaign** "FajTech | Calgary | Search | IT Support + Free Assessment" — ID **24521467641**, **PAUSED**, built 2026-11-20 via Windsor.ai:
   - Budget **CAD 16/day**; bidding **Maximize clicks** (target_spend). **CPC cap CAD 8: applied 2026-11-20** with the owner's approval.
-  - Location: **40 km radius around downtown Calgary** (51.0447, -114.0719) — covers Airdrie, Cochrane, Chestermere, Okotoks. **To do in the Google Ads UI:** Settings → Locations → Location options → "Presence: people in or regularly in" (Windsor.ai can't set this).
+  - Location: **40 km radius around downtown Calgary** (51.0447, -114.0719) — covers Airdrie, Cochrane, Chestermere, Okotoks. Location option **PRESENCE** — set by the owner in the UI and verified 2026-11-20.
   - Language: English. Schedule (Calgary time): Mon–Fri 07:00–19:00, Sat 09:00–14:00.
   - Ad groups (all PAUSED, keywords PAUSED, PHRASE + EXACT only):
     - Managed IT Support Calgary — ad group **203286519018**, 24 keywords, 2 RSAs (→ /free-it-assessment/, /services/managed-it/)
@@ -38,7 +38,7 @@ _Last updated: 2026-11-20. Read this first in any new session that manages FAJTe
   - Ads use final URL suffix `utm_source=google&utm_medium=cpc&utm_campaign=calgary_search`.
   - **Not created (Windsor.ai has no action for them):** sitelinks, callouts, call asset. Add in the Google Ads UI (Assets) or later.
 - **Conversion labels: DONE 2026-11-20** — all five `send_to` labels are in `site.ts` and live (assessment VcJGCJru8bodEIDXvfFE, booking _v3FCK3y8bodEIDXvfFE, contactForm wp3uCPrx8bodEIDXvfFE, chatStart Tle0CIL08bodEIDXvfFE, phoneClick sr_bCKv58bodEIDXvfFE), each tested.
-- **To launch (each step needs the owner's OK):** enhanced conversions on; Presence setting; ~~apply CPC cap~~ (done); test with Tag Assistant; then enable campaign → ad groups → ads → keywords.
+- **To launch (each step needs the owner's OK):** ~~enhanced conversions on~~ (verified); ~~Presence setting~~ (verified); ~~apply CPC cap~~ (done); test with Tag Assistant (optional); then enable campaign → ad groups → ads → keywords.
 
 ## Account & tracking status
 
