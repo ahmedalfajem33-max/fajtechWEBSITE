@@ -1,10 +1,11 @@
 # Google Ads: status and plan (hand-off note)
 
-_Last updated: 2026-11-18. Read this first in any new session that manages FAJTech's Google Ads._
+_Last updated: 2026-11-20. Read this first in any new session that manages FAJTech's Google Ads._
 
 ## Ground rules (agreed with the owner)
 
-- Google Ads is managed through the **Adspirer Search Ads** connector.
+- Google Ads is managed through the **Windsor.ai** connector (connector `google_ads`, account `761-790-3566`; Windsor.ai **trial** plan since 2026-11-20). Adspirer (free plan, 15 actions/month, used up until 2026-12-02) was the previous connector.
+- Windsor.ai asks for a confirmation (preview + token) for anything that starts or increases spend: enabling a campaign/ad group/ad/keyword, budget or bid changes. Show the preview to the owner and only confirm after their OK.
 - **Budget: CAD 500 per month, maximum** (about CAD 16/day across all campaigns). Never exceed it.
 - **Never launch, enable or raise the budget of a campaign without the owner's explicit OK.** New campaigns are created **paused** and shown to the owner first.
 - Send a short weekly report: spend, clicks, conversions (leads), cost per lead, and every change made.
@@ -21,6 +22,22 @@ _Last updated: 2026-11-18. Read this first in any new session that manages FAJTe
   2. Turn on Enhanced conversions for web (Google tag method) in Google Ads.
   3. Test conversions with Google Tag Assistant.
   4. Check location targeting is "Presence" only and consider a max-CPC safeguard (e.g. switch to Maximize clicks with a CPC cap of about CAD 8 until 15+ conversions), then resume with the owner's OK.
+
+## Current state (2026-11-20) — supersedes the 2026-11-18 notes above
+
+- The owner **deleted all previous campaigns** on 2026-11-19 (the old Alberta + Toronto campaign and the paused Calgary campaign 24487330043 are REMOVED and cannot be restored).
+- **New campaign** "FajTech | Calgary | Search | IT Support + Free Assessment" — ID **24521467641**, **PAUSED**, built 2026-11-20 via Windsor.ai:
+  - Budget **CAD 16/day**; bidding **Maximize clicks** (target_spend). **CPC cap CAD 8: NOT yet applied** (Windsor.ai needs the owner's confirmation).
+  - Location: **40 km radius around downtown Calgary** (51.0447, -114.0719) — covers Airdrie, Cochrane, Chestermere, Okotoks. **To do in the Google Ads UI:** Settings → Locations → Location options → "Presence: people in or regularly in" (Windsor.ai can't set this).
+  - Language: English. Schedule (Calgary time): Mon–Fri 07:00–19:00, Sat 09:00–14:00.
+  - Ad groups (all PAUSED, keywords PAUSED, PHRASE + EXACT only):
+    - Managed IT Support Calgary — ad group **203286519018**, 24 keywords, 2 RSAs (→ /free-it-assessment/, /services/managed-it/)
+    - Cybersecurity Calgary — ad group **200612217965**, 16 keywords, 2 RSAs (→ /services/cybersecurity/, /free-it-assessment/)
+    - Microsoft 365 & Cloud Calgary — ad group **200612225645**, 16 keywords, 2 RSAs (→ /services/cloud-services/, /services/backup-disaster-recovery/)
+  - 37 campaign-level negative keywords (jobs, courses, home, DIY, repair, etc.). "free" is deliberately NOT negative (the offer is a free assessment).
+  - Ads use final URL suffix `utm_source=google&utm_medium=cpc&utm_campaign=calgary_search`.
+  - **Not created (Windsor.ai has no action for them):** sitelinks, callouts, call asset. Add in the Google Ads UI (Assets) or later.
+- **To launch (each step needs the owner's OK):** conversion labels in `site.ts` + deploy; enhanced conversions on; Presence setting; apply CPC cap; then enable campaign → ad groups → ads → keywords.
 
 ## Account & tracking status
 
