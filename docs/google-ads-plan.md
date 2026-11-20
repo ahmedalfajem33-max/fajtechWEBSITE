@@ -40,6 +40,14 @@ _Last updated: 2026-11-20. Read this first in any new session that manages FAJTe
 - **Conversion labels: DONE 2026-11-20** — all five `send_to` labels are in `site.ts` and live (assessment VcJGCJru8bodEIDXvfFE, booking _v3FCK3y8bodEIDXvfFE, contactForm wp3uCPrx8bodEIDXvfFE, chatStart Tle0CIL08bodEIDXvfFE, phoneClick sr_bCKv58bodEIDXvfFE), each tested.
 - **To launch (each step needs the owner's OK):** ~~enhanced conversions on~~ (verified); ~~Presence setting~~ (verified); ~~apply CPC cap~~ (done); test with Tag Assistant (optional); then enable campaign → ad groups → ads → keywords.
 
+## Pre-launch audit (2026-11-20)
+
+Verified via Windsor.ai: auto-tagging ON; Display Network OFF; Google Search ON; **Search partners ON (owner to turn OFF in UI)**; AI Max off; campaign broad-match setting off; budget CAD 16/day standard delivery; Maximize clicks + CAD 8 cap; Presence targeting; enhanced conversions + customer data terms accepted; all 56 keywords PHRASE/EXACT. Low-volume ("rarely served") keywords: firewall services, business computer support, office 365 migration, microsoft 365 migration, azure consultant (kept; harmless). The two weaker ads were expanded to 14–15 headlines and 4 descriptions.
+
+**Owner to do in the Google Ads UI before launch:** turn off Search partners; turn off auto-apply recommendations; add sitelinks, callouts, structured snippet and call asset (8 am–7 pm); check billing/payment method and any advertiser-verification notice.
+
+**Watch in week 1:** the CAD 8 cap may limit impressions for competitive terms ("it support calgary" can cost more); if impression share is very low after 5–7 days, consider raising the cap to CAD 10–12 (owner approval needed).
+
 ## Account & tracking status
 
 - Google Ads tag on every page: **AW-18491599744** (`src/config/site.ts` → `googleAds.id`).
