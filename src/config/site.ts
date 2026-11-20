@@ -62,7 +62,7 @@ export const googleAds = {
     /** Live chat started (visitor sent their first question). */
     chatStart: '',
     /** Click on the phone number. */
-    phoneClick: '',
+    phoneClick: 'AW-18491599744/sr_bCKv58bodEIDXvfFE',
     /** Click on the email address (usually a secondary conversion). */
     emailClick: '',
   },
