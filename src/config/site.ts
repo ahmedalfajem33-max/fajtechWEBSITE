@@ -60,7 +60,7 @@ export const googleAds = {
     /** Consultation booked or requested (/thank-you/?source=booking or booking-request). */
     booking: 'AW-18491599744/_v3FCK3y8bodEIDXvfFE',
     /** Live chat started (visitor sent their first question). */
-    chatStart: '',
+    chatStart: 'AW-18491599744/Tle0CIL08bodEIDXvfFE',
     /** Click on the phone number. */
     phoneClick: 'AW-18491599744/sr_bCKv58bodEIDXvfFE',
     /** Click on the email address (usually a secondary conversion). */
