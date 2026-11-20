@@ -58,7 +58,7 @@ export const googleAds = {
     /** Free IT assessment requested (/thank-you/?source=assessment). Falls back to contactForm if empty. */
     assessment: 'AW-18491599744/VcJGCJru8bodEIDXvfFE',
     /** Consultation booked or requested (/thank-you/?source=booking or booking-request). */
-    booking: '',
+    booking: 'AW-18491599744/_v3FCK3y8bodEIDXvfFE',
     /** Live chat started (visitor sent their first question). */
     chatStart: '',
     /** Click on the phone number. */
